@@ -17,7 +17,9 @@ export function Footer() {
                 className="h-8 w-8 object-contain"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling.style.display = 'inline';
+                  if (e.currentTarget.nextElementSibling) {
+                    (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'inline';
+                  }
                 }}
               />
               <span className="text-2xl" style={{display: 'none'}}>🍓</span>
