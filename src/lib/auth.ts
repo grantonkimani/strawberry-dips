@@ -103,7 +103,7 @@ export function createAuthSession(user: AdminUser): AuthSession {
 export function verifySessionToken(token: string): boolean {
   // In a real app, you'd verify the token signature and check expiration
   // For simplicity, we'll just check if it exists and is not expired
-  return token && token.length > 0;
+  return Boolean(token && token.length > 0);
 }
 
 // Hash password (for future use)

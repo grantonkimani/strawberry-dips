@@ -115,12 +115,20 @@ type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>;
 
 type ToastActionElement = React.ReactElement<typeof ToastAction>;
 
+interface ToastData {
+  id: string;
+  title?: string;
+  description?: string;
+  action?: React.ReactNode;
+  variant?: "default" | "destructive";
+}
+
 function Toaster() {
-  const [toasts, setToasts] = React.useState<ToastProps[]>([]);
+  const [toasts, setToasts] = React.useState<ToastData[]>([]);
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
-      const handleToast = (event: CustomEvent) => {
+      const handleToast = (event: CustomEvent<ToastData>) => {
         setToasts((toasts) => [...toasts, event.detail]);
       };
 
