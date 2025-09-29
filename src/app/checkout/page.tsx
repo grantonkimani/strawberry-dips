@@ -97,6 +97,13 @@ export default function CheckoutPage() {
     }));
   };
 
+  const updateFormField = (name: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Form submission is handled by the payment components
@@ -344,9 +351,7 @@ export default function CheckoutPage() {
                           onClick={() => {
                             const tomorrow = new Date();
                             tomorrow.setDate(tomorrow.getDate() + 1);
-                            handleInputChange({
-                              target: { name: 'deliveryDate', value: tomorrow.toISOString().split('T')[0] }
-                            });
+                            updateFormField('deliveryDate', tomorrow.toISOString().split('T')[0]);
                           }}
                           className="px-3 py-1 text-xs bg-pink-100 text-pink-700 rounded-md hover:bg-pink-200 transition-colors"
                         >
@@ -357,9 +362,7 @@ export default function CheckoutPage() {
                           onClick={() => {
                             const dayAfter = new Date();
                             dayAfter.setDate(dayAfter.getDate() + 2);
-                            handleInputChange({
-                              target: { name: 'deliveryDate', value: dayAfter.toISOString().split('T')[0] }
-                            });
+                            updateFormField('deliveryDate', dayAfter.toISOString().split('T')[0]);
                           }}
                           className="px-3 py-1 text-xs bg-pink-100 text-pink-700 rounded-md hover:bg-pink-200 transition-colors"
                         >
@@ -370,9 +373,7 @@ export default function CheckoutPage() {
                           onClick={() => {
                             const weekend = new Date();
                             weekend.setDate(weekend.getDate() + (6 - weekend.getDay())); // Next Saturday
-                            handleInputChange({
-                              target: { name: 'deliveryDate', value: weekend.toISOString().split('T')[0] }
-                            });
+                            updateFormField('deliveryDate', weekend.toISOString().split('T')[0]);
                           }}
                           className="px-3 py-1 text-xs bg-pink-100 text-pink-700 rounded-md hover:bg-pink-200 transition-colors"
                         >
