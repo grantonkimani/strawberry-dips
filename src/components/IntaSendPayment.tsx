@@ -1,0 +1,247 @@
+'use client';
+
+import React, { useState } from 'react';
+import { Button } from './ui/Button';
+
+interface IntaSendPaymentProps {
+  amount: number;
+  customerEmail: string;
+  customerPhone: string;
+  customerName: string;
+  cartItems?: any[];
+  deliveryInfo?: any;
+  onSuccess?: (data: any) => void;
+  onError?: (error: string) => void;
+}
+
+export default function IntaSendPayment({
+  amount,
+  customerEmail,
+  customerPhone,
+  customerName,
+  cartItems = [],
+  deliveryInfo = {},
+  onSuccess,
+  onError
+}: IntaSendPaymentProps) {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card'>('mpesa');
+  const [statusMessage, setStatusMessage] = useState('');
+
+  const handlePayment = async () => {
+    if (!customerEmail || !customerPhone) {
+      const error = 'Please provide email and phone number';
+      setStatusMessage(error);
+      onError?.(error);
+      return;
+    }
+
+    setIsProcessing(true);
+    setStatusMessage('');
+
+    try {
+      const orderId = `ORDER-${Date.now()}`;
+
+      const response = await fetch('/api/intasend/initiate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId,
+          amount,
+          currency: 'KES',
+          paymentMethod,
+          customerName,
+          customerEmail,
+          customerPhone,
+          cartItems,
+          deliveryInfo,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to initiate payment');
+      }
+
+      if (data.success) {
+        if (paymentMethod === 'mpesa') {
+          setStatusMessage('M-Pesa STK push sent to your phone. Please enter your PIN to complete payment.');
+
+          // Start polling for payment status
+          pollPaymentStatus(data.invoiceId, data.orderId);
+        } else if (data.checkoutUrl) {
+          setStatusMessage('Redirecting to card payment...');
+          window.open(data.checkoutUrl, '_blank');
+
+          // Start polling for payment status
+          pollPaymentStatus(data.invoiceId, data.orderId);
+        } else {
+          setStatusMessage('Payment initiated successfully.');
+          onSuccess?.(data);
+        }
+      } else {
+        throw new Error(data.error || 'Payment initiation failed');
+      }
+    } catch (error) {
+      console.error('IntaSend payment error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Payment failed';
+      setStatusMessage(`Payment failed: ${errorMessage}`);
+      onError?.(errorMessage);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const pollPaymentStatus = async (invoiceId: string, orderId: string) => {
+    let attempts = 0;
+    const maxAttempts = 30; // Poll for 5 minutes (30 * 10 seconds)
+
+    const poll = async () => {
+      try {
+        const response = await fetch(`/api/intasend/status?invoiceId=${invoiceId}&orderId=${orderId}`);
+        const data = await response.json();
+
+        if (data.success) {
+          if (data.paid) {
+            setStatusMessage('Payment successful! 🎉');
+            onSuccess?.(data);
+            return;
+          } else if (data.status === 'FAILED') {
+            setStatusMessage('Payment failed. Please try again.');
+            onError?.('Payment failed');
+            return;
+          }
+        }
+
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(poll, 10000); // Poll every 10 seconds
+        } else {
+          setStatusMessage('Payment status check timed out. Please check your order status.');
+        }
+      } catch (error) {
+        console.error('Status polling error:', error);
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(poll, 10000);
+        }
+      }
+    };
+
+    // Start polling after 5 seconds
+    setTimeout(poll, 5000);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold mb-4">IntaSend Payment</h3>
+
+        {/* Payment Method Selection */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Choose Payment Method
+          </label>
+          <div className="flex space-x-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="mpesa"
+                checked={paymentMethod === 'mpesa'}
+                onChange={(e) => setPaymentMethod(e.target.value as 'mpesa')}
+                className="mr-2"
+              />
+              <span className="text-sm">M-Pesa</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="card"
+                checked={paymentMethod === 'card'}
+                onChange={(e) => setPaymentMethod(e.target.value as 'card')}
+                className="mr-2"
+              />
+              <span className="text-sm">Credit/Debit Card</span>
+            </label>
+          </div>
+        </div>
+
+        {/* Payment Details */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-4">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm text-gray-600">Amount:</span>
+            <span className="font-semibold">KES {amount.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm text-gray-600">Email:</span>
+            <span className="text-sm">{customerEmail}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">Phone:</span>
+            <span className="text-sm">{customerPhone}</span>
+          </div>
+        </div>
+
+        {/* Payment Method Info */}
+        {paymentMethod === 'mpesa' && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+            <p className="text-sm text-green-800">
+              📱 You will receive an M-Pesa STK push on your phone. Enter your M-Pesa PIN to complete the payment.
+            </p>
+          </div>
+        )}
+
+        {paymentMethod === 'card' && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+            <p className="text-sm text-blue-800">
+              💳 You will be redirected to a secure payment page to enter your card details.
+            </p>
+          </div>
+        )}
+
+        {/* Status Message */}
+        {statusMessage && (
+          <div className={`p-3 rounded-lg mb-4 text-sm ${
+            statusMessage.includes('successful') || statusMessage.includes('🎉')
+              ? 'bg-green-50 border border-green-200 text-green-800'
+              : statusMessage.includes('failed') || statusMessage.includes('error')
+              ? 'bg-red-50 border border-red-200 text-red-800'
+              : 'bg-yellow-50 border border-yellow-200 text-yellow-800'
+          }`}>
+            {statusMessage}
+          </div>
+        )}
+
+        {/* Payment Button */}
+        <Button
+          onClick={handlePayment}
+          disabled={isProcessing}
+          className={`w-full ${
+            paymentMethod === 'mpesa'
+              ? 'bg-green-600 hover:bg-green-700'
+              : 'bg-blue-600 hover:bg-blue-700'
+          } text-white`}
+        >
+          {isProcessing ? (
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Processing...
+            </div>
+          ) : (
+            `Pay KES ${amount.toLocaleString()} with ${paymentMethod === 'mpesa' ? 'M-Pesa' : 'Card'}`
+          )}
+        </Button>
+
+        <p className="text-xs text-gray-500 mt-2 text-center">
+          Secure payment powered by IntaSend
+        </p>
+      </div>
+    </div>
+  );
+}
+

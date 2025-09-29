@@ -1,0 +1,33 @@
+# Production Environment Variables for GoDaddy Deployment
+
+# IMPORTANT: Replace these with your actual production values!
+
+# Supabase Configuration (PRODUCTION)
+NEXT_PUBLIC_SUPABASE_URL=your_production_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_production_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_production_supabase_service_role_key
+
+# IntaSend Configuration (PRODUCTION - REMOVE TEST MODE)
+INTASEND_PUBLISHABLE_KEY=ISPubKey_live_e49e13e3-b971-48b5-8004-b5c52d95fa07
+INTASEND_SECRET_KEY=ISSecretKey_live_c05a9d92-3a85-4f17-b151-5e3c4ba07c36
+INTASEND_TEST_MODE=false
+
+# Pesapal Configuration (PRODUCTION)
+PESAPAL_CONSUMER_KEY=your_production_pesapal_consumer_key
+PESAPAL_CONSUMER_SECRET=your_production_pesapal_consumer_secret
+PESAPAL_ENVIRONMENT=live
+
+# M-Pesa Configuration (PRODUCTION)
+MPESA_CONSUMER_KEY=your_production_mpesa_consumer_key
+MPESA_CONSUMER_SECRET=your_production_mpesa_consumer_secret
+MPESA_SHORTCODE=your_mpesa_shortcode
+MPESA_TILL_NUMBER=your_mpesa_till_number
+MPESA_PASSKEY=your_mpesa_passkey
+MPESA_ENVIRONMENT=live
+
+# Application Configuration (REPLACE WITH YOUR DOMAIN)
+NEXT_PUBLIC_BASE_URL=https://yourdomain.com
+
+# Admin Configuration
+ADMIN_EMAIL=your_admin_email@domain.com
+ADMIN_PASSWORD=your_secure_admin_password

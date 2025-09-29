@@ -1,0 +1,138 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
+
+// GET /api/categories/[id] - Get single category
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching category:', error);
+      return NextResponse.json(
+        { error: 'Category not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ category: data });
+  } catch (error) {
+    console.error('Get category API error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT /api/categories/[id] - Update category
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const { name, description, display_order, is_active } = await request.json();
+
+    if (!name) {
+      return NextResponse.json(
+        { error: 'Category name is required' },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabase
+      .from('categories')
+      .update({
+        name,
+        description: description || null,
+        display_order: display_order || 0,
+        is_active: is_active !== undefined ? is_active : true,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating category:', error);
+      return NextResponse.json(
+        { error: 'Failed to update category' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ category: data });
+  } catch (error) {
+    console.error('Update category API error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/categories/[id] - Delete category (soft delete)
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    // Check if category has products
+    const { data: products, error: productsError } = await supabase
+      .from('products')
+      .select('id')
+      .eq('category_id', id)
+      .limit(1);
+
+    if (productsError) {
+      console.error('Error checking products:', productsError);
+      return NextResponse.json(
+        { error: 'Failed to check category usage' },
+        { status: 500 }
+      );
+    }
+
+    if (products && products.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete category that has products. Please move or delete products first.' },
+        { status: 400 }
+      );
+    }
+
+    // Soft delete by setting is_active to false
+    const { data, error } = await supabase
+      .from('categories')
+      .update({
+        is_active: false,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error deleting category:', error);
+      return NextResponse.json(
+        { error: 'Failed to delete category' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ message: 'Category deleted successfully' });
+  } catch (error) {
+    console.error('Delete category API error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
