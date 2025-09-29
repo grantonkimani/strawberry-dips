@@ -511,11 +511,11 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900">{item.name}</h4>
-                        <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                        <p className="text-sm text-gray-500">Qty: {item.quantity || 0}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-medium text-gray-900">
-                          KSH {(item.price * item.quantity).toFixed(2)}
+                          KSH {(item.price * (item.quantity || 0)).toFixed(2)}
                         </p>
                       </div>
                     </div>
