@@ -70,7 +70,9 @@ export function Header() {
               onError={(e) => {
                 // Fallback to emoji if image fails to load
                 e.currentTarget.style.display = 'none';
-                e.currentTarget.nextElementSibling.style.display = 'inline';
+                if (e.currentTarget.nextElementSibling) {
+                  (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'inline';
+                }
               }}
             />
             <span className="text-2xl" style={{display: 'none'}}>🍓</span>
