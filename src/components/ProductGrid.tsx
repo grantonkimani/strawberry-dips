@@ -86,20 +86,26 @@ export function ProductGrid() {
 		fetchData();
 	}, []);
 
+	// Transform products to ensure description is never null
+	const transformedProducts = products.map(product => ({
+		...product,
+		description: product.description || ''
+	}));
+
 	// Group products by category
-	const groupedProducts = products.reduce((acc, product) => {
+	const groupedProducts = transformedProducts.reduce((acc, product) => {
 		const categoryId = product.category_id || 'uncategorized';
 		if (!acc[categoryId]) {
 			acc[categoryId] = [];
 		}
 		acc[categoryId].push(product);
 		return acc;
-	}, {} as Record<string, ApiProduct[]>);
+	}, {} as Record<string, any[]>);
 
 	// Filter products based on selected category
 	const filteredProducts = selectedCategory 
 		? groupedProducts[selectedCategory] || []
-		: products;
+		: transformedProducts;
 
 	// Get categories with products
 	const categoriesWithProducts = categories.filter(cat => 
