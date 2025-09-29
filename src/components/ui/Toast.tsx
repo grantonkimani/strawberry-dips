@@ -119,12 +119,14 @@ function Toaster() {
   const [toasts, setToasts] = React.useState<ToastProps[]>([]);
 
   React.useEffect(() => {
-    const handleToast = (event: CustomEvent) => {
-      setToasts((toasts) => [...toasts, event.detail]);
-    };
+    if (typeof window !== 'undefined') {
+      const handleToast = (event: CustomEvent) => {
+        setToasts((toasts) => [...toasts, event.detail]);
+      };
 
-    window.addEventListener('toast' as any, handleToast);
-    return () => window.removeEventListener('toast' as any, handleToast);
+      window.addEventListener('toast' as any, handleToast);
+      return () => window.removeEventListener('toast' as any, handleToast);
+    }
   }, []);
 
   return (

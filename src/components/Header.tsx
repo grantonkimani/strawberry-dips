@@ -13,44 +13,48 @@ export function Header() {
 
   // Update body class when cart opens/closes
   useEffect(() => {
-    if (isCartOpen) {
-      document.body.classList.add('cart-open');
-    } else {
-      document.body.classList.remove('cart-open');
+    if (typeof window !== 'undefined') {
+      if (isCartOpen) {
+        document.body.classList.add('cart-open');
+      } else {
+        document.body.classList.remove('cart-open');
+      }
+      
+      // Cleanup on unmount
+      return () => {
+        document.body.classList.remove('cart-open');
+      };
     }
-    
-    // Cleanup on unmount
-    return () => {
-      document.body.classList.remove('cart-open');
-    };
   }, [isCartOpen]);
 
   // Prevent any swipe gestures from opening the cart
   useEffect(() => {
-    const preventSwipe = (e: TouchEvent) => {
-      // Prevent any horizontal swipe gestures
-      if (e.touches.length > 1) {
+    if (typeof window !== 'undefined') {
+      const preventSwipe = (e: TouchEvent) => {
+        // Prevent any horizontal swipe gestures
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      };
+
+      const preventGesture = (e: Event) => {
         e.preventDefault();
-      }
-    };
+      };
 
-    const preventGesture = (e: Event) => {
-      e.preventDefault();
-    };
+      // Add event listeners to prevent swipe gestures
+      document.addEventListener('touchstart', preventSwipe, { passive: false });
+      document.addEventListener('touchmove', preventSwipe, { passive: false });
+      document.addEventListener('gesturestart', preventGesture, { passive: false });
+      document.addEventListener('gesturechange', preventGesture, { passive: false });
 
-    // Add event listeners to prevent swipe gestures
-    document.addEventListener('touchstart', preventSwipe, { passive: false });
-    document.addEventListener('touchmove', preventSwipe, { passive: false });
-    document.addEventListener('gesturestart', preventGesture, { passive: false });
-    document.addEventListener('gesturechange', preventGesture, { passive: false });
-
-    // Cleanup
-    return () => {
-      document.removeEventListener('touchstart', preventSwipe);
-      document.removeEventListener('touchmove', preventSwipe);
-      document.removeEventListener('gesturestart', preventGesture);
-      document.removeEventListener('gesturechange', preventGesture);
-    };
+      // Cleanup
+      return () => {
+        document.removeEventListener('touchstart', preventSwipe);
+        document.removeEventListener('touchmove', preventSwipe);
+        document.removeEventListener('gesturestart', preventGesture);
+        document.removeEventListener('gesturechange', preventGesture);
+      };
+    }
   }, []);
 
   return (

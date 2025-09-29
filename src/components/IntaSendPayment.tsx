@@ -74,7 +74,9 @@ export default function IntaSendPayment({
           pollPaymentStatus(data.invoiceId, data.orderId);
         } else if (data.checkoutUrl) {
           setStatusMessage('Redirecting to card payment...');
-          window.open(data.checkoutUrl, '_blank');
+          if (typeof window !== 'undefined') {
+            window.open(data.checkoutUrl, '_blank');
+          }
 
           // Start polling for payment status
           pollPaymentStatus(data.invoiceId, data.orderId);

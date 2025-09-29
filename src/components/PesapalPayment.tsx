@@ -54,8 +54,8 @@ export function PesapalPayment({
           customerPhone: customerPhone || '254700000000',
           cartItems: cartItems || [],
           deliveryInfo: deliveryInfo || {},
-          callbackUrl: `${window.location.origin}/checkout?order=${orderId}&status=success`,
-          cancellationUrl: `${window.location.origin}/checkout?order=${orderId}&status=cancelled`,
+          callbackUrl: `${typeof window !== 'undefined' ? window.location.origin : 'https://strawberrydips.shop'}/checkout?order=${orderId}&status=success`,
+          cancellationUrl: `${typeof window !== 'undefined' ? window.location.origin : 'https://strawberrydips.shop'}/checkout?order=${orderId}&status=cancelled`,
         }),
       });
 
@@ -67,7 +67,9 @@ export function PesapalPayment({
 
       if (data.success && data.redirectUrl) {
         // Redirect to Pesapal payment page
-        window.location.href = data.redirectUrl;
+        if (typeof window !== 'undefined') {
+          window.location.href = data.redirectUrl;
+        }
       } else {
         throw new Error('No redirect URL received from Pesapal');
       }
