@@ -118,16 +118,16 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                       <div className="flex items-center space-x-2">
                         <button
                           className="w-6 h-6 bg-white border border-gray-200 rounded text-gray-600 hover:bg-pink-50 hover:border-pink-200 hover:text-pink-600 flex items-center justify-center transition-all duration-200"
-                          onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                          onClick={() => handleQuantityChange(item.id, (item.quantity || 0) - 1)}
                         >
                           <Minus className="h-3 w-3" />
                         </button>
                         <span className="w-6 text-center text-sm font-semibold text-gray-900">
-                          {item.quantity}
+                          {item.quantity || 0}
                         </span>
                         <button
                           className="w-6 h-6 bg-white border border-gray-200 rounded text-gray-600 hover:bg-pink-50 hover:border-pink-200 hover:text-pink-600 flex items-center justify-center transition-all duration-200"
-                          onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                          onClick={() => handleQuantityChange(item.id, (item.quantity || 0) + 1)}
                         >
                           <Plus className="h-3 w-3" />
                         </button>
