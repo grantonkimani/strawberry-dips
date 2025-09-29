@@ -328,7 +328,6 @@ export default function CheckoutPage() {
                         value={formData.area}
                         onChange={(value) => setFormData(prev => ({ ...prev, area: value }))}
                         placeholder="Search or select your area..."
-                        required
                       />
                     </div>
                   </div>
