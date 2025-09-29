@@ -23,11 +23,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AdminUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(typeof window === 'undefined');
 
-  // Check for existing session on mount
+  // Check for existing session on mount (client-side only)
   useEffect(() => {
-    checkSession();
+    if (typeof window !== 'undefined') {
+      setIsLoading(true);
+      checkSession();
+    }
   }, []);
 
   const checkSession = async () => {
