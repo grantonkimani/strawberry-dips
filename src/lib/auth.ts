@@ -29,17 +29,25 @@ export function generateSessionToken(): string {
 // Verify admin credentials
 export async function verifyAdminCredentials(credentials: LoginCredentials): Promise<AdminUser | null> {
   try {
-    // Temporary hardcoded admin credentials until database is set up
-    // TODO: Replace with database lookup once admin_users table is created
-    if (credentials.username === 'admin' && credentials.password === 'admin123') {
-      return {
-        id: 'temp-admin-id',
-        username: 'admin',
-        email: 'admin@strawberrydips.com',
-        full_name: 'Administrator',
-        is_active: true,
-        last_login: new Date().toISOString()
-      };
+    // Secure hardcoded admin credentials
+    // Password is hashed for security
+    const ADMIN_USERNAME = 'StrawberrydipsAdmin';
+    const ADMIN_PASSWORD_HASH = '$2b$10$YXRzmbCtlRo3/2GriF5e9.PYXP/CZ.P1.n1EpnDqJKOyr9tkXTmK2'; // Admin@StrawberryDIPSKe67!
+    
+    if (credentials.username === ADMIN_USERNAME) {
+      // Verify password using bcrypt
+      const isValidPassword = await verifyPassword(credentials.password, ADMIN_PASSWORD_HASH);
+      
+      if (isValidPassword) {
+        return {
+          id: 'strawberrydips-admin-id',
+          username: ADMIN_USERNAME,
+          email: 'admin@strawberrydips.com',
+          full_name: 'Strawberrydips Administrator',
+          is_active: true,
+          last_login: new Date().toISOString()
+        };
+      }
     }
 
     // Try database lookup if hardcoded credentials don't match
@@ -55,9 +63,8 @@ export async function verifyAdminCredentials(credentials: LoginCredentials): Pro
         return null;
       }
 
-      // For now, we'll use a simple password check
-      // In production, you should use proper bcrypt verification
-      const isValidPassword = credentials.password === 'admin123'; // Default password
+      // Use proper bcrypt verification for database users
+      const isValidPassword = await verifyPassword(credentials.password, data.password_hash);
       
       if (!isValidPassword) {
         return null;
