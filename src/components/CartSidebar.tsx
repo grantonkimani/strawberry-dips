@@ -42,7 +42,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       {/* Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-10 backdrop-blur-sm z-[9998] transition-opacity duration-300 cart-overlay"
+          className="fixed inset-0 bg-transparent z-[9998] transition-opacity duration-300 cart-overlay"
           onClick={onClose}
           style={{ touchAction: 'none' }}
         />
