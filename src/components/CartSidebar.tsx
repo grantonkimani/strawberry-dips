@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useCart } from '@/contexts/CartContext';
@@ -13,6 +14,13 @@ interface CartSidebarProps {
 
 export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const { state, updateQuantity, removeItem, clearCart, getTotalPrice } = useCart();
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure component is mounted before rendering portal
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   const handleQuantityChange = (id: string, newQuantity: number) => {
     if (newQuantity === 0) {
@@ -26,12 +34,15 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
     onClose(); // Close the sidebar first
   };
 
-  return (
+  // Don't render anything on server or before mount
+  if (!mounted) return null;
+
+  const cartContent = (
     <>
       {/* Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-[100] transition-opacity duration-300 cart-overlay"
+          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-[9998] transition-opacity duration-300 cart-overlay"
           onClick={onClose}
           style={{ touchAction: 'none' }}
         />
@@ -39,7 +50,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
       {/* Sidebar */}
       <div 
-        className={`fixed right-0 top-0 h-screen w-full max-w-sm bg-white shadow-2xl z-[101] transform transition-all duration-300 ease-out cart-sidebar ${
+        className={`fixed right-0 top-0 h-screen w-full max-w-sm bg-white shadow-2xl z-[9999] transform transition-all duration-300 ease-out cart-sidebar ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{ touchAction: 'pan-y' }}
@@ -181,4 +192,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       </div>
     </>
   );
+
+  // Render cart in a portal to ensure it appears above all other content
+  return createPortal(cartContent, document.body);
 }
