@@ -57,6 +57,8 @@ body {
   color: hsl(var(--foreground));
   font-family: Arial, Helvetica, sans-serif;
   touch-action: manipulation;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Prevent unintended swipe gestures */
@@ -87,6 +89,23 @@ body:not(.cart-open) * {
   -moz-user-select: none !important;
   -ms-user-select: none !important;
   user-select: none !important;
+}
+
+/* Prevent horizontal scroll globally */
+html {
+  overflow-x: hidden;
+}
+
+/* Ensure containers don't exceed viewport */
+.container, .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl {
+  max-width: calc(100vw - 2rem);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Prevent any element from causing overflow */
+* {
+  box-sizing: border-box;
 }
 
 /* Allow only vertical scrolling in cart */
