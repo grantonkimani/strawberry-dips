@@ -116,11 +116,11 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-gray-50">
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="bg-white border-b border-pink-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Admin Dashboard</h1>
           <p className="text-gray-600">Manage orders and track business performance</p>
         </div>
       </div>
@@ -129,12 +129,49 @@ export default function AdminDashboard() {
       <AdminNav />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Clear Test Data Button */}
+        {orders && orders.length > 0 && (
+          <div className="mb-6">
+            <Card className="border-pink-200 bg-pink-50">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-pink-800">Test Data Cleanup</h3>
+                    <p className="text-pink-600">Clear all test orders to start fresh for real customers</p>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      if (confirm('Are you sure you want to clear ALL test data? This cannot be undone.')) {
+                        try {
+                          const response = await fetch('/api/admin/clear-test-data', { method: 'POST' });
+                          const result = await response.json();
+                          if (result.success) {
+                            alert('Test data cleared successfully!');
+                            fetchOrders(); // Refresh the page
+                          } else {
+                            alert('Error: ' + result.error);
+                          }
+                        } catch (error) {
+                          alert('Failed to clear test data');
+                        }
+                      }
+                    }}
+                    className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    Clear Test Data
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <Package className="h-8 w-8 text-blue-500" />
+                <Package className="h-8 w-8 text-pink-500" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Orders</p>
                   <p className="text-2xl font-bold text-gray-900">{orders?.length || 0}</p>
@@ -146,7 +183,7 @@ export default function AdminDashboard() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <CheckCircle className="h-8 w-8 text-green-500" />
+                <CheckCircle className="h-8 w-8 text-pink-500" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Paid Orders</p>
                   <p className="text-2xl font-bold text-gray-900">
@@ -160,7 +197,7 @@ export default function AdminDashboard() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <Clock className="h-8 w-8 text-yellow-500" />
+                <Clock className="h-8 w-8 text-pink-400" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Pending</p>
                   <p className="text-2xl font-bold text-gray-900">
@@ -174,7 +211,7 @@ export default function AdminDashboard() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <DollarSign className="h-8 w-8 text-green-500" />
+                <DollarSign className="h-8 w-8 text-pink-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Revenue</p>
                   <p className="text-2xl font-bold text-gray-900">

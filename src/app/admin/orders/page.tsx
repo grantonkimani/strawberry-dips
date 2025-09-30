@@ -169,11 +169,11 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-gray-50">
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="bg-white border-b border-pink-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">Order Management</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Order Management</h1>
           <p className="text-gray-600">View and manage customer orders</p>
         </div>
       </div>

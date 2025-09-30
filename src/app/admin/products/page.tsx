@@ -209,11 +209,11 @@ export default function AdminProductsPage() {
 
 
 	return (
-		<div className="min-h-screen bg-gray-50">
-			<div className="bg-white border-b">
+		<div className="min-h-screen bg-gradient-to-br from-pink-50 to-gray-50">
+			<div className="bg-white border-b border-pink-100 shadow-sm">
 				<div className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
 					<div>
-						<h1 className="text-3xl font-bold text-gray-900">Manage Products</h1>
+						<h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Manage Products</h1>
 						<p className="text-gray-600">Add, edit, or remove items for sale</p>
 					</div>
 					<Button onClick={() => setIsCreating(prev => !prev)} className="bg-pink-600 hover:bg-pink-700">
