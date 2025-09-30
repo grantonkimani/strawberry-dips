@@ -9,6 +9,49 @@ import { useCart } from '@/contexts/CartContext';
 import { PaymentOptions } from '@/components/PaymentOptions';
 import Link from 'next/link';
 
+// Major Kenyan Cities
+const KENYAN_CITIES = [
+  { value: 'nairobi', label: 'Nairobi' },
+  { value: 'mombasa', label: 'Mombasa' },
+  { value: 'kisumu', label: 'Kisumu' },
+  { value: 'nakuru', label: 'Nakuru' },
+  { value: 'eldoret', label: 'Eldoret' },
+  { value: 'thika', label: 'Thika' },
+  { value: 'machakos', label: 'Machakos' },
+  { value: 'meru', label: 'Meru' },
+  { value: 'nyeri', label: 'Nyeri' },
+  { value: 'kericho', label: 'Kericho' },
+  { value: 'kitale', label: 'Kitale' },
+  { value: 'malindi', label: 'Malindi' },
+  { value: 'lamu', label: 'Lamu' },
+  { value: 'garissa', label: 'Garissa' },
+  { value: 'kakamega', label: 'Kakamega' },
+  { value: 'bungoma', label: 'Bungoma' },
+  { value: 'kericho', label: 'Kericho' },
+  { value: 'embu', label: 'Embu' },
+  { value: 'isiolo', label: 'Isiolo' },
+  { value: 'marsabit', label: 'Marsabit' },
+  { value: 'moyale', label: 'Moyale' },
+  { value: 'wajir', label: 'Wajir' },
+  { value: 'mandera', label: 'Mandera' },
+  { value: 'turkana', label: 'Turkana' },
+  { value: 'west-pokot', label: 'West Pokot' },
+  { value: 'samburu', label: 'Samburu' },
+  { value: 'laikipia', label: 'Laikipia' },
+  { value: 'nyandarua', label: 'Nyandarua' },
+  { value: 'murang\'a', label: 'Murang\'a' },
+  { value: 'kiambu', label: 'Kiambu' },
+  { value: 'kajiado', label: 'Kajiado' },
+  { value: 'narok', label: 'Narok' },
+  { value: 'bomet', label: 'Bomet' },
+  { value: 'kericho', label: 'Kericho' },
+  { value: 'nandi', label: 'Nandi' },
+  { value: 'uasin-gishu', label: 'Uasin Gishu' },
+  { value: 'trans-nzoia', label: 'Trans Nzoia' },
+  { value: 'elgeyo-marakwet', label: 'Elgeyo Marakwet' },
+  { value: 'baringo', label: 'Baringo' },
+];
+
 // Kenyan Areas/Subcounties
 const KENYAN_AREAS = [
   // Nairobi Areas
@@ -78,7 +121,6 @@ export default function CheckoutPage() {
     phone: '',
     
     // Delivery Info
-    address: '',
     city: '',
     area: '',
     deliveryDate: '',
@@ -297,33 +339,16 @@ export default function CheckoutPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">
-                      Delivery Address *
-                    </label>
-                    <input
-                      type="text"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="123 Main Street"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
-                    />
-                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-800 mb-2">
                         City *
                       </label>
-                      <input
-                        type="text"
-                        name="city"
+                      <SearchableSelect
+                        options={KENYAN_CITIES}
                         value={formData.city}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., Nairobi, Mombasa, Kisumu"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+                        onChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
+                        placeholder="Search or select your city..."
                       />
                     </div>
                     <div>
@@ -414,18 +439,18 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-800 mb-2">
-                      Additional directions to your location
+                      Delivery Instructions & Location Details
                     </label>
                     <textarea
                       name="specialInstructions"
                       value={formData.specialInstructions}
                       onChange={handleInputChange}
                       rows={3}
-                      placeholder="e.g., Near the red gate, opposite the pharmacy, apartment block B..."
+                      placeholder="e.g., Near the red gate, opposite the pharmacy, apartment block B, specific building name, landmark references..."
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Help our delivery person find you easily with specific landmarks or directions
+                      Please provide specific location details, landmarks, building names, or any special delivery instructions to help our delivery person find you easily
                     </p>
                   </div>
                 </CardContent>
@@ -478,7 +503,6 @@ export default function CheckoutPage() {
                         customerName={`${formData.firstName} ${formData.lastName}`}
                         cartItems={state.items}
                         deliveryInfo={{
-                          address: formData.address,
                           city: formData.city,
                           area: formData.area,
                           deliveryDate: formData.deliveryDate,
