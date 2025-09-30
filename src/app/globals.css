@@ -78,22 +78,45 @@ body:not(.cart-open) {
 /* Ensure cart doesn't affect page layout */
 .cart-open {
   overflow: hidden;
-  position: relative;
 }
 
 /* Ensure proper z-index stacking */
 .cart-sidebar {
   position: fixed !important;
-  z-index: 50 !important;
+  z-index: 101 !important;
+  top: 0 !important;
+  right: 0 !important;
+  height: 100vh !important;
+  width: 100% !important;
+  max-width: 24rem !important;
 }
 
 .cart-overlay {
-  z-index: 40 !important;
+  position: fixed !important;
+  z-index: 100 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
 }
 
 /* Prevent any horizontal swipe gestures */
 * {
   touch-action: manipulation;
+}
+
+/* Debug: Make cart more visible */
+.cart-sidebar {
+  box-shadow: -10px 0 25px -3px rgba(0, 0, 0, 0.1), -10px 0 10px -3px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Ensure cart is always visible when open */
+.cart-sidebar.translate-x-0 {
+  transform: translateX(0) !important;
+}
+
+.cart-sidebar.translate-x-full {
+  transform: translateX(100%) !important;
 }
 
 /* Completely disable touch gestures on the page when cart is closed */
