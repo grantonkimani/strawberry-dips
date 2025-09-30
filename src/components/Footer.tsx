@@ -5,7 +5,7 @@ import { Phone, Mail, MapPin, Clock, Heart } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-gradient-to-br from-gray-800 via-gray-900 to-pink-900 text-white">
+    <footer className="bg-gray-800 text-white">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 py-16">
         {/* Top Section - Brand Description */}
@@ -140,7 +140,7 @@ export function Footer() {
         </div>
 
         {/* Business Hours Section */}
-        <div className="mt-12 pt-8 border-t border-pink-800">
+        <div className="mt-12 pt-8 border-t border-pink-600">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
               <h4 className="text-lg font-semibold mb-4 flex items-center">
@@ -180,9 +180,9 @@ export function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-pink-800 bg-gradient-to-r from-pink-900 to-gray-900">
+      <div className="border-t border-pink-600 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 py-6">
-            <div className="text-center text-gray-50">
+            <div className="text-center text-gray-300">
             <p>&copy; 2024 Strawberrydips Ltd. All rights reserved.</p>
           </div>
         </div>

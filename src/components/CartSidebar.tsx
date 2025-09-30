@@ -31,7 +31,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       {/* Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-[9998] transition-opacity duration-300 cart-overlay"
+          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-[99998] transition-opacity duration-300 cart-overlay"
           onClick={onClose}
           style={{ touchAction: 'none' }}
         />
@@ -39,7 +39,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
       {/* Sidebar */}
       <div 
-        className={`fixed right-0 top-0 h-screen w-full max-w-sm bg-white shadow-2xl z-[9999] transform transition-all duration-300 ease-out cart-sidebar ${
+        className={`fixed right-0 top-0 h-screen w-full max-w-sm bg-white shadow-2xl z-[99999] transform transition-all duration-300 ease-out cart-sidebar ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{ touchAction: 'pan-y' }}
