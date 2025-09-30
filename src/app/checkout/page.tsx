@@ -198,7 +198,7 @@ export default function CheckoutPage() {
 
   if (state.items.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-pink-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h1>
           <p className="text-gray-600 mb-6">Add some delicious strawberries to get started!</p>
@@ -213,7 +213,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 relative">
+    <div className="min-h-screen bg-pink-50 relative">
       {/* Processing Overlay */}
       {isProcessing && (
         <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
