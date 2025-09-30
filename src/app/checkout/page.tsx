@@ -213,11 +213,11 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-8">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Left Column - Form */}
           <div className="space-y-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 checkout-form">
               {/* Customer Information */}
               <Card>
                 <CardHeader>
@@ -227,9 +227,9 @@ export default function CheckoutPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">
+                      <label className="block text-sm font-semibold text-gray-800 mb-2">
                         First Name *
                       </label>
                       <input
@@ -242,7 +242,7 @@ export default function CheckoutPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">
+                      <label className="block text-sm font-semibold text-gray-800 mb-2">
                         Last Name *
                       </label>
                       <input
@@ -256,7 +256,7 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-1">
+                    <label className="block text-sm font-semibold text-gray-800 mb-2">
                       Email Address *
                     </label>
                     <input
@@ -269,7 +269,7 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-1">
+                    <label className="block text-sm font-semibold text-gray-800 mb-2">
                       Phone Number *
                     </label>
                     <input
@@ -296,9 +296,9 @@ export default function CheckoutPage() {
                     <span>Delivery Information</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-1">
+                    <label className="block text-sm font-semibold text-gray-800 mb-2">
                       Delivery Address *
                     </label>
                     <input
@@ -311,9 +311,9 @@ export default function CheckoutPage() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">
+                      <label className="block text-sm font-semibold text-gray-800 mb-2">
                         City *
                       </label>
                       <input
@@ -327,7 +327,7 @@ export default function CheckoutPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">
+                      <label className="block text-sm font-semibold text-gray-800 mb-2">
                         Area/Subcounty *
                       </label>
                       <SearchableSelect
@@ -338,14 +338,14 @@ export default function CheckoutPage() {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">
+                      <label className="block text-sm font-semibold text-gray-800 mb-2">
                         Delivery Date *
                       </label>
                       
                       {/* Quick Date Selection Buttons */}
-                      <div className="flex gap-2 mb-2">
+                      <div className="flex flex-wrap gap-2 mb-3">
                         <button
                           type="button"
                           onClick={() => {
@@ -395,7 +395,7 @@ export default function CheckoutPage() {
                       </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">
+                      <label className="block text-sm font-semibold text-gray-800 mb-2">
                         Delivery Time *
                       </label>
                       <select
@@ -413,7 +413,7 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-1">
+                    <label className="block text-sm font-semibold text-gray-800 mb-2">
                       Additional directions to your location
                     </label>
                     <textarea

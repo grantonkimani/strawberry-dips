@@ -75,6 +75,22 @@ body:not(.cart-open) {
   touch-action: manipulation;
 }
 
+/* Ensure cart doesn't affect page layout */
+.cart-open {
+  overflow: hidden;
+  position: relative;
+}
+
+/* Ensure proper z-index stacking */
+.cart-sidebar {
+  position: fixed !important;
+  z-index: 50 !important;
+}
+
+.cart-overlay {
+  z-index: 40 !important;
+}
+
 /* Prevent any horizontal swipe gestures */
 * {
   touch-action: manipulation;
@@ -94,6 +110,7 @@ body:not(.cart-open) * {
 /* Prevent horizontal scroll globally */
 html {
   overflow-x: hidden;
+  position: relative;
 }
 
 /* Ensure containers don't exceed viewport */
@@ -106,6 +123,31 @@ html {
 /* Prevent any element from causing overflow */
 * {
   box-sizing: border-box;
+}
+
+/* Mobile form improvements */
+@media (max-width: 640px) {
+  .checkout-form input,
+  .checkout-form select,
+  .checkout-form textarea {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .checkout-form label {
+    margin-bottom: 8px !important;
+    display: block;
+  }
+  
+  .checkout-form .grid {
+    gap: 1rem !important;
+  }
+  
+  /* Better touch targets */
+  button, .button {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
 }
 
 /* Allow only vertical scrolling in cart */
