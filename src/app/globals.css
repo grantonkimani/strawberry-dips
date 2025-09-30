@@ -84,11 +84,11 @@ body:not(.cart-open) {
 /* Ensure proper z-index stacking */
 .cart-sidebar {
   position: fixed !important;
-  z-index: 99999 !important;
+  z-index: 50 !important;
 }
 
 .cart-overlay {
-  z-index: 99998 !important;
+  z-index: 40 !important;
 }
 
 /* Prevent any horizontal swipe gestures */
