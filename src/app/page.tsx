@@ -2,6 +2,7 @@ import { Header } from "@/components/Header";
 import { ProductGrid } from "@/components/ProductGrid";
 import { Footer } from "@/components/Footer";
 import { SupportSection } from "@/components/SupportSection";
+import { WhyChoose } from "@/components/WhyChoose";
 
 export default function HomePage() {
   return (
@@ -9,6 +10,9 @@ export default function HomePage() {
       <Header />
       <ProductGrid />
       
+      {/* Why Choose Section */}
+      <WhyChoose />
+
       {/* Support Section */}
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
