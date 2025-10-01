@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const ticketId = params.id;
+    const { id: ticketId } = await params;
     const { status, priority, admin_notes } = await request.json();
 
     if (!ticketId) {
@@ -46,9 +46,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const ticketId = params.id;
+    const { id: ticketId } = await params;
 
     if (!ticketId) {
       return NextResponse.json(
