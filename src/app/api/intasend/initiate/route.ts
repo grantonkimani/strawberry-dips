@@ -125,15 +125,18 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Set a 20-second timeout for IntaSend API calls
+      // Set a 40-second timeout for IntaSend API calls (gateways can be slow)
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('IntaSend API timeout')), 20000)
+        setTimeout(() => reject(new Error('IntaSend API timeout')), 40000)
       );
 
       intasendResponse = await Promise.race([intasendPromise, timeoutPromise]);
 
     } catch (error) {
-      console.error('IntaSend API error or timeout:', error);
+      // Surface more context from the IntaSend SDK/network layer
+      const anyErr: any = error;
+      const debugPayload = anyErr?.response?.data || anyErr?.data || anyErr?.message || anyErr;
+      console.error('IntaSend API error or timeout:', debugPayload);
 
       // If IntaSend times out or fails, mark order as needing manual processing
       const { error: updateError } = await supabase
@@ -153,7 +156,8 @@ export async function POST(request: NextRequest) {
           error: 'IntaSend service timeout',
           timeout: true,
           orderId: order.id,
-          message: 'Payment gateway is taking longer than expected. You can proceed with document upload instead.'
+          message: 'Payment gateway is taking longer than expected. Please try again shortly.',
+          debug: typeof debugPayload === 'string' ? debugPayload : undefined
         },
         { status: 408 } // 408 Request Timeout
       );

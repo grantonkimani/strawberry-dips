@@ -61,15 +61,9 @@ export async function createMpesaPayment(paymentData: IntaSendPaymentData) {
     console.log('IntaSend M-Pesa response:', response);
     return response;
   } catch (error) {
-    console.error('IntaSend M-Pesa payment error:', error);
-
-    // Try to get more detailed error information
-    if (error && typeof error === 'object' && 'response' in error) {
-      const response = (error as any).response;
-      console.error('IntaSend Error Response:', response?.data || response);
-    }
-
-    throw new Error(`Failed to create M-Pesa payment: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    const anyErr: any = error;
+    console.error('IntaSend M-Pesa payment error:', anyErr?.response?.data || anyErr?.data || anyErr);
+    throw new Error(`Failed to create M-Pesa payment: ${anyErr?.response?.data?.message || (error instanceof Error ? error.message : 'Unknown error')}`);
   }
 }
 
@@ -115,8 +109,9 @@ export async function createCardPayment(paymentData: IntaSendPaymentData) {
     console.log('IntaSend card payment response:', response);
     return response;
   } catch (error) {
-    console.error('IntaSend card payment error:', error);
-    throw new Error(`Failed to create card payment: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    const anyErr: any = error;
+    console.error('IntaSend card payment error:', anyErr?.response?.data || anyErr?.data || anyErr);
+    throw new Error(`Failed to create card payment: ${anyErr?.response?.data?.message || (error instanceof Error ? error.message : 'Unknown error')}`);
   }
 }
 
