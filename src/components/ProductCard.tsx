@@ -46,7 +46,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Product Image */}
         <div className="relative overflow-hidden rounded-t-lg">
           {product.image_url ? (
-            <div className="aspect-[3/4] bg-gray-100">
+            <div className="aspect-[5/4] bg-gray-100">
               <img 
                 src={product.image_url} 
                 alt={product.name}
@@ -57,7 +57,7 @@ export function ProductCard({ product }: ProductCardProps) {
                   e.currentTarget.nextElementSibling?.classList.remove('hidden');
                 }}
               />
-              <div className="aspect-[3/4] bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center hidden">
+              <div className="aspect-[5/4] bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center hidden">
                 <div className="text-center space-y-2">
                   <div className="w-20 h-20 bg-gradient-to-br from-pink-200 to-red-200 rounded-full mx-auto flex items-center justify-center">
                     <span className="text-2xl">🍓</span>
@@ -67,7 +67,7 @@ export function ProductCard({ product }: ProductCardProps) {
               </div>
             </div>
           ) : (
-            <div className="aspect-[3/4] bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center">
+            <div className="aspect-[5/4] bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center">
               <div className="text-center space-y-2">
                 <div className="w-20 h-20 bg-gradient-to-br from-pink-200 to-red-200 rounded-full mx-auto flex items-center justify-center">
                   <span className="text-2xl">🍓</span>
