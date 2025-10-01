@@ -1,4 +1,4 @@
-import { ShoppingCart, Heart, Star } from "lucide-react";
+import { ShoppingCart, Heart } from "lucide-react";
 import { Button } from "./ui/Button";
 import { Card, CardContent, CardFooter } from "./ui/Card";
 import { useCart } from "@/contexts/CartContext";
@@ -100,17 +100,9 @@ export function ProductCard({ product }: ProductCardProps) {
             <h3 className="font-semibold text-gray-900 text-lg leading-tight">
               {product.name}
             </h3>
-            <p className="text-gray-600 text-sm mt-1 line-clamp-2">
+            <p className="text-gray-700 text-sm mt-1 line-clamp-4">
               {product.description}
             </p>
-          </div>
-
-          {/* Rating */}
-          <div className="flex items-center space-x-1">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-            ))}
-            <span className="text-sm text-gray-500 ml-1">(4.8)</span>
           </div>
 
           {/* Price */}
