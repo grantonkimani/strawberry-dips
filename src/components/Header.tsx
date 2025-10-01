@@ -99,7 +99,7 @@ export function Header() {
           </nav>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 md:space-x-4">
             {/* Search - Hidden on mobile */}
             <div className="hidden lg:block">
               <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600">
@@ -110,9 +110,9 @@ export function Header() {
             </div>
 
             {/* Wishlist */}
-            <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 relative">
-              <Heart className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+            <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 relative h-10 w-10 md:h-9 md:w-9">
+              <Heart className="h-6 w-6 md:h-5 md:w-5" />
+              <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] md:text-xs rounded-full h-5 w-5 md:h-5 md:w-5 flex items-center justify-center">
                 0
               </span>
             </Button>
@@ -121,12 +121,12 @@ export function Header() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="text-gray-600 hover:text-pink-600 relative"
+              className="text-gray-600 hover:text-pink-600 relative h-10 w-10 md:h-9 md:w-9"
               onClick={() => setIsCartOpen(true)}
             >
-              <ShoppingCart className="h-5 w-5" />
+              <ShoppingCart className="h-6 w-6 md:h-5 md:w-5" />
               {state.items.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] md:text-xs rounded-full h-5 w-5 md:h-5 md:w-5 flex items-center justify-center">
                   {state.items.reduce((total, item) => total + (item.quantity || 1), 0)}
                 </span>
               )}
@@ -134,14 +134,14 @@ export function Header() {
 
             {/* User Account */}
             <Link href="/account">
-              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600">
-                <User className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 h-10 w-10 md:h-9 md:w-9">
+                <User className="h-6 w-6 md:h-5 md:w-5" />
               </Button>
             </Link>
 
             {/* Mobile Menu Button */}
-            <Button variant="ghost" size="icon" className="md:hidden text-gray-600 hover:text-pink-600">
-              <Menu className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="md:hidden text-gray-600 hover:text-pink-600 h-10 w-10">
+              <Menu className="h-6 w-6" />
             </Button>
           </div>
         </div>
