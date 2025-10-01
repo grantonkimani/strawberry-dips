@@ -72,13 +72,13 @@ export default function AdminSupportPage() {
         setTickets(prevTickets => 
           prevTickets.map(ticket => 
             ticket.id === ticketId 
-              ? { ...ticket, status: newStatus }
+              ? { ...ticket, status: newStatus as SupportTicket['status'] }
               : ticket
           )
         );
         
         if (selectedTicket?.id === ticketId) {
-          setSelectedTicket({ ...selectedTicket, status: newStatus });
+          setSelectedTicket({ ...selectedTicket, status: newStatus as SupportTicket['status'] });
         }
         
         alert(`Ticket status updated to ${newStatus}`);
