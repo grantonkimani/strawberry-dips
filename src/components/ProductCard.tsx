@@ -41,12 +41,12 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Card className="group hover:shadow-lg hover:shadow-pink-100 transition-all duration-300 hover:-translate-y-1 hover:border-pink-200">
+    <Card className="group hover:shadow-md hover:shadow-pink-100 transition-all duration-300 hover:-translate-y-0.5 hover:border-pink-200">
       <CardContent className="p-0">
         {/* Product Image */}
         <div className="relative overflow-hidden rounded-t-lg">
           {product.image_url ? (
-            <div className="aspect-square bg-gray-100">
+            <div className="aspect-[4/5] bg-gray-100">
               <img 
                 src={product.image_url} 
                 alt={product.name}
@@ -57,7 +57,7 @@ export function ProductCard({ product }: ProductCardProps) {
                   e.currentTarget.nextElementSibling?.classList.remove('hidden');
                 }}
               />
-              <div className="aspect-square bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center hidden">
+              <div className="aspect-[4/5] bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center hidden">
                 <div className="text-center space-y-2">
                   <div className="w-20 h-20 bg-gradient-to-br from-pink-200 to-red-200 rounded-full mx-auto flex items-center justify-center">
                     <span className="text-2xl">🍓</span>
@@ -67,7 +67,7 @@ export function ProductCard({ product }: ProductCardProps) {
               </div>
             </div>
           ) : (
-            <div className="aspect-square bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center">
+            <div className="aspect-[4/5] bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center">
               <div className="text-center space-y-2">
                 <div className="w-20 h-20 bg-gradient-to-br from-pink-200 to-red-200 rounded-full mx-auto flex items-center justify-center">
                   <span className="text-2xl">🍓</span>
@@ -95,12 +95,12 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Product Info */}
-        <div className="p-4 space-y-3">
+        <div className="p-3 space-y-2.5">
           <div>
-            <h3 className="font-semibold text-gray-900 text-lg leading-tight">
+            <h3 className="font-semibold text-gray-900 text-base leading-snug">
               {product.name}
             </h3>
-            <p className="text-gray-700 text-sm mt-1 line-clamp-4">
+            <p className="text-gray-700 text-sm mt-1 line-clamp-3">
               {product.description}
             </p>
           </div>
@@ -120,9 +120,9 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardFooter className="p-4 pt-0">
         <Button 
           onClick={handleAddToCart}
-          className="w-full bg-pink-600 hover:bg-pink-700 text-white"
+          className="w-full bg-pink-600 hover:bg-pink-700 text-white h-10 text-sm"
         >
-          <ShoppingCart className="h-4 w-4 mr-2" />
+          <ShoppingCart className="h-3.5 w-3.5 mr-2" />
           Add to Cart
         </Button>
       </CardFooter>
