@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Package, Clock, CheckCircle, XCircle, DollarSign } from 'lucide-react';
+import { Package, Clock, CheckCircle, XCircle, DollarSign, Mail } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { AdminNav } from '@/components/AdminNav';
+import { Button } from '@/components/ui/Button';
 
 interface OrderItem {
   id: string;
@@ -40,6 +41,7 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -63,6 +65,43 @@ export default function AdminDashboard() {
       setError('Failed to fetch orders');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    setUpdatingStatus(orderId);
+    
+    try {
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderId, status: newStatus }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update the order in the local state
+        setOrders(prevOrders => 
+          prevOrders.map(order => 
+            order.id === orderId 
+              ? { ...order, status: newStatus }
+              : order
+          )
+        );
+        
+        // Show success message
+        alert(`Order status updated to ${newStatus}${data.message.includes('email sent') ? ' and email sent!' : ''}`);
+      } else {
+        alert(`Failed to update order status: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      alert('Failed to update order status');
+    } finally {
+      setUpdatingStatus(null);
     }
   };
 
@@ -223,6 +262,9 @@ export default function AdminDashboard() {
                         Status
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Delivery
                       </th>
                     </tr>
@@ -263,6 +305,26 @@ export default function AdminDashboard() {
                             {getStatusIcon(order.status)}
                             <span className="ml-1 capitalize">{order.status}</span>
                           </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center space-x-2">
+                            <select
+                              value={order.status}
+                              onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                              disabled={updatingStatus === order.id}
+                              className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-pink-500 disabled:opacity-50"
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="paid">Paid</option>
+                              <option value="preparing">Preparing</option>
+                              <option value="out_for_delivery">Out for Delivery</option>
+                              <option value="delivered">Delivered</option>
+                              <option value="cancelled">Cancelled</option>
+                            </select>
+                            {updatingStatus === order.id && (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-pink-600"></div>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">

@@ -90,6 +90,9 @@ export function Header() {
             <Link href="/about" className="text-gray-600 hover:text-pink-600 font-medium transition-colors">
               About
             </Link>
+            <Link href="/support" className="text-gray-600 hover:text-pink-600 font-medium transition-colors">
+              Support
+            </Link>
             <Link href="/contact" className="text-gray-600 hover:text-pink-600 font-medium transition-colors">
               Contact
             </Link>

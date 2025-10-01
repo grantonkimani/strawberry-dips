@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Package, ShoppingBag, Settings, Home, FileText, LogOut, User, Tag } from 'lucide-react';
+import { Package, ShoppingBag, Settings, Home, FileText, LogOut, User, Tag, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function AdminNav() {
@@ -28,6 +28,7 @@ export function AdminNav() {
     { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
     { href: '/admin/products', label: 'Products', icon: Package },
     { href: '/admin/categories', label: 'Categories', icon: Tag },
+    { href: '/admin/support', label: 'Support', icon: MessageSquare },
     { href: '/admin/reports', label: 'Reports', icon: FileText },
   ];
 

@@ -38,6 +38,7 @@ export function Footer() {
             <h3 className="text-lg font-semibold mb-3 text-pink-300">Quick Links</h3>
             <div className="grid grid-cols-2 gap-2">
               <Link href="/about" className="text-white hover:text-pink-300 transition-colors text-sm">About Us</Link>
+              <Link href="/support" className="text-white hover:text-pink-300 transition-colors text-sm">Support</Link>
               <Link href="/policies/privacy" className="text-white hover:text-pink-300 transition-colors text-sm">Privacy Policy</Link>
               <Link href="/policies/terms" className="text-white hover:text-pink-300 transition-colors text-sm">Terms of Service</Link>
               <Link href="/policies/delivery" className="text-white hover:text-pink-300 transition-colors text-sm">Delivery Info</Link>

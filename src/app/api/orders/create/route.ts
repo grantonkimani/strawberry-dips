@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { sendOrderConfirmationEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -119,6 +120,30 @@ export async function POST(request: NextRequest) {
         { error: `Failed to create order items: ${itemsError.message}` },
         { status: 500 }
       );
+    }
+
+    // Send order confirmation email
+    try {
+      const emailResult = await sendOrderConfirmationEmail({
+        id: order.id,
+        customer_email: customer.email,
+        total: total,
+        delivery_date: customer.deliveryDate,
+        delivery_time: customer.deliveryTime,
+        delivery_city: customer.city,
+        delivery_state: customer.area || customer.state || 'N/A',
+        special_instructions: customer.specialInstructions || null,
+      });
+      
+      if (!emailResult.success) {
+        console.warn('Order confirmation email failed:', emailResult.error);
+        // Don't fail the request if email fails
+      } else {
+        console.log('Order confirmation email sent successfully');
+      }
+    } catch (emailError) {
+      console.error('Email sending error:', emailError);
+      // Don't fail the request if email fails
     }
 
     return NextResponse.json({
