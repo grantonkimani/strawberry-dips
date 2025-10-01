@@ -110,9 +110,9 @@ export function Header() {
             </div>
 
             {/* Wishlist */}
-            <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 relative h-10 w-10 md:h-9 md:w-9">
-              <Heart className="h-6 w-6 md:h-5 md:w-5" />
-              <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] md:text-xs rounded-full h-5 w-5 md:h-5 md:w-5 flex items-center justify-center">
+            <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-11 w-11 md:h-9 md:w-9">
+              <Heart className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.25} />
+              <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] md:text-xs rounded-full h-5 min-w-[1.25rem] px-1 md:px-0 flex items-center justify-center">
                 0
               </span>
             </Button>
@@ -121,12 +121,12 @@ export function Header() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="text-gray-600 hover:text-pink-600 relative h-10 w-10 md:h-9 md:w-9"
+              className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-11 w-11 md:h-9 md:w-9"
               onClick={() => setIsCartOpen(true)}
             >
-              <ShoppingCart className="h-6 w-6 md:h-5 md:w-5" />
+              <ShoppingCart className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.25} />
               {state.items.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] md:text-xs rounded-full h-5 w-5 md:h-5 md:w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] md:text-xs rounded-full h-5 min-w-[1.25rem] px-1 md:px-0 flex items-center justify-center">
                   {state.items.reduce((total, item) => total + (item.quantity || 1), 0)}
                 </span>
               )}
@@ -134,14 +134,14 @@ export function Header() {
 
             {/* User Account */}
             <Link href="/account">
-              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 h-10 w-10 md:h-9 md:w-9">
-                <User className="h-6 w-6 md:h-5 md:w-5" />
+              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 h-11 w-11 md:h-9 md:w-9">
+                <User className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.25} />
               </Button>
             </Link>
 
             {/* Mobile Menu Button */}
-            <Button variant="ghost" size="icon" className="md:hidden text-gray-600 hover:text-pink-600 h-10 w-10">
-              <Menu className="h-6 w-6" />
+            <Button variant="ghost" size="icon" className="md:hidden text-gray-600 hover:text-pink-600 active:bg-pink-50 h-11 w-11">
+              <Menu className="h-7 w-7" strokeWidth={2.25} />
             </Button>
           </div>
         </div>
