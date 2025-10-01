@@ -142,7 +142,7 @@ export function ProductGrid() {
 						{/* Products Display */}
 						{selectedCategory ? (
 							// Show single category
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
 								{filteredProducts.map((product) => (
 									<ProductCard
 										key={product.id}
