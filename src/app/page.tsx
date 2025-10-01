@@ -5,7 +5,7 @@ import { SupportSection } from "@/components/SupportSection";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
+    <div className="min-h-screen bg-pink-50">
       <Header />
       <ProductGrid />
       
