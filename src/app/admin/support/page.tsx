@@ -32,17 +32,24 @@ export default function AdminSupportPage() {
 
   const fetchTickets = async () => {
     try {
+      console.log('Fetching support tickets...');
       const response = await fetch('/api/support');
-      const data = await response.json();
+      console.log('API response status:', response.status);
       
-      if (data.tickets) {
+      const data = await response.json();
+      console.log('API response data:', data);
+      
+      if (data.success && data.tickets) {
         setTickets(data.tickets);
+        setError(null);
       } else if (data.error) {
         setError(data.error);
+        console.error('API error:', data.error);
       } else {
         setError('Failed to fetch support tickets');
       }
     } catch (err) {
+      console.error('Fetch error:', err);
       setError('Failed to fetch support tickets');
     } finally {
       setLoading(false);
@@ -246,22 +253,24 @@ export default function AdminSupportPage() {
               {selectedTicket ? (
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-semibold text-gray-900">{selectedTicket.name}</h3>
+                    <h3 className="font-semibold text-gray-900">{selectedTicket.name || 'Unknown'}</h3>
                     <p className="text-sm text-gray-600 mt-1">
-                      Email: {selectedTicket.email}
+                      Email: {selectedTicket.email || 'No email provided'}
                     </p>
                     <p className="text-sm text-gray-600">
-                      Phone: {selectedTicket.phone}
+                      Phone: {selectedTicket.phone || 'No phone provided'}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {new Date(selectedTicket.created_at).toLocaleString()}
+                      {selectedTicket.created_at ? new Date(selectedTicket.created_at).toLocaleString() : 'Unknown date'}
                     </p>
                   </div>
 
                   <div>
                     <h4 className="font-medium text-gray-900 mb-2">Message</h4>
                     <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{selectedTicket.message}</p>
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                        {selectedTicket.message || 'No message provided'}
+                      </p>
                     </div>
                   </div>
 
