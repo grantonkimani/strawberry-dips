@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS support_tickets (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
   subject VARCHAR(500) NOT NULL,
   message TEXT NOT NULL,
   priority VARCHAR(20) DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),

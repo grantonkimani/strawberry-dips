@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, Mail, Trash2, Edit } from 'lucide-react';
+import { MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, Mail, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { AdminNav } from '@/components/AdminNav';
 import { Button } from '@/components/ui/Button';
@@ -10,6 +10,7 @@ interface SupportTicket {
   id: string;
   name: string;
   email: string;
+  phone: string;
   subject: string;
   message: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
@@ -24,20 +25,14 @@ export default function AdminSupportPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
-  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
 
   useEffect(() => {
     fetchTickets();
-  }, [filterStatus]);
+  }, []);
 
   const fetchTickets = async () => {
     try {
-      const url = filterStatus === 'all' 
-        ? '/api/support' 
-        : `/api/support?status=${filterStatus}`;
-      
-      const response = await fetch(url);
+      const response = await fetch('/api/support');
       const data = await response.json();
       
       if (data.tickets) {
@@ -51,45 +46,6 @@ export default function AdminSupportPage() {
       setError('Failed to fetch support tickets');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const updateTicketStatus = async (ticketId: string, newStatus: string) => {
-    setUpdatingStatus(ticketId);
-    
-    try {
-      const response = await fetch(`/api/support/${ticketId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      const data = await response.json();
-
-      if (data.ticket) {
-        setTickets(prevTickets => 
-          prevTickets.map(ticket => 
-            ticket.id === ticketId 
-              ? { ...ticket, status: newStatus as SupportTicket['status'] }
-              : ticket
-          )
-        );
-        
-        if (selectedTicket?.id === ticketId) {
-          setSelectedTicket({ ...selectedTicket, status: newStatus as SupportTicket['status'] });
-        }
-        
-        alert(`Ticket status updated to ${newStatus}`);
-      } else {
-        alert(`Failed to update ticket status: ${data.error}`);
-      }
-    } catch (error) {
-      console.error('Error updating ticket status:', error);
-      alert('Failed to update ticket status');
-    } finally {
-      setUpdatingStatus(null);
     }
   };
 
@@ -154,21 +110,6 @@ export default function AdminSupportPage() {
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent':
-        return 'bg-red-100 text-red-800';
-      case 'high':
-        return 'bg-orange-100 text-orange-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'low':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -197,8 +138,8 @@ export default function AdminSupportPage() {
       {/* Header */}
       <div className="bg-white border-b border-pink-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Support Tickets</h1>
-          <p className="text-gray-600">Manage customer support inquiries</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Customer Support</h1>
+          <p className="text-gray-600">View customer messages and inquiries</p>
         </div>
       </div>
 
@@ -207,13 +148,13 @@ export default function AdminSupportPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
                 <MessageSquare className="h-8 w-8 text-pink-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Tickets</p>
+                  <p className="text-sm font-medium text-gray-600">Total Messages</p>
                   <p className="text-2xl font-bold text-gray-900">{tickets.length}</p>
                 </div>
               </div>
@@ -225,23 +166,9 @@ export default function AdminSupportPage() {
               <div className="flex items-center">
                 <Clock className="h-8 w-8 text-yellow-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Open</p>
+                  <p className="text-sm font-medium text-gray-600">New Messages</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {tickets.filter(t => t.status === 'open').length}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <AlertCircle className="h-8 w-8 text-blue-500" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">In Progress</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {tickets.filter(t => t.status === 'in_progress').length}
                   </p>
                 </div>
               </div>
@@ -264,30 +191,17 @@ export default function AdminSupportPage() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* Tickets List */}
+          {/* Messages List */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Support Tickets</CardTitle>
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="text-sm border border-gray-300 rounded-md px-2 py-1"
-                >
-                  <option value="all">All Tickets</option>
-                  <option value="open">Open</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="closed">Closed</option>
-                </select>
-              </div>
+              <CardTitle>Customer Messages</CardTitle>
             </CardHeader>
             <CardContent>
               {tickets.length === 0 ? (
                 <div className="text-center py-8">
                   <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No support tickets</h3>
-                  <p className="text-gray-600">Support tickets will appear here when customers contact you.</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No messages yet</h3>
+                  <p className="text-gray-600">Customer messages will appear here when they contact you.</p>
                 </div>
               ) : (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -303,16 +217,13 @@ export default function AdminSupportPage() {
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h4 className="font-medium text-gray-900 text-sm">{ticket.subject}</h4>
-                          <p className="text-gray-600 text-xs mt-1">{ticket.name} - {ticket.email}</p>
+                          <h4 className="font-medium text-gray-900 text-sm">{ticket.name}</h4>
+                          <p className="text-gray-600 text-xs mt-1">{ticket.email}</p>
                           <p className="text-gray-500 text-xs mt-1">
                             {new Date(ticket.created_at).toLocaleDateString()}
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(ticket.priority)}`}>
-                            {ticket.priority}
-                          </span>
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(ticket.status)}`}>
                             {getStatusIcon(ticket.status)}
                             <span className="ml-1">{ticket.status}</span>
@@ -326,18 +237,21 @@ export default function AdminSupportPage() {
             </CardContent>
           </Card>
 
-          {/* Ticket Details */}
+          {/* Message Details */}
           <Card>
             <CardHeader>
-              <CardTitle>Ticket Details</CardTitle>
+              <CardTitle>Message Details</CardTitle>
             </CardHeader>
             <CardContent>
               {selectedTicket ? (
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-semibold text-gray-900">{selectedTicket.subject}</h3>
+                    <h3 className="font-semibold text-gray-900">{selectedTicket.name}</h3>
                     <p className="text-sm text-gray-600 mt-1">
-                      From: {selectedTicket.name} ({selectedTicket.email})
+                      Email: {selectedTicket.email}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Phone: {selectedTicket.phone}
                     </p>
                     <p className="text-sm text-gray-500">
                       {new Date(selectedTicket.created_at).toLocaleString()}
@@ -352,9 +266,6 @@ export default function AdminSupportPage() {
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(selectedTicket.priority)}`}>
-                      Priority: {selectedTicket.priority}
-                    </span>
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedTicket.status)}`}>
                       {getStatusIcon(selectedTicket.status)}
                       <span className="ml-1">Status: {selectedTicket.status}</span>
@@ -362,31 +273,13 @@ export default function AdminSupportPage() {
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <select
-                      value={selectedTicket.status}
-                      onChange={(e) => updateTicketStatus(selectedTicket.id, e.target.value)}
-                      disabled={updatingStatus === selectedTicket.id}
-                      className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-pink-500 disabled:opacity-50"
-                    >
-                      <option value="open">Open</option>
-                      <option value="in_progress">In Progress</option>
-                      <option value="resolved">Resolved</option>
-                      <option value="closed">Closed</option>
-                    </select>
-                    
-                    {updatingStatus === selectedTicket.id && (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-pink-600"></div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center space-x-2">
                     <Button
-                      onClick={() => window.open(`mailto:${selectedTicket.email}?subject=Re: ${selectedTicket.subject}`)}
+                      onClick={() => window.open(`mailto:${selectedTicket.email}?subject=Re: Your Support Request`)}
                       variant="outline"
                       size="sm"
                     >
                       <Mail className="h-4 w-4 mr-1" />
-                      Reply
+                      Reply via Email
                     </Button>
                     
                     <Button
@@ -403,8 +296,8 @@ export default function AdminSupportPage() {
               ) : (
                 <div className="text-center py-8">
                   <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Select a ticket</h3>
-                  <p className="text-gray-600">Click on a ticket to view details and manage it.</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Select a message</h3>
+                  <p className="text-gray-600">Click on a message to view details.</p>
                 </div>
               )}
             </CardContent>
