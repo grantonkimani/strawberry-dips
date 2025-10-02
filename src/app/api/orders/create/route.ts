@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
         delivery_city: customer.city,
         delivery_state: customer.area || customer.state || 'N/A', // Use area from form
         delivery_zip_code: customer.zipCode || 'N/A', // Make optional
-        delivery_date: customer.deliveryDate || null,
+        delivery_date: customer.deliveryDate || new Date().toISOString().split('T')[0],
         delivery_time: customer.deliveryTime || null,
         special_instructions: customer.specialInstructions || null,
         payment_method: 'intasend', // Default payment method
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
         id: order.id,
         customer_email: customer.email,
         total: total,
-        delivery_date: customer.deliveryDate || null,
+        delivery_date: customer.deliveryDate || new Date().toISOString().split('T')[0],
         delivery_time: customer.deliveryTime || null,
         delivery_city: customer.city,
         delivery_state: customer.area || customer.state || 'N/A',
