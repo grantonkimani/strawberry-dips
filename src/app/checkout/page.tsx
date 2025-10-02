@@ -50,56 +50,45 @@ const KENYAN_CITIES = [
   { value: 'baringo', label: 'Baringo' },
 ];
 
-// Kenyan Areas/Subcounties
-const KENYAN_AREAS = [
-  // Nairobi Areas
-  { value: 'kasarani', label: 'Kasarani' },
-  { value: 'westlands', label: 'Westlands' },
-  { value: 'embakasi', label: 'Embakasi' },
-  { value: 'kibra', label: 'Kibra' },
-  { value: 'langata', label: 'Langata' },
-  { value: 'karen', label: 'Karen' },
-  { value: 'runda', label: 'Runda' },
-  { value: 'kileleshwa', label: 'Kileleshwa' },
-  { value: 'kilimani', label: 'Kilimani' },
-  { value: 'parklands', label: 'Parklands' },
-  { value: 'eastleigh', label: 'Eastleigh' },
-  { value: 'south-c', label: 'South C' },
-  { value: 'south-b', label: 'South B' },
-  { value: 'lavington', label: 'Lavington' },
-  { value: 'muthaiga', label: 'Muthaiga' },
-  { value: 'gigiri', label: 'Gigiri' },
-  { value: 'spring-valley', label: 'Spring Valley' },
-  { value: 'riverside', label: 'Riverside' },
-  { value: 'hurlingham', label: 'Hurlingham' },
-  { value: 'ngong-road', label: 'Ngong Road' },
-  { value: 'adams-arcade', label: 'Adams Arcade' },
-  { value: 'kiambu-road', label: 'Kiambu Road' },
-  { value: 'thika-road', label: 'Thika Road' },
-  { value: 'mombasa-road', label: 'Mombasa Road' },
-  { value: 'jogoo-road', label: 'Jogoo Road' },
-  { value: 'outering-road', label: 'Outering Road' },
-  { value: 'donholm', label: 'Donholm' },
-  { value: 'buru-buru', label: 'Buru Buru' },
-  { value: 'umoja', label: 'Umoja' },
-  { value: 'kayole', label: 'Kayole' },
-  { value: 'dandora', label: 'Dandora' },
-  { value: 'mathare', label: 'Mathare' },
-  { value: 'korogocho', label: 'Korogocho' },
-  { value: 'kawangware', label: 'Kawangware' },
-  
-  // Major Towns
-  { value: 'mombasa', label: 'Mombasa' },
-  { value: 'kisumu', label: 'Kisumu' },
-  { value: 'nakuru', label: 'Nakuru' },
-  { value: 'eldoret', label: 'Eldoret' },
-  { value: 'thika', label: 'Thika' },
-  { value: 'machakos', label: 'Machakos' },
-  { value: 'meru', label: 'Meru' },
-  { value: 'nyeri', label: 'Nyeri' },
-  { value: 'kitale', label: 'Kitale' },
-  { value: 'malindi', label: 'Malindi' },
-  { value: 'lamu', label: 'Lamu' },
+// Kenyan Counties
+const KENYAN_COUNTIES = [
+  { value: 'nairobi', label: 'Nairobi County' },
+  { value: 'mombasa', label: 'Mombasa County' },
+  { value: 'kisumu', label: 'Kisumu County' },
+  { value: 'nakuru', label: 'Nakuru County' },
+  { value: 'eldoret', label: 'Uasin Gishu County' },
+  { value: 'thika', label: 'Kiambu County' },
+  { value: 'machakos', label: 'Machakos County' },
+  { value: 'meru', label: 'Meru County' },
+  { value: 'nyeri', label: 'Nyeri County' },
+  { value: 'kericho', label: 'Kericho County' },
+  { value: 'kitale', label: 'Trans Nzoia County' },
+  { value: 'malindi', label: 'Kilifi County' },
+  { value: 'lamu', label: 'Lamu County' },
+  { value: 'garissa', label: 'Garissa County' },
+  { value: 'kakamega', label: 'Kakamega County' },
+  { value: 'bungoma', label: 'Bungoma County' },
+  { value: 'embu', label: 'Embu County' },
+  { value: 'isiolo', label: 'Isiolo County' },
+  { value: 'marsabit', label: 'Marsabit County' },
+  { value: 'moyale', label: 'Marsabit County' },
+  { value: 'wajir', label: 'Wajir County' },
+  { value: 'mandera', label: 'Mandera County' },
+  { value: 'turkana', label: 'Turkana County' },
+  { value: 'west-pokot', label: 'West Pokot County' },
+  { value: 'samburu', label: 'Samburu County' },
+  { value: 'laikipia', label: 'Laikipia County' },
+  { value: 'nyandarua', label: 'Nyandarua County' },
+  { value: 'murang\'a', label: 'Murang\'a County' },
+  { value: 'kiambu', label: 'Kiambu County' },
+  { value: 'kajiado', label: 'Kajiado County' },
+  { value: 'narok', label: 'Narok County' },
+  { value: 'bomet', label: 'Bomet County' },
+  { value: 'nandi', label: 'Nandi County' },
+  { value: 'uasin-gishu', label: 'Uasin Gishu County' },
+  { value: 'trans-nzoia', label: 'Trans Nzoia County' },
+  { value: 'elgeyo-marakwet', label: 'Elgeyo Marakwet County' },
+  { value: 'baringo', label: 'Baringo County' },
 ];
 
 export default function CheckoutPage() {
@@ -353,7 +342,7 @@ export default function CheckoutPage() {
                         Area/Subcounty *
                       </label>
                       <SearchableSelect
-                        options={KENYAN_AREAS}
+                        options={KENYAN_COUNTIES}
                         value={formData.area}
                         onChange={(value) => setFormData(prev => ({ ...prev, area: value }))}
                         placeholder="Search or select your area..."
