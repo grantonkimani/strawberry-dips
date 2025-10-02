@@ -103,17 +103,13 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 		const file = e.target.files?.[0]
 		if (!file) return
 		setIsUploadingCreate(true)
-		try {
-			const ext = file.name.split('.').pop() || 'jpg'
-			// Path is relative to the bucket; no bucket prefix
-			const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-			const { error: uploadError } = await supabase.storage.from('product-images').upload(path, file, {
-				upsert: true,
-				contentType: file.type || 'image/jpeg'
-			})
-			if (uploadError) throw uploadError
-			const { data } = supabase.storage.from('product-images').getPublicUrl(path)
-			setForm(prev => ({ ...prev, image_url: data.publicUrl }))
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/uploads/product-image', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Upload failed')
+      setForm(prev => ({ ...prev, image_url: data.url }))
 		} catch (err) {
 			setError('Failed to upload image. Please try again.')
 		} finally {
@@ -125,17 +121,13 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 		const file = e.target.files?.[0]
 		if (!file) return
 		setIsUploadingEdit(true)
-		try {
-			const ext = file.name.split('.').pop() || 'jpg'
-			// Path is relative to the bucket; no bucket prefix
-			const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-			const { error: uploadError } = await supabase.storage.from('product-images').upload(path, file, {
-				upsert: true,
-				contentType: file.type || 'image/jpeg'
-			})
-			if (uploadError) throw uploadError
-			const { data } = supabase.storage.from('product-images').getPublicUrl(path)
-			setEditForm(prev => ({ ...prev, image_url: data.publicUrl }))
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/uploads/product-image', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Upload failed')
+      setEditForm(prev => ({ ...prev, image_url: data.url }))
 		} catch (err) {
 			setError('Failed to upload image. Please try again.')
 		} finally {
