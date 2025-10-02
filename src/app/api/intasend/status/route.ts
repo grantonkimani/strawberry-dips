@@ -80,6 +80,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      orderId: orderId, // Include the orderId in the response
       status: statusResponse.invoice?.state || 'UNKNOWN',
       amount: statusResponse.invoice?.net_amount || 0,
       currency: statusResponse.invoice?.currency || 'KES',

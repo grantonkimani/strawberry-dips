@@ -24,7 +24,8 @@ export function PaymentOptions({
   onError
 }: PaymentOptionsProps) {
   const handleIntaSendSuccess = (data: any) => {
-    onSuccess(data.invoiceId || data.reference, 'intasend');
+    // Use orderId from IntaSend response, not invoiceId
+    onSuccess(data.orderId || data.invoiceId || data.reference, 'intasend');
   };
 
   return (

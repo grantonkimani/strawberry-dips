@@ -188,8 +188,10 @@ export default function CheckoutPage() {
         setOrderId(paymentIntentId);
         
         // Clear cart and redirect to success page after a short delay
+        // Use the orderId from the IntaSend response, not the invoice ID
         setTimeout(() => {
           clearCart();
+          // The paymentIntentId should be the orderId from IntaSend response
           window.location.href = `/order-success/${paymentIntentId}`;
         }, 2000);
         return;
