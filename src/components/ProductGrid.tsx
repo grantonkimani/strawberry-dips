@@ -33,8 +33,18 @@ export function ProductGrid() {
 	const [products, setProducts] = useState<ApiProduct[]>([]);
 	const [categories, setCategories] = useState<Category[]>([]);
 	const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+	const [search, setSearch] = useState<string>('');
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+
+	// Read query from URL (?q=)
+	useEffect(() => {
+		if (typeof window !== 'undefined') {
+			const params = new URLSearchParams(window.location.search);
+			const q = params.get('q') || '';
+			setSearch(q);
+		}
+	}, []);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -102,10 +112,19 @@ export function ProductGrid() {
 		return acc;
 	}, {} as Record<string, any[]>);
 
-	// Filter products based on selected category
-	const filteredProducts = selectedCategory 
+	// Filter products based on selected category and search
+	const baseFiltered = selectedCategory 
 		? groupedProducts[selectedCategory] || []
 		: transformedProducts;
+
+	const normalized = (s: string) => s.toLowerCase();
+	const searchFiltered = search.trim()
+		? baseFiltered.filter(p =>
+			normalized(p.name).includes(normalized(search)) ||
+			normalized(p.description || '').includes(normalized(search)) ||
+			normalized(p.categories?.name || p.category || '').includes(normalized(search))
+		)
+		: baseFiltered;
 
 	// Get categories with products
 	const categoriesWithProducts = categories.filter(cat => 
@@ -139,11 +158,11 @@ export function ProductGrid() {
 							onCategorySelect={setSelectedCategory}
 						/>
 
-						{/* Products Display */}
+					{/* Products Display */}
 						{selectedCategory ? (
-							// Show single category
+						// Show single category
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
-								{filteredProducts.map((product) => (
+							{searchFiltered.map((product) => (
 									<ProductCard
 										key={product.id}
 										product={{
@@ -159,7 +178,7 @@ export function ProductGrid() {
 								))}
 							</div>
 						) : (
-							// Show all categories in sections
+						// Show all categories in sections
 							<div>
 								{categoriesWithProducts
 									.sort((a, b) => a.display_order - b.display_order)
@@ -167,7 +186,12 @@ export function ProductGrid() {
 										<CategorySection
 											key={category.id}
 											category={category}
-											products={groupedProducts[category.id] || []}
+										products={(groupedProducts[category.id] || []).filter((p) =>
+											search.trim()
+												? (normalized(p.name).includes(normalized(search)) ||
+												   normalized(p.description || '').includes(normalized(search)))
+												: true
+										)}
 										/>
 									))}
 							</div>

@@ -5,11 +5,14 @@ import { Button } from "./ui/Button";
 import { useCart } from "@/contexts/CartContext";
 import { CartSidebar } from "./CartSidebar";
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export function Header() {
   const { state } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
 
   // Update body class when cart opens/closes
   useEffect(() => {
@@ -104,12 +107,33 @@ export function Header() {
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3 md:space-x-4">
             {/* Search - Hidden on mobile */}
-            <div className="hidden lg:block">
-              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </Button>
+            <div className="hidden lg:flex items-center">
+              <div className="relative">
+                <input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const q = searchQuery.trim();
+                      router.push(q ? `/?q=${encodeURIComponent(q)}` : '/');
+                    }
+                  }}
+                  placeholder="Search products or categories..."
+                  className="w-64 md:w-72 lg:w-80 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
+                />
+                <button
+                  onClick={() => {
+                    const q = searchQuery.trim();
+                    router.push(q ? `/?q=${encodeURIComponent(q)}` : '/');
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-pink-600"
+                  aria-label="Search"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             {/* Wishlist */}
