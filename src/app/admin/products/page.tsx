@@ -104,7 +104,8 @@ export default function AdminProductsPage() {
 		setIsUploadingCreate(true)
 		try {
 			const ext = file.name.split('.').pop() || 'jpg'
-			const path = `product-images/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+			// Path is relative to the bucket; no bucket prefix
+			const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 			const { error: uploadError } = await supabase.storage.from('product-images').upload(path, file, {
 				upsert: true,
 				contentType: file.type || 'image/jpeg'
@@ -125,7 +126,8 @@ export default function AdminProductsPage() {
 		setIsUploadingEdit(true)
 		try {
 			const ext = file.name.split('.').pop() || 'jpg'
-			const path = `product-images/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+			// Path is relative to the bucket; no bucket prefix
+			const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 			const { error: uploadError } = await supabase.storage.from('product-images').upload(path, file, {
 				upsert: true,
 				contentType: file.type || 'image/jpeg'
@@ -143,6 +145,10 @@ export default function AdminProductsPage() {
 	async function createProduct() {
 		// Clear any previous errors
 		setError(null)
+		if (isUploadingCreate) {
+			setError('Please wait for the image upload to finish before saving.')
+			return
+		}
 		
 		// Validate required fields
 		if (!form.name.trim()) {
@@ -207,6 +213,10 @@ export default function AdminProductsPage() {
 	async function updateProduct(id: string) {
 		// Clear any previous errors
 		setError(null)
+		if (isUploadingEdit) {
+			setError('Please wait for the image upload to finish before saving.')
+			return
+		}
 		
 		// Validate required fields
 		if (!editForm.name?.trim()) {
@@ -326,7 +336,7 @@ export default function AdminProductsPage() {
 								</div>
 							</div>
 							<div className="mt-4 flex justify-end">
-								<Button onClick={createProduct} className="bg-pink-600 hover:bg-pink-700">
+								<Button onClick={createProduct} disabled={isUploadingCreate} className="bg-pink-600 hover:bg-pink-700 disabled:opacity-60 disabled:cursor-not-allowed">
 									<Save className="h-4 w-4 mr-2" /> Save Product
 								</Button>
 							</div>
