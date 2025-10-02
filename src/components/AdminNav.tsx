@@ -42,8 +42,10 @@ export function AdminNav() {
   return (
     <nav className="bg-white border-b border-pink-100">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-8">
+        <div className="flex items-center justify-between">
+          {/* Scrollable nav on mobile */}
+          <div className="flex-1 overflow-x-auto no-scrollbar -mx-2 md:mx-0">
+            <div className="flex whitespace-nowrap space-x-6 px-2 md:px-0">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -52,7 +54,7 @@ export function AdminNav() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center space-x-2 px-3 py-4 border-b-2 font-medium text-sm transition-colors ${
+                    className={`inline-flex items-center space-x-2 px-3 py-4 border-b-2 font-medium text-sm transition-colors ${
                     isActive
                       ? 'border-pink-600 text-pink-600'
                       : 'border-transparent text-gray-700 hover:text-pink-600 hover:border-pink-200'
@@ -63,10 +65,11 @@ export function AdminNav() {
                 </Link>
               );
             })}
+            </div>
           </div>
           
           {/* User Info and Logout */}
-          <div className="flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4 ml-4 flex-shrink-0">
             <div className="flex items-center space-x-2 text-sm text-gray-800">
               <User className="h-4 w-4" />
               <span>{user?.full_name || 'Admin'}</span>
