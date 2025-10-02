@@ -19,6 +19,7 @@ interface Order {
   id: string;
   stripe_payment_intent_id: string;
   status: string;
+  payment_status: string;
   subtotal: number;
   delivery_fee: number;
   total: number;
@@ -44,28 +45,35 @@ export default function AdminOrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFailedOrders, setShowFailedOrders] = useState(false);
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  // Filter orders based on search query
+  // Filter orders based on search query and failed orders toggle
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredOrders(orders);
-    } else {
-      const filtered = orders.filter(order => {
-        const query = searchQuery.toLowerCase();
-        return (
-          order.id.toLowerCase().includes(query) ||
-          order.id.slice(0, 8).toLowerCase().includes(query) ||
-          `${order.customer_first_name} ${order.customer_last_name}`.toLowerCase().includes(query) ||
-          order.customer_email.toLowerCase().includes(query)
-        );
-      });
-      setFilteredOrders(filtered);
+    let filtered = orders;
+
+    // First filter out failed orders if toggle is off
+    if (!showFailedOrders) {
+      const failedStatuses = ['intasend_timeout', 'failed', 'document_pending'];
+      filtered = orders.filter(order => !failedStatuses.includes(order.payment_status));
     }
-  }, [searchQuery, orders]);
+
+    // Then apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(order => (
+        order.id.toLowerCase().includes(query) ||
+        order.id.slice(0, 8).toLowerCase().includes(query) ||
+        `${order.customer_first_name} ${order.customer_last_name}`.toLowerCase().includes(query) ||
+        order.customer_email.toLowerCase().includes(query)
+      ));
+    }
+
+    setFilteredOrders(filtered);
+  }, [searchQuery, orders, showFailedOrders]);
 
   const fetchOrders = async () => {
     try {
@@ -103,7 +111,19 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, paymentStatus?: string) => {
+    // Check payment status first for failed orders
+    if (paymentStatus === 'intasend_timeout') {
+      return 'bg-orange-100 text-orange-800';
+    }
+    if (paymentStatus === 'failed') {
+      return 'bg-red-100 text-red-800';
+    }
+    if (paymentStatus === 'document_pending') {
+      return 'bg-blue-100 text-blue-800';
+    }
+    
+    // Then check order status
     switch (status) {
       case 'paid':
         return 'bg-green-100 text-green-800';
@@ -189,6 +209,17 @@ export default function AdminOrdersPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Orders ({filteredOrders.length}{filteredOrders.length !== orders.length ? ` of ${orders.length}` : ''})</CardTitle>
+                  <div className="flex items-center space-x-2">
+                    <label className="flex items-center space-x-2 text-sm text-gray-600">
+                      <input
+                        type="checkbox"
+                        checked={showFailedOrders}
+                        onChange={(e) => setShowFailedOrders(e.target.checked)}
+                        className="rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                      />
+                      <span>Show failed orders</span>
+                    </label>
+                  </div>
                 </div>
                 {/* Search Bar */}
                 <div className="relative">
@@ -246,9 +277,14 @@ export default function AdminOrdersPage() {
                               <h3 className="font-semibold text-gray-900">
                                 #{order.id.slice(0, 8)}
                               </h3>
-                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status, order.payment_status)}`}>
                                 {getStatusIcon(order.status)}
-                                <span className="ml-1 capitalize">{order.status}</span>
+                                <span className="ml-1 capitalize">
+                                  {order.payment_status === 'intasend_timeout' ? 'Timeout' :
+                                   order.payment_status === 'failed' ? 'Failed' :
+                                   order.payment_status === 'document_pending' ? 'Document Pending' :
+                                   order.status}
+                                </span>
                               </span>
                             </div>
                             <p className="text-sm text-gray-600">
@@ -285,11 +321,21 @@ export default function AdminOrdersPage() {
                     <div className="space-y-1 text-sm">
                       <p><span className="font-medium">Order ID:</span> #{selectedOrder.id.slice(0, 8)}</p>
                       <p><span className="font-medium">Status:</span> 
-                        <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedOrder.status)}`}>
+                        <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedOrder.status, selectedOrder.payment_status)}`}>
                           {getStatusIcon(selectedOrder.status)}
-                          <span className="ml-1 capitalize">{selectedOrder.status}</span>
+                          <span className="ml-1 capitalize">
+                            {selectedOrder.payment_status === 'intasend_timeout' ? 'Timeout' :
+                             selectedOrder.payment_status === 'failed' ? 'Failed' :
+                             selectedOrder.payment_status === 'document_pending' ? 'Document Pending' :
+                             selectedOrder.status}
+                          </span>
                         </span>
                       </p>
+                      {selectedOrder.payment_status && (
+                        <p><span className="font-medium">Payment Status:</span> 
+                          <span className="ml-2 text-sm text-gray-600 capitalize">{selectedOrder.payment_status.replace('_', ' ')}</span>
+                        </p>
+                      )}
                       <p><span className="font-medium">Total:</span> KSH {selectedOrder.total.toFixed(2)}</p>
                       <p><span className="font-medium">Date:</span> {new Date(selectedOrder.created_at).toLocaleString()}</p>
                     </div>

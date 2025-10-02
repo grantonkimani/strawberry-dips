@@ -34,6 +34,7 @@ interface Order {
   delivery_time: string;
   special_instructions: string;
   created_at: string;
+  tracking_code?: string;
   order_items: OrderItem[];
 }
 
@@ -169,6 +170,11 @@ export default function TrackOrderPage() {
             <CardTitle className="flex items-center space-x-2">
               {getStatusIcon(order.status)}
               <span>Order #{order.id.slice(0, 8)}</span>
+              {order.tracking_code && (
+                <span className="text-sm font-normal text-gray-500">
+                  (Tracking: {order.tracking_code})
+                </span>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>

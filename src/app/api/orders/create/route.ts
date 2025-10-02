@@ -65,6 +65,11 @@ export async function POST(request: NextRequest) {
       customerId = newCustomer.id;
     }
 
+    // Generate tracking code
+    const generateTrackingCode = () =>
+      Math.random().toString(36).slice(2, 6).toUpperCase() +
+      Math.random().toString(36).slice(2, 6).toUpperCase();
+
     // Create order
     const { data: order, error: orderError } = await supabase
       .from('orders')
@@ -87,9 +92,10 @@ export async function POST(request: NextRequest) {
         delivery_time: customer.deliveryTime,
         special_instructions: customer.specialInstructions || null,
         payment_method: 'intasend', // Default payment method
-        payment_status: 'completed'
+        payment_status: 'completed',
+        tracking_code: generateTrackingCode()
       })
-      .select('id')
+      .select('id, tracking_code')
       .single();
 
     if (orderError) {
@@ -133,6 +139,7 @@ export async function POST(request: NextRequest) {
         delivery_city: customer.city,
         delivery_state: customer.area || customer.state || 'N/A',
         special_instructions: customer.specialInstructions || null,
+        tracking_code: order.tracking_code,
       });
       
       if (!emailResult.success) {
@@ -149,6 +156,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       orderId: order.id,
+      trackingCode: order.tracking_code,
       message: 'Order created successfully'
     });
 
