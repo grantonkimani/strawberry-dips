@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/Button'
+import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { AdminNav } from '@/components/AdminNav'
 import { Plus, Trash2, Pencil, Save, X } from 'lucide-react'
@@ -51,6 +52,8 @@ export default function AdminProductsPage() {
 	const [form, setForm] = useState<typeof emptyForm>(emptyForm)
 	const [editingId, setEditingId] = useState<string | null>(null)
 	const [editForm, setEditForm] = useState<Partial<Product>>({})
+	const [isUploadingCreate, setIsUploadingCreate] = useState(false)
+	const [isUploadingEdit, setIsUploadingEdit] = useState(false)
 
 	useEffect(() => {
 		fetchProducts()
@@ -93,6 +96,48 @@ export default function AdminProductsPage() {
 			...prev,
 			[name]: type === 'checkbox' ? checked : name === 'base_price' ? Number(value) : value,
 		}))
+	}
+
+	async function handleUploadForCreate(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0]
+		if (!file) return
+		setIsUploadingCreate(true)
+		try {
+			const ext = file.name.split('.').pop() || 'jpg'
+			const path = `product-images/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+			const { error: uploadError } = await supabase.storage.from('product-images').upload(path, file, {
+				upsert: true,
+				contentType: file.type || 'image/jpeg'
+			})
+			if (uploadError) throw uploadError
+			const { data } = supabase.storage.from('product-images').getPublicUrl(path)
+			setForm(prev => ({ ...prev, image_url: data.publicUrl }))
+		} catch (err) {
+			setError('Failed to upload image. Please try again.')
+		} finally {
+			setIsUploadingCreate(false)
+		}
+	}
+
+	async function handleUploadForEdit(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0]
+		if (!file) return
+		setIsUploadingEdit(true)
+		try {
+			const ext = file.name.split('.').pop() || 'jpg'
+			const path = `product-images/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+			const { error: uploadError } = await supabase.storage.from('product-images').upload(path, file, {
+				upsert: true,
+				contentType: file.type || 'image/jpeg'
+			})
+			if (uploadError) throw uploadError
+			const { data } = supabase.storage.from('product-images').getPublicUrl(path)
+			setEditForm(prev => ({ ...prev, image_url: data.publicUrl }))
+		} catch (err) {
+			setError('Failed to upload image. Please try again.')
+		} finally {
+			setIsUploadingEdit(false)
+		}
 	}
 
 	async function createProduct() {
@@ -256,8 +301,20 @@ export default function AdminProductsPage() {
 									<input name="base_price" type="number" min={0} step={0.01} value={form.base_price} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" />
 								</div>
 								<div>
-									<label className="block text-sm font-semibold text-gray-800 mb-1">Image URL</label>
-									<input name="image_url" value={form.image_url} onChange={handleChange} placeholder="https://..." className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" />
+									<label className="block text-sm font-semibold text-gray-800 mb-1">Image</label>
+									<div className="space-y-2">
+										<input name="image_url" value={form.image_url} onChange={handleChange} placeholder="https://... (optional if you upload)" className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" />
+										<div className="flex items-center space-x-3">
+											<label className="inline-block">
+												<span className="sr-only">Upload image</span>
+												<input type="file" accept="image/*" onChange={handleUploadForCreate} className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100" />
+											</label>
+											{isUploadingCreate && <span className="text-sm text-gray-600">Uploading...</span>}
+										</div>
+										{form.image_url && (
+											<img src={form.image_url} alt="Preview" className="h-24 rounded border" />
+										)}
+									</div>
 								</div>
 								<div className="md:col-span-2">
 									<label className="block text-sm font-semibold text-gray-800 mb-1">Description</label>
@@ -306,12 +363,20 @@ export default function AdminProductsPage() {
 														placeholder="Product name"
 														className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" 
 													/>
-													<input 
-														value={editForm.image_url || ''} 
-														onChange={e => handleEditChange('image_url', e.target.value)} 
-														placeholder="Image URL"
-														className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" 
-													/>
+										<label className="block text-sm font-semibold text-gray-800 mb-1">Image</label>
+										<input 
+											value={editForm.image_url || ''} 
+											onChange={e => handleEditChange('image_url', e.target.value)} 
+											placeholder="https://... (optional if you upload)"
+											className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 mb-2" 
+										/>
+										<div className="flex items-center space-x-3 mb-2">
+											<input type="file" accept="image/*" onChange={handleUploadForEdit} className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100" />
+											{isUploadingEdit && <span className="text-sm text-gray-600">Uploading...</span>}
+										</div>
+										{editForm.image_url && (
+											<img src={editForm.image_url} alt="Preview" className="h-24 rounded border" />
+										)}
 													<textarea 
 														value={editForm.description || ''} 
 														onChange={e => handleEditChange('description', e.target.value)} 
