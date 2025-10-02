@@ -166,10 +166,15 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 		}
 
 		try {
+			// Normalize image_url to public URL if needed
+			const normalizedForm = {
+				...form,
+				image_url: normalizePublicUrl(form.image_url)
+			}
 			const res = await fetch('/api/products', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(form),
+				body: JSON.stringify(normalizedForm),
 			})
 			const data = await res.json()
 			if (data.product) {
@@ -235,10 +240,15 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 		}
 
 		try {
+			// Normalize image_url to public URL if needed
+			const normalizedEdit = {
+				...editForm,
+				image_url: normalizePublicUrl(editForm.image_url || '')
+			}
 			const res = await fetch(`/api/products/${id}`, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(editForm),
+				body: JSON.stringify(normalizedEdit),
 			})
 			const data = await res.json()
       if (data.product) {
@@ -472,4 +482,16 @@ function getStoragePathFromPublicUrl(url?: string | null): string | null {
   const idx = url.indexOf(marker)
   if (idx === -1) return null
   return url.substring(idx + marker.length)
+}
+
+function normalizePublicUrl(url?: string | null): string {
+  if (!url) return ''
+  // If already has /object/public/, return as is
+  if (url.includes('/object/public/product-images/')) return url
+  // If it has /object/product-images/, convert to public path
+  const marker = '/storage/v1/object/product-images/'
+  if (url.includes(marker)) {
+    return url.replace('/storage/v1/object/product-images/', '/storage/v1/object/public/product-images/')
+  }
+  return url
 }
