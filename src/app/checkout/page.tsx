@@ -50,7 +50,7 @@ const KENYAN_CITIES = [
   { value: 'baringo', label: 'Baringo' },
 ];
 
-// Kenyan Counties
+// Kenyan Counties (for City field)
 const KENYAN_COUNTIES = [
   { value: 'nairobi', label: 'Nairobi County' },
   { value: 'mombasa', label: 'Mombasa County' },
@@ -89,6 +89,44 @@ const KENYAN_COUNTIES = [
   { value: 'trans-nzoia', label: 'Trans Nzoia County' },
   { value: 'elgeyo-marakwet', label: 'Elgeyo Marakwet County' },
   { value: 'baringo', label: 'Baringo County' },
+];
+
+// Kenyan Areas/Subcounties (for Area field) – sample major Nairobi areas
+const KENYAN_AREAS = [
+  { value: 'kasarani', label: 'Kasarani' },
+  { value: 'westlands', label: 'Westlands' },
+  { value: 'embakasi', label: 'Embakasi' },
+  { value: 'kibra', label: 'Kibra' },
+  { value: 'langata', label: 'Langata' },
+  { value: 'karen', label: 'Karen' },
+  { value: 'runda', label: 'Runda' },
+  { value: 'kileleshwa', label: 'Kileleshwa' },
+  { value: 'kilimani', label: 'Kilimani' },
+  { value: 'parklands', label: 'Parklands' },
+  { value: 'eastleigh', label: 'Eastleigh' },
+  { value: 'south-c', label: 'South C' },
+  { value: 'south-b', label: 'South B' },
+  { value: 'lavington', label: 'Lavington' },
+  { value: 'muthaiga', label: 'Muthaiga' },
+  { value: 'gigiri', label: 'Gigiri' },
+  { value: 'spring-valley', label: 'Spring Valley' },
+  { value: 'riverside', label: 'Riverside' },
+  { value: 'hurlingham', label: 'Hurlingham' },
+  { value: 'ngong-road', label: 'Ngong Road' },
+  { value: 'adams-arcade', label: 'Adams Arcade' },
+  { value: 'kiambu-road', label: 'Kiambu Road' },
+  { value: 'thika-road', label: 'Thika Road' },
+  { value: 'mombasa-road', label: 'Mombasa Road' },
+  { value: 'jogoo-road', label: 'Jogoo Road' },
+  { value: 'outering-road', label: 'Outering Road' },
+  { value: 'donholm', label: 'Donholm' },
+  { value: 'buru-buru', label: 'Buru Buru' },
+  { value: 'umoja', label: 'Umoja' },
+  { value: 'kayole', label: 'Kayole' },
+  { value: 'dandora', label: 'Dandora' },
+  { value: 'mathare', label: 'Mathare' },
+  { value: 'korogocho', label: 'Korogocho' },
+  { value: 'kawangware', label: 'Kawangware' },
 ];
 
 export default function CheckoutPage() {
@@ -331,7 +369,7 @@ export default function CheckoutPage() {
                         City *
                       </label>
                       <SearchableSelect
-                        options={KENYAN_CITIES}
+                        options={KENYAN_COUNTIES}
                         value={formData.city}
                         onChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
                         placeholder="Search or select your city..."
@@ -342,7 +380,7 @@ export default function CheckoutPage() {
                         Area/Subcounty *
                       </label>
                       <SearchableSelect
-                        options={KENYAN_COUNTIES}
+                        options={KENYAN_AREAS}
                         value={formData.area}
                         onChange={(value) => setFormData(prev => ({ ...prev, area: value }))}
                         placeholder="Search or select your area..."
