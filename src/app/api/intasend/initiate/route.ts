@@ -111,55 +111,45 @@ export async function POST(request: NextRequest) {
     let intasendResponse;
 
     try {
-      // Add timeout handling for IntaSend API calls
-      const intasendPromise = paymentMethod === 'mpesa'
-        ? createMpesaPayment(paymentData)
-        : paymentMethod === 'card'
-        ? createCardPayment(paymentData)
-        : null;
-
-      if (!intasendPromise) {
+      // Call IntaSend API directly (let IntaSend handle its own timeouts)
+      if (paymentMethod === 'mpesa') {
+        intasendResponse = await createMpesaPayment(paymentData);
+      } else if (paymentMethod === 'card') {
+        intasendResponse = await createCardPayment(paymentData);
+      } else {
         return NextResponse.json(
           { error: 'Invalid payment method. Use "mpesa" or "card"' },
           { status: 400 }
         );
       }
 
-      // Set a 40-second timeout for IntaSend API calls (gateways can be slow)
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('IntaSend API timeout')), 40000)
-      );
-
-      intasendResponse = await Promise.race([intasendPromise, timeoutPromise]);
-
     } catch (error) {
       // Surface more context from the IntaSend SDK/network layer
       const anyErr: any = error;
       const debugPayload = anyErr?.response?.data || anyErr?.data || anyErr?.message || anyErr;
-      console.error('IntaSend API error or timeout:', debugPayload);
+      console.error('IntaSend API error:', debugPayload);
 
-      // If IntaSend times out or fails, mark order as needing manual processing
+      // If IntaSend fails, mark order as failed
       const { error: updateError } = await supabase
         .from('orders')
         .update({
-          payment_status: 'intasend_timeout',
+          payment_status: 'failed',
           updated_at: new Date().toISOString(),
         })
         .eq('id', order.id);
 
       if (updateError) {
-        console.error('Error updating order status for timeout:', updateError);
+        console.error('Error updating order status for failure:', updateError);
       }
 
       return NextResponse.json(
         {
-          error: 'IntaSend service timeout',
-          timeout: true,
+          error: 'IntaSend payment failed',
           orderId: order.id,
-          message: 'Payment gateway is taking longer than expected. Please try again shortly.',
+          message: 'Payment failed. Please try again or contact support.',
           debug: typeof debugPayload === 'string' ? debugPayload : undefined
         },
-        { status: 408 } // 408 Request Timeout
+        { status: 500 }
       );
     }
 
