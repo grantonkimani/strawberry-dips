@@ -114,6 +114,7 @@ export async function createCardPayment(paymentData: IntaSendPaymentData) {
     });
 
     console.log('IntaSend card payment response:', response);
+    console.log('IntaSend card payment checkout URL:', response.checkout_url);
     return response;
   } catch (error) {
     const anyErr: any = error;

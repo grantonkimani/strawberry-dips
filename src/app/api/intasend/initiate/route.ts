@@ -167,15 +167,19 @@ export async function POST(request: NextRequest) {
       console.error('Error updating order with IntaSend reference:', updateError);
     }
 
+    console.log('IntaSend response checkout URL:', intasendResponse.checkout_url);
+    console.log('IntaSend response payment link:', intasendResponse.payment_link);
+    console.log('IntaSend response invoice:', intasendResponse.invoice);
+
     return NextResponse.json({
       success: true,
       orderId: order.id,
       invoiceId: intasendResponse.invoice?.invoice_id || intasendResponse.id,
       paymentMethod: paymentMethod,
-      checkoutUrl: intasendResponse.checkout_url || null,
+      checkoutUrl: intasendResponse.checkout_url || intasendResponse.payment_link || null,
       message: paymentMethod === 'mpesa'
         ? 'M-Pesa STK push sent to your phone. Please enter your PIN to complete payment.'
-        : intasendResponse.checkout_url 
+        : (intasendResponse.checkout_url || intasendResponse.payment_link)
           ? 'Redirecting to card payment...'
           : 'Payment initiated successfully.',
     });
