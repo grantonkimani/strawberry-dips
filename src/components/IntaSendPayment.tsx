@@ -75,12 +75,19 @@ export default function IntaSendPayment({
         } else if (data.checkoutUrl) {
           setStatusMessage('Redirecting to card payment...');
           if (typeof window !== 'undefined') {
-            window.open(data.checkoutUrl, '_blank');
+            // Navigate to IntaSend checkout for card details entry
+            window.location.href = data.checkoutUrl as string;
           }
 
           // Start polling for payment status
           pollPaymentStatus(data.invoiceId, data.orderId);
         } else {
+          // For card payments, we must have a checkout URL to collect card details.
+          if (paymentMethod === 'card') {
+            setStatusMessage('Card checkout is unavailable right now. Please try again or use M-Pesa.');
+            onError?.('Card checkout URL missing');
+            return;
+          }
           setStatusMessage('Payment initiated successfully.');
           onSuccess?.(data);
         }
