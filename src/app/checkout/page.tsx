@@ -186,7 +186,12 @@ export default function CheckoutPage() {
         // Order already exists, just mark as successful
         setPaymentSuccess(true);
         setOrderId(paymentIntentId);
-        clearCart();
+        
+        // Clear cart and redirect to success page after a short delay
+        setTimeout(() => {
+          clearCart();
+          window.location.href = `/order-success/${paymentIntentId}`;
+        }, 2000);
         return;
       }
 
@@ -210,10 +215,8 @@ export default function CheckoutPage() {
       if (result.success) {
         console.log('Order saved successfully:', result.orderId);
         
-        // Clear cart
+        // Clear cart and redirect to success page
         clearCart();
-        
-        // Redirect to success page
         window.location.href = `/order-success/${result.orderId}`;
       } else {
         throw new Error(result.error || 'Failed to save order');
@@ -230,7 +233,7 @@ export default function CheckoutPage() {
     setIsProcessing(false);
   };
 
-  if (state.items.length === 0) {
+  if (state.items.length === 0 && !isProcessing) {
     return (
       <div className="min-h-screen bg-pink-50 flex items-center justify-center">
         <div className="text-center">
@@ -260,8 +263,10 @@ export default function CheckoutPage() {
               PLEASE WAIT - DO NOT CLOSE THIS WINDOW
             </p>
             <p className="text-gray-600 text-sm">
-              We're confirming your payment and preparing your order confirmation. 
-              This may take a few moments...
+              {paymentSuccess 
+                ? 'Payment successful! Redirecting to order confirmation...'
+                : 'We\'re confirming your payment and preparing your order confirmation. This may take a few moments...'
+              }
             </p>
             <div className="mt-6 flex items-center justify-center space-x-2">
               <div className="w-2 h-2 bg-pink-600 rounded-full animate-bounce"></div>
