@@ -7,6 +7,11 @@ export const INTASEND_CONFIG = {
   testMode: process.env.INTASEND_TEST_MODE === 'true',
 };
 
+// Log configuration for debugging
+console.log('IntaSend Publishable Key configured:', !!INTASEND_CONFIG.publishableKey);
+console.log('IntaSend Secret Key configured:', !!INTASEND_CONFIG.secretKey);
+console.log('IntaSend Test Mode:', INTASEND_CONFIG.testMode);
+
 // Initialize IntaSend client
 export const intasend = new IntaSend(
   INTASEND_CONFIG.publishableKey,
