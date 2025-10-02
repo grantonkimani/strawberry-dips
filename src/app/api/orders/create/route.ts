@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
         customer_first_name: customer.firstName,
         customer_last_name: customer.lastName,
         customer_phone: customer.phone,
-        delivery_address: customer.address,
+        delivery_address: customer.address || 'N/A',
         delivery_city: customer.city,
         delivery_state: customer.area || customer.state || 'N/A', // Use area from form
         delivery_zip_code: customer.zipCode || 'N/A', // Make optional
