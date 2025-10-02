@@ -3,6 +3,9 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 export async function POST(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Storage not configured' }, { status: 500 })
+    }
     const contentType = request.headers.get('content-type') || ''
     if (!contentType.startsWith('multipart/form-data')) {
       return NextResponse.json({ error: 'Expected multipart/form-data' }, { status: 400 })
