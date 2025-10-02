@@ -19,6 +19,7 @@ interface Order {
   id: string;
   stripe_payment_intent_id: string;
   status: string;
+  payment_status: string;
   subtotal: number;
   delivery_fee: number;
   total: number;
@@ -39,13 +40,28 @@ interface Order {
 
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [showFailedOrders, setShowFailedOrders] = useState(false);
 
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  // Filter orders based on failed orders toggle
+  useEffect(() => {
+    let filtered = orders;
+
+    // Filter out failed orders if toggle is off
+    if (!showFailedOrders) {
+      const failedStatuses = ['intasend_timeout', 'failed', 'document_pending'];
+      filtered = orders.filter(order => !failedStatuses.includes(order.payment_status));
+    }
+
+    setFilteredOrders(filtered);
+  }, [orders, showFailedOrders]);
 
   const fetchOrders = async () => {
     try {
@@ -54,8 +70,10 @@ export default function AdminDashboard() {
       
       if (Array.isArray(data)) {
         setOrders(data);
+        setFilteredOrders(data);
       } else if (data.orders) {
         setOrders(data.orders);
+        setFilteredOrders(data.orders);
       } else if (data.error) {
         setError(data.error);
       } else {
@@ -118,7 +136,19 @@ export default function AdminDashboard() {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, paymentStatus?: string) => {
+    // Check payment status first for failed orders
+    if (paymentStatus === 'intasend_timeout') {
+      return 'bg-orange-100 text-orange-800';
+    }
+    if (paymentStatus === 'failed') {
+      return 'bg-red-100 text-red-800';
+    }
+    if (paymentStatus === 'document_pending') {
+      return 'bg-blue-100 text-blue-800';
+    }
+    
+    // Then check order status
     switch (status) {
       case 'paid':
         return 'bg-green-100 text-green-800';
@@ -176,7 +206,7 @@ export default function AdminDashboard() {
                 <Package className="h-8 w-8 text-pink-500" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                  <p className="text-2xl font-bold text-gray-900">{orders?.length || 0}</p>
+                  <p className="text-2xl font-bold text-gray-900">{filteredOrders?.length || 0}</p>
                 </div>
               </div>
             </CardContent>
@@ -189,7 +219,7 @@ export default function AdminDashboard() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Paid Orders</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {orders?.filter(o => o.status === 'paid').length || 0}
+                    {filteredOrders?.filter(o => o.status === 'paid').length || 0}
                   </p>
                 </div>
               </div>
@@ -203,7 +233,7 @@ export default function AdminDashboard() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Pending</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {orders?.filter(o => o.status === 'pending').length || 0}
+                    {filteredOrders?.filter(o => o.status === 'pending').length || 0}
                   </p>
                 </div>
               </div>
@@ -217,7 +247,7 @@ export default function AdminDashboard() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Revenue</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    KSH {orders?.filter(order => 
+                    KSH {filteredOrders?.filter(order => 
                       order.status === 'paid' || 
                       order.status === 'completed' || 
                       order.status === 'confirmed'
@@ -232,14 +262,34 @@ export default function AdminDashboard() {
         {/* Orders Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Orders</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Recent Orders ({filteredOrders.length}{filteredOrders.length !== orders.length ? ` of ${orders.length}` : ''})</CardTitle>
+              <div className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2 text-sm text-gray-600">
+                  <input
+                    type="checkbox"
+                    checked={showFailedOrders}
+                    onChange={(e) => setShowFailedOrders(e.target.checked)}
+                    className="rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                  />
+                  <span>Show failed orders</span>
+                </label>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            {!orders || orders.length === 0 ? (
+            {!filteredOrders || filteredOrders.length === 0 ? (
               <div className="text-center py-8">
                 <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
-                <p className="text-gray-600">Orders will appear here once customers start placing them.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {orders.length === 0 ? 'No orders yet' : 'No orders found'}
+                </h3>
+                <p className="text-gray-600">
+                  {orders.length === 0 
+                    ? 'Orders will appear here once customers start placing them.'
+                    : 'All orders are currently filtered out. Try checking "Show failed orders" to see all orders.'
+                  }
+                </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -270,7 +320,7 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {orders.map((order) => (
+                    {filteredOrders.map((order) => (
                       <tr key={order.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
@@ -301,9 +351,14 @@ export default function AdminDashboard() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status, order.payment_status)}`}>
                             {getStatusIcon(order.status)}
-                            <span className="ml-1 capitalize">{order.status}</span>
+                            <span className="ml-1 capitalize">
+                              {order.payment_status === 'intasend_timeout' ? 'Timeout' :
+                               order.payment_status === 'failed' ? 'Failed' :
+                               order.payment_status === 'document_pending' ? 'Document Pending' :
+                               order.status}
+                            </span>
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
