@@ -52,8 +52,9 @@ export default function AdminProductsPage() {
 	const [form, setForm] = useState<typeof emptyForm>(emptyForm)
 	const [editingId, setEditingId] = useState<string | null>(null)
 	const [editForm, setEditForm] = useState<Partial<Product>>({})
-	const [isUploadingCreate, setIsUploadingCreate] = useState(false)
-	const [isUploadingEdit, setIsUploadingEdit] = useState(false)
+const [isUploadingCreate, setIsUploadingCreate] = useState(false)
+const [isUploadingEdit, setIsUploadingEdit] = useState(false)
+const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(null)
 
 	useEffect(() => {
 		fetchProducts()
@@ -195,6 +196,7 @@ export default function AdminProductsPage() {
 			image_url: product.image_url,
 			is_available: product.is_available
 		})
+    setOriginalEditImageUrl(product.image_url || null)
 	}
 
 	function cancelEditing() {
@@ -239,11 +241,18 @@ export default function AdminProductsPage() {
 				body: JSON.stringify(editForm),
 			})
 			const data = await res.json()
-			if (data.product) {
+      if (data.product) {
 				setProducts(prev => prev.map(p => (p.id === id ? data.product : p)))
 				setEditingId(null)
 				setEditForm({})
 				setError(null)
+        if (originalEditImageUrl && originalEditImageUrl !== data.product.image_url) {
+          const oldPath = getStoragePathFromPublicUrl(originalEditImageUrl)
+          if (oldPath) {
+            try { await supabase.storage.from('product-images').remove([oldPath]) } catch {}
+          }
+        }
+        setOriginalEditImageUrl(null)
 			} else if (data.error) {
 				setError(data.error)
 			} else {
@@ -455,4 +464,12 @@ export default function AdminProductsPage() {
 			</div>
 		</div>
 	)
+}
+
+function getStoragePathFromPublicUrl(url?: string | null): string | null {
+  if (!url) return null
+  const marker = '/object/public/product-images/'
+  const idx = url.indexOf(marker)
+  if (idx === -1) return null
+  return url.substring(idx + marker.length)
 }
