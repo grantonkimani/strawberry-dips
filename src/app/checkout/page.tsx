@@ -180,7 +180,17 @@ export default function CheckoutPage() {
     setIsProcessing(true);
     
     try {
-      // Save order to database
+      // For IntaSend payments, the order is already created in /api/intasend/initiate
+      // We just need to update the payment status to completed
+      if (paymentMethod === 'intasend') {
+        // Order already exists, just mark as successful
+        setPaymentSuccess(true);
+        setOrderId(paymentIntentId);
+        clearCart();
+        return;
+      }
+
+      // For other payment methods, create the order
       const response = await fetch('/api/orders/create', {
         method: 'POST',
         headers: {

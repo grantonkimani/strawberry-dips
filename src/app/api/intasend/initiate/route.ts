@@ -175,7 +175,9 @@ export async function POST(request: NextRequest) {
       checkoutUrl: intasendResponse.checkout_url || null,
       message: paymentMethod === 'mpesa'
         ? 'M-Pesa STK push sent to your phone. Please enter your PIN to complete payment.'
-        : 'Payment initiated successfully.',
+        : intasendResponse.checkout_url 
+          ? 'Redirecting to card payment...'
+          : 'Payment initiated successfully.',
     });
 
   } catch (error) {
