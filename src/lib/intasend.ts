@@ -11,6 +11,8 @@ export const INTASEND_CONFIG = {
 console.log('IntaSend Publishable Key configured:', !!INTASEND_CONFIG.publishableKey);
 console.log('IntaSend Secret Key configured:', !!INTASEND_CONFIG.secretKey);
 console.log('IntaSend Test Mode:', INTASEND_CONFIG.testMode);
+console.log('IntaSend Publishable Key value:', INTASEND_CONFIG.publishableKey);
+console.log('IntaSend Secret Key value:', INTASEND_CONFIG.secretKey);
 
 // Initialize IntaSend client
 export const intasend = new IntaSend(
