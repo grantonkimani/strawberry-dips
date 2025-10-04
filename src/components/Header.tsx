@@ -15,6 +15,11 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
 
+  // Debug mobile menu state
+  useEffect(() => {
+    console.log('Mobile menu state:', isMobileMenuOpen);
+  }, [isMobileMenuOpen]);
+
   // Update body class when cart or mobile menu opens/closes
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -196,7 +201,7 @@ export function Header() {
           />
 
           {/* Mobile Menu */}
-          <div className="fixed left-0 top-0 h-screen w-full max-w-sm bg-white shadow-2xl z-[10001] transform transition-all duration-300 ease-out md:hidden mobile-menu">
+          <div className="fixed left-0 top-0 h-screen w-full max-w-sm bg-red-500 shadow-2xl z-[10001] transform translate-x-0 transition-all duration-300 ease-out md:hidden mobile-menu" style={{backgroundColor: 'red', zIndex: 10001}}>
             <div className="flex flex-col h-full">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-pink-50 to-purple-50">

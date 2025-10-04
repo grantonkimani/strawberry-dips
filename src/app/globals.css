@@ -119,6 +119,14 @@ body:not(.cart-open) {
   height: 100vh !important;
   width: 100% !important;
   max-width: 24rem !important;
+  background: white !important;
+  box-shadow: 10px 0 25px -3px rgba(0, 0, 0, 0.1), 10px 0 10px -3px rgba(0, 0, 0, 0.05) !important;
+  transform: translateX(0) !important;
+}
+
+/* Debug: Make mobile menu more visible */
+.mobile-menu-overlay {
+  background: rgba(0, 0, 0, 0.7) !important;
 }
 
 /* Prevent any horizontal swipe gestures */
