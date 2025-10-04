@@ -24,59 +24,23 @@ export function MobileMenu({ isOpen, onClose, onOpenCart }: MobileMenuProps) {
   // Don't render anything on server or before mount
   if (!mounted) return null;
 
-  // Debug: Force mobile menu to always render for testing
-  const forceOpen = true;
-
   const mobileMenuContent = (
     <>
-      {/* Debug Banner */}
-      <div style={{
-        position: 'fixed',
-        top: '10px',
-        right: '10px',
-        backgroundColor: 'red',
-        color: 'white',
-        padding: '10px',
-        zIndex: 999999,
-        fontSize: '12px'
-      }}>
-        MobileMenu State: {isOpen ? 'OPEN' : 'CLOSED'} | Force: {forceOpen ? 'TRUE' : 'FALSE'}
-      </div>
-
       {/* Overlay */}
-      {forceOpen && (
+      {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-[9998] transition-opacity duration-300 mobile-menu-overlay"
+          className="fixed inset-0 bg-transparent z-[9998] transition-opacity duration-300"
           onClick={onClose}
-          style={{ 
-            touchAction: 'none',
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            zIndex: 999998
-          }}
+          style={{ touchAction: 'none' }}
         />
       )}
 
       {/* Mobile Menu */}
       <div 
-        className={`fixed left-0 top-0 h-screen w-full max-w-sm bg-red-500 shadow-2xl z-[9999] transform transition-all duration-300 ease-out mobile-menu ${
-          forceOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed left-0 top-0 h-screen w-full max-w-sm bg-white shadow-2xl z-[9999] transform transition-all duration-300 ease-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-        style={{ 
-          touchAction: 'pan-y',
-          backgroundColor: 'red',
-          zIndex: 999999,
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          height: '100vh',
-          width: '300px',
-          transform: 'translateX(0)'
-        }}
+        style={{ touchAction: 'pan-y' }}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
