@@ -101,7 +101,7 @@ body:not(.cart-open) {
   height: 100vh !important;
 }
 
-/* Mobile menu z-index priority */
+/* Mobile menu z-index priority - Simplified */
 .mobile-menu-overlay {
   position: fixed !important;
   z-index: 10000 !important;
@@ -110,19 +110,6 @@ body:not(.cart-open) {
   width: 100vw !important;
   height: 100vh !important;
   background: rgba(0, 0, 0, 0.5) !important;
-}
-
-.mobile-menu {
-  position: fixed !important;
-  z-index: 10001 !important;
-  top: 0 !important;
-  left: 0 !important;
-  height: 100vh !important;
-  width: 100% !important;
-  max-width: 24rem !important;
-  background: white !important;
-  box-shadow: 10px 0 25px -3px rgba(0, 0, 0, 0.1), 10px 0 10px -3px rgba(0, 0, 0, 0.05) !important;
-  transform: translateX(0) !important;
 }
 
 
