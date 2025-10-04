@@ -193,15 +193,40 @@ export function Header() {
 
       {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
-        <>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 10000,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        }}>
           {/* Overlay */}
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-[10000] md:hidden mobile-menu-overlay"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 10000
+            }}
             onClick={() => setIsMobileMenuOpen(false)}
           />
 
           {/* Mobile Menu */}
-          <div className="fixed left-0 top-0 h-screen w-full max-w-sm bg-red-500 shadow-2xl z-[10001] transform translate-x-0 transition-all duration-300 ease-out md:hidden mobile-menu" style={{backgroundColor: 'red', zIndex: 10001}}>
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '300px',
+            height: '100vh',
+            backgroundColor: 'red',
+            zIndex: 10001,
+            boxShadow: '2px 0 10px rgba(0,0,0,0.1)'
+          }}>
             <div className="flex flex-col h-full">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-pink-50 to-purple-50">
@@ -316,7 +341,7 @@ export function Header() {
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
     </header>
   );
