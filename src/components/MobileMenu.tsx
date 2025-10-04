@@ -42,10 +42,13 @@ export function MobileMenu({ isOpen, onClose, onOpenCart }: MobileMenuProps) {
     );
   }
 
+  // Debug: Force mobile menu to always render for testing
+  const forceOpen = true;
+
   const mobileMenuContent = (
     <>
       {/* Overlay */}
-      {isOpen && (
+      {forceOpen && (
         <div 
           className="fixed inset-0 bg-transparent z-[9998] transition-opacity duration-300 mobile-menu-overlay"
           onClick={onClose}
@@ -56,7 +59,7 @@ export function MobileMenu({ isOpen, onClose, onOpenCart }: MobileMenuProps) {
       {/* Mobile Menu */}
       <div 
         className={`fixed left-0 top-0 h-screen w-full max-w-sm bg-white shadow-2xl z-[9999] transform transition-all duration-300 ease-out mobile-menu ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+          forceOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{ touchAction: 'pan-y' }}
       >
