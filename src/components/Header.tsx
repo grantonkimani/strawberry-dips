@@ -190,6 +190,40 @@ export function Header() {
         onClose={() => setIsCartOpen(false)} 
       />
 
+      {/* Simple Test Mobile Menu - Always Visible */}
+      <div 
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '300px',
+          height: '100vh',
+          backgroundColor: 'red',
+          zIndex: 99999,
+          color: 'white',
+          padding: '20px',
+          fontSize: '20px',
+          fontWeight: 'bold'
+        }}
+      >
+        TEST MOBILE MENU - ALWAYS VISIBLE
+        <br />
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          style={{
+            backgroundColor: 'white',
+            color: 'red',
+            padding: '10px',
+            marginTop: '20px',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer'
+          }}
+        >
+          Toggle State: {isMobileMenuOpen ? 'OPEN' : 'CLOSED'}
+        </button>
+      </div>
+
       {/* Mobile Navigation Menu */}
       {console.log('Rendering check - isMobileMenuOpen:', isMobileMenuOpen)}
       {(isMobileMenuOpen || true) && (
