@@ -46,18 +46,37 @@ export function MobileMenu({ isOpen, onClose, onOpenCart }: MobileMenuProps) {
       {/* Overlay */}
       {forceOpen && (
         <div 
-          className="fixed inset-0 bg-transparent z-[9998] transition-opacity duration-300 mobile-menu-overlay"
+          className="fixed inset-0 bg-black bg-opacity-50 z-[9998] transition-opacity duration-300 mobile-menu-overlay"
           onClick={onClose}
-          style={{ touchAction: 'none' }}
+          style={{ 
+            touchAction: 'none',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 99998
+          }}
         />
       )}
 
       {/* Mobile Menu */}
       <div 
-        className={`fixed left-0 top-0 h-screen w-full max-w-sm bg-white shadow-2xl z-[9999] transform transition-all duration-300 ease-out mobile-menu ${
+        className={`fixed left-0 top-0 h-screen w-full max-w-sm bg-red-500 shadow-2xl z-[9999] transform transition-all duration-300 ease-out mobile-menu ${
           forceOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-        style={{ touchAction: 'pan-y' }}
+        style={{ 
+          touchAction: 'pan-y',
+          backgroundColor: 'red',
+          zIndex: 99999,
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          height: '100vh',
+          width: '300px',
+          transform: 'translateX(0)'
+        }}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
