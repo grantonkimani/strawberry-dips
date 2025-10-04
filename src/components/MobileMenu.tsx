@@ -24,6 +24,24 @@ export function MobileMenu({ isOpen, onClose, onOpenCart }: MobileMenuProps) {
   // Don't render anything on server or before mount
   if (!mounted) return null;
 
+  // Debug: Always render a test element
+  if (!isOpen) {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: '10px',
+        right: '10px',
+        backgroundColor: 'red',
+        color: 'white',
+        padding: '10px',
+        zIndex: 99999,
+        fontSize: '12px'
+      }}>
+        MobileMenu Component Loaded - State: {isOpen ? 'OPEN' : 'CLOSED'}
+      </div>
+    );
+  }
+
   const mobileMenuContent = (
     <>
       {/* Overlay */}
