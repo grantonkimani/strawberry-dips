@@ -225,7 +225,6 @@ export function Header() {
       </div>
 
       {/* Mobile Navigation Menu */}
-      {console.log('Rendering check - isMobileMenuOpen:', isMobileMenuOpen)}
       {(isMobileMenuOpen || true) && (
         <>
           {/* Overlay */}
