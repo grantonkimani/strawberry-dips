@@ -37,7 +37,7 @@ export function MobileMenu({ isOpen, onClose, onOpenCart }: MobileMenuProps) {
         backgroundColor: 'red',
         color: 'white',
         padding: '10px',
-        zIndex: 99999,
+        zIndex: 999999,
         fontSize: '12px'
       }}>
         MobileMenu State: {isOpen ? 'OPEN' : 'CLOSED'} | Force: {forceOpen ? 'TRUE' : 'FALSE'}
@@ -56,7 +56,7 @@ export function MobileMenu({ isOpen, onClose, onOpenCart }: MobileMenuProps) {
             width: '100vw',
             height: '100vh',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            zIndex: 99998
+            zIndex: 999998
           }}
         />
       )}
@@ -69,7 +69,7 @@ export function MobileMenu({ isOpen, onClose, onOpenCart }: MobileMenuProps) {
         style={{ 
           touchAction: 'pan-y',
           backgroundColor: 'red',
-          zIndex: 99999,
+          zIndex: 999999,
           position: 'fixed',
           left: 0,
           top: 0,
