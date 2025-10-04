@@ -145,8 +145,8 @@ body:not(.cart-open) {
   transform: translateX(100%) !important;
 }
 
-/* Completely disable touch gestures on the page when cart is closed */
-body:not(.cart-open) * {
+/* Completely disable touch gestures on the page when cart and mobile menu are closed */
+body:not(.cart-open):not(.menu-open) * {
   touch-action: manipulation !important;
   -webkit-touch-callout: none !important;
   -webkit-user-select: none !important;

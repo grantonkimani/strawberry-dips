@@ -198,10 +198,10 @@ export function Header() {
 
           {/* Mobile Menu */}
           <div 
-            className={`fixed left-0 top-0 h-screen w-full max-w-sm bg-white shadow-2xl z-[10001] transform transition-all duration-300 ease-out mobile-menu ${
+            className={`fixed left-0 top-0 h-screen w-full max-w-sm bg-red-500 shadow-2xl z-[10001] transform transition-all duration-300 ease-out mobile-menu ${
               isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
             }`}
-            style={{ touchAction: 'pan-y' }}
+            style={{ touchAction: 'pan-y', backgroundColor: 'red', zIndex: 10001 }}
           >
             <div className="flex flex-col h-full">
               {/* Header */}
