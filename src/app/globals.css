@@ -109,6 +109,7 @@ body:not(.cart-open) {
   left: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
+  background: rgba(0, 0, 0, 0.5) !important;
 }
 
 .mobile-menu {
@@ -124,10 +125,6 @@ body:not(.cart-open) {
   transform: translateX(0) !important;
 }
 
-/* Debug: Make mobile menu more visible */
-.mobile-menu-overlay {
-  background: rgba(0, 0, 0, 0.7) !important;
-}
 
 /* Prevent any horizontal swipe gestures */
 * {
