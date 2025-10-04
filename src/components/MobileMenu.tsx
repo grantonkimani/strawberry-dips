@@ -24,9 +24,12 @@ export function MobileMenu({ isOpen, onClose, onOpenCart }: MobileMenuProps) {
   // Don't render anything on server or before mount
   if (!mounted) return null;
 
-  // Debug: Always render a test element
-  if (!isOpen) {
-    return (
+  // Debug: Force mobile menu to always render for testing
+  const forceOpen = true;
+
+  const mobileMenuContent = (
+    <>
+      {/* Debug Banner */}
       <div style={{
         position: 'fixed',
         top: '10px',
@@ -37,16 +40,9 @@ export function MobileMenu({ isOpen, onClose, onOpenCart }: MobileMenuProps) {
         zIndex: 99999,
         fontSize: '12px'
       }}>
-        MobileMenu Component Loaded - State: {isOpen ? 'OPEN' : 'CLOSED'}
+        MobileMenu State: {isOpen ? 'OPEN' : 'CLOSED'} | Force: {forceOpen ? 'TRUE' : 'FALSE'}
       </div>
-    );
-  }
 
-  // Debug: Force mobile menu to always render for testing
-  const forceOpen = true;
-
-  const mobileMenuContent = (
-    <>
       {/* Overlay */}
       {forceOpen && (
         <div 
