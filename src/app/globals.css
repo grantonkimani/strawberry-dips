@@ -101,15 +101,33 @@ body:not(.cart-open) {
   height: 100vh !important;
 }
 
-/* Mobile menu z-index priority - Simplified */
+/* Mobile menu - Following cart pattern exactly */
 .mobile-menu-overlay {
   position: fixed !important;
-  z-index: 10000 !important;
+  z-index: 9998 !important;
   top: 0 !important;
   left: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+.mobile-menu {
+  position: fixed !important;
+  z-index: 9999 !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100vh !important;
+  width: 100% !important;
+  max-width: 24rem !important;
+}
+
+/* Ensure mobile menu is always visible when open */
+.mobile-menu.translate-x-0 {
+  transform: translateX(0) !important;
+}
+
+.mobile-menu.-translate-x-full {
+  transform: translateX(-100%) !important;
 }
 
 
