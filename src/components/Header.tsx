@@ -172,7 +172,11 @@ export function Header() {
               variant="ghost" 
               size="icon" 
               className="md:hidden text-gray-600 hover:text-pink-600 active:bg-pink-50 h-11 w-11"
-              onClick={() => setIsMobileMenuOpen(true)}
+              onClick={() => {
+                console.log('Hamburger clicked! Current state:', isMobileMenuOpen);
+                setIsMobileMenuOpen(true);
+                console.log('Set to true, new state should be:', true);
+              }}
             >
               <Menu className="h-7 w-7" strokeWidth={2.25} />
             </Button>
@@ -187,7 +191,8 @@ export function Header() {
       />
 
       {/* Mobile Navigation Menu */}
-      {isMobileMenuOpen && (
+      {console.log('Rendering check - isMobileMenuOpen:', isMobileMenuOpen)}
+      {(isMobileMenuOpen || true) && (
         <>
           {/* Overlay */}
           <div 
