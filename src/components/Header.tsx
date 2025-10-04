@@ -3,8 +3,7 @@
 import { ShoppingCart, Heart, User, Menu } from "lucide-react";
 import { Button } from "./ui/Button";
 import { useCart } from "@/contexts/CartContext";
-import { CartSidebar } from "./CartSidebar";
-import { MobileMenu } from "./MobileMenu";
+import { MobileNav } from "./CartSidebar";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -147,19 +146,20 @@ export function Header() {
             </Button>
 
             {/* Cart */}
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-11 w-11 md:h-9 md:w-9"
-              onClick={() => setIsCartOpen(true)}
-            >
-              <ShoppingCart className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.25} />
-              {state.items.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] md:text-xs rounded-full h-5 min-w-[1.25rem] px-1 md:px-0 flex items-center justify-center">
-                  {state.items.reduce((total, item) => total + (item.quantity || 1), 0)}
-                </span>
-              )}
-            </Button>
+            <Link href="/cart">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-11 w-11 md:h-9 md:w-9"
+              >
+                <ShoppingCart className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.25} />
+                {state.items.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] md:text-xs rounded-full h-5 min-w-[1.25rem] px-1 md:px-0 flex items-center justify-center">
+                    {state.items.reduce((total, item) => total + (item.quantity || 1), 0)}
+                  </span>
+                )}
+              </Button>
+            </Link>
 
             {/* User Account */}
             <Link href="/account">
@@ -181,17 +181,10 @@ export function Header() {
         </div>
       </div>
       
-      {/* Cart Sidebar */}
-      <CartSidebar 
-        isOpen={isCartOpen} 
-        onClose={() => setIsCartOpen(false)} 
-      />
-
-      {/* Mobile Menu */}
-      <MobileMenu 
+      {/* Mobile Navigation */}
+      <MobileNav 
         isOpen={isMobileMenuOpen} 
-        onClose={() => setIsMobileMenuOpen(false)}
-        onOpenCart={() => setIsCartOpen(true)}
+        onClose={() => setIsMobileMenuOpen(false)} 
       />
     </header>
   );
