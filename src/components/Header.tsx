@@ -191,12 +191,12 @@ export function Header() {
         <>
           {/* Overlay */}
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-[9998] md:hidden"
+            className="fixed inset-0 bg-black bg-opacity-50 z-[10000] md:hidden mobile-menu-overlay"
             onClick={() => setIsMobileMenuOpen(false)}
           />
 
           {/* Mobile Menu */}
-          <div className="fixed left-0 top-0 h-screen w-full max-w-sm bg-white shadow-2xl z-[9999] transform transition-all duration-300 ease-out md:hidden">
+          <div className="fixed left-0 top-0 h-screen w-full max-w-sm bg-white shadow-2xl z-[10001] transform transition-all duration-300 ease-out md:hidden mobile-menu">
             <div className="flex flex-col h-full">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-pink-50 to-purple-50">

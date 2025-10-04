@@ -101,6 +101,26 @@ body:not(.cart-open) {
   height: 100vh !important;
 }
 
+/* Mobile menu z-index priority */
+.mobile-menu-overlay {
+  position: fixed !important;
+  z-index: 10000 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+.mobile-menu {
+  position: fixed !important;
+  z-index: 10001 !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100vh !important;
+  width: 100% !important;
+  max-width: 24rem !important;
+}
+
 /* Prevent any horizontal swipe gestures */
 * {
   touch-action: manipulation;
