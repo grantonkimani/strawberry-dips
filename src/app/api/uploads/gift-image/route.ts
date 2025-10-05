@@ -50,6 +50,15 @@ export async function POST(request: NextRequest) {
 
     if (uploadError) {
       console.error('Supabase Storage upload error:', uploadError);
+      
+      // Provide more helpful error messages
+      if (uploadError.message.includes('Bucket not found')) {
+        return NextResponse.json(
+          { error: 'Storage bucket not configured. Please contact administrator to set up image storage.' },
+          { status: 500 }
+        );
+      }
+      
       return NextResponse.json(
         { error: `Failed to upload image: ${uploadError.message}` },
         { status: 500 }
