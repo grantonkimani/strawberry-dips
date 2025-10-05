@@ -185,19 +185,14 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-gray-50">
+    <>
       {/* Header */}
-      <div className="bg-white border-b border-pink-100 shadow-sm">
+      <div className="bg-white border-b border-pink-100 shadow-sm mb-8">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Admin Dashboard</h1>
           <p className="text-gray-600">Manage orders and track business performance</p>
         </div>
       </div>
-
-      {/* Navigation */}
-      <AdminNav />
-
-      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
@@ -397,7 +392,6 @@ export default function AdminDashboard() {
             )}
           </CardContent>
         </Card>
-      </div>
-    </div>
+    </>
   );
 }

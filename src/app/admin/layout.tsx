@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { AdminNav } from '@/components/AdminNav';
 
 export default function AdminLayout({
   children,
@@ -21,5 +22,15 @@ export default function AdminLayout({
     );
   }
 
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-gray-50">
+      {/* Navigation */}
+      <AdminNav />
+      
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {children}
+      </div>
+    </div>
+  );
 }

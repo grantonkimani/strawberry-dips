@@ -182,16 +182,17 @@ export default function GiftProductsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <Gift className="h-8 w-8 mr-3 text-pink-600" />
-            Gift Products Management
-          </h1>
-          <p className="text-gray-600 mt-2">Manage flowers, liquor, and other gift products</p>
+      <div className="bg-white border-b border-pink-100 shadow-sm mb-8">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Gift Products Management</h1>
+          <p className="text-gray-600">Manage flowers, liquor, and other gift products</p>
         </div>
+      </div>
+
+      {/* Action Button */}
+      <div className="flex justify-end mb-8">
         <Button
           onClick={() => setShowAddForm(true)}
           className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white"
@@ -398,6 +399,7 @@ export default function GiftProductsPage() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
