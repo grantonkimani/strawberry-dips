@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { AdminNav } from '@/components/AdminNav';
 
 interface Category {
   id: string;
@@ -126,33 +125,32 @@ export default function CategoriesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-gray-50">
-        <AdminNav />
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
-        </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-gray-50">
-      <AdminNav />
-      
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Category Management</h1>
-            <p className="text-gray-600 mt-2">Manage product categories for your store</p>
-          </div>
-          <Button
-            onClick={() => setShowAddForm(true)}
-            className="bg-pink-600 hover:bg-pink-700 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Category
-          </Button>
+    <>
+      {/* Header */}
+      <div className="bg-white border-b border-pink-100 shadow-sm mb-8">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Category Management</h1>
+          <p className="text-gray-600">Manage product categories for your store</p>
         </div>
+      </div>
+
+      {/* Action Button */}
+      <div className="flex justify-end mb-8">
+        <Button
+          onClick={() => setShowAddForm(true)}
+          className="bg-pink-600 hover:bg-pink-700 text-white"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Category
+        </Button>
+      </div>
 
         {/* Error/Success Messages */}
         {error && (
@@ -328,7 +326,6 @@ export default function CategoriesPage() {
             </CardContent>
           </Card>
         )}
-      </div>
-    </div>
+    </>
   );
 }

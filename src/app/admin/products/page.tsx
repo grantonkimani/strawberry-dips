@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import { AdminNav } from '@/components/AdminNav'
 import { Plus, Trash2, Pencil, Save, X } from 'lucide-react'
 
 interface Product {
@@ -290,9 +289,7 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 			</div>
 
 			{/* Navigation */}
-			<AdminNav />
-
-			<div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+		<div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
 				{error && (
 					<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
 						{error}

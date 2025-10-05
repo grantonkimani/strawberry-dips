@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, Mail, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { AdminNav } from '@/components/AdminNav';
 import { Button } from '@/components/ui/Button';
 
 interface SupportTicket {
@@ -151,8 +150,6 @@ export default function AdminSupportPage() {
       </div>
 
       {/* Navigation */}
-      <AdminNav />
-
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
