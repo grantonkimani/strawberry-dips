@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 import { Plus, Edit, Trash2, Eye, EyeOff, Gift } from 'lucide-react';
 
 interface GiftProduct {
@@ -30,6 +31,7 @@ export default function GiftProductsPage() {
     image_url: '',
     is_active: true
   });
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Fetch gift products
   const fetchGiftProducts = async () => {
@@ -140,6 +142,7 @@ export default function GiftProductsPage() {
       image_url: '',
       is_active: true
     });
+    setUploadError(null);
     setShowAddForm(false);
     setEditingProduct(null);
   };
@@ -252,14 +255,16 @@ export default function GiftProductsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Image URL
+                  Product Image
                 </label>
-                <input
-                  type="url"
+                <ImageUpload
                   value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  onChange={(imageUrl) => setFormData({ ...formData, image_url: imageUrl })}
+                  onError={(error) => setUploadError(error)}
                 />
+                {uploadError && (
+                  <p className="text-red-500 text-sm mt-2">{uploadError}</p>
+                )}
               </div>
             </div>
             <div>

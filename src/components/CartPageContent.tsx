@@ -193,7 +193,7 @@ export function CartPageContent() {
                             alt={gift.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {
-                              e.currentTarget.src = '/images/placeholder-gift.jpg';
+                              e.currentTarget.src = '/images/placeholder-gift.svg';
                             }}
                           />
                         ) : (

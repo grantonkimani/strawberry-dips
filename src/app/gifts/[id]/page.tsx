@@ -102,7 +102,7 @@ export default function GiftProductPage() {
                 alt={product.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  e.currentTarget.src = '/images/placeholder-gift.jpg';
+                  e.currentTarget.src = '/images/placeholder-gift.svg';
                 }}
               />
             ) : (
