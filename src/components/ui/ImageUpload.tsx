@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Button } from './ui/Button';
+import { Button } from './Button';
 import { Upload, X, Image as ImageIcon, Link as LinkIcon } from 'lucide-react';
 
 interface ImageUploadProps {
