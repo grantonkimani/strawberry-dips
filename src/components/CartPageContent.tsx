@@ -174,43 +174,65 @@ export function CartPageContent() {
                   <p className="text-gray-600">No gift products available at the moment</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {giftProducts.map((gift) => (
                     <div
                       key={gift.id}
-                      className={`p-3 sm:p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                      className={`group cursor-pointer transition-all duration-300 overflow-hidden rounded-lg border-2 ${
                         selectedGifts.includes(gift.id)
                           ? 'border-pink-500 bg-pink-50'
-                          : 'border-gray-200 hover:border-pink-300'
+                          : 'border-gray-200 hover:border-pink-300 hover:shadow-lg'
                       }`}
                       onClick={() => handleGiftToggle(gift.id)}
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-gray-900 text-sm sm:text-base break-words">{gift.name}</h3>
-                          <p className="text-xs sm:text-sm text-gray-500 mt-1 break-words">{gift.description}</p>
-                        </div>
-                        <span className="text-pink-600 font-semibold text-sm sm:text-base ml-2 flex-shrink-0">
-                          KSH {gift.price.toFixed(2)}
-                        </span>
-                      </div>
-                      {gift.image_url && (
-                        <div className="mb-2">
+                      {/* Product Image */}
+                      <div className="aspect-square bg-gray-100 overflow-hidden">
+                        {gift.image_url ? (
                           <img
                             src={gift.image_url}
                             alt={gift.name}
-                            className="w-full h-20 sm:h-24 object-cover rounded"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {
-                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.src = '/images/placeholder-gift.jpg';
                             }}
                           />
-                        </div>
-                      )}
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500 capitalize">{gift.category}</span>
-                        {selectedGifts.includes(gift.id) && (
-                          <div className="text-xs text-pink-600 font-medium">✓ Selected</div>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-100 to-purple-100">
+                            <span className="text-4xl">🎁</span>
+                          </div>
                         )}
+                      </div>
+                      
+                      {/* Product Details */}
+                      <div className="p-4">
+                        {/* Category Badge */}
+                        <div className="mb-2">
+                          <span className="px-2 py-1 bg-pink-100 text-pink-800 text-xs font-medium rounded-full">
+                            {gift.category}
+                          </span>
+                        </div>
+                        
+                        {/* Product Name */}
+                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors">
+                          {gift.name}
+                        </h3>
+                        
+                        {/* Description */}
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                          {gift.description}
+                        </p>
+                        
+                        {/* Price and Selection Status */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-lg font-bold text-pink-600">
+                            KSH {gift.price.toFixed(2)}
+                          </span>
+                          {selectedGifts.includes(gift.id) && (
+                            <div className="flex items-center text-pink-600 font-medium">
+                              <span className="text-sm">✓ Selected</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}

@@ -91,6 +91,9 @@ export function Header() {
             <Link href="/menu" className="text-gray-600 hover:text-pink-600 font-medium transition-colors">
               Menu
             </Link>
+            <Link href="/gifts" className="text-gray-600 hover:text-pink-600 font-medium transition-colors">
+              Gifts
+            </Link>
             <Link href="/track" className="text-gray-600 hover:text-pink-600 font-medium transition-colors">
               Track Order
             </Link>
