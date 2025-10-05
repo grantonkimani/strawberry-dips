@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,30 +31,47 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'gift-products');
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
-    }
-
-    // Generate unique filename
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 15);
-    const fileExtension = file.name.split('.').pop();
-    const fileName = `gift-${timestamp}-${randomString}.${fileExtension}`;
-    
-    const filePath = join(uploadsDir, fileName);
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    await writeFile(filePath, buffer);
+    // Generate unique filename for Supabase Storage
+    const fileExtension = file.name.split('.').pop();
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 15);
+    const fileName = `gift-${timestamp}-${randomString}.${fileExtension}`;
 
-    // Return the public URL
-    const publicUrl = `/uploads/gift-products/${fileName}`;
+    // Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('gift-images')
+      .upload(fileName, buffer, {
+        contentType: file.type,
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error('Supabase Storage upload error:', uploadError);
+      return NextResponse.json(
+        { error: `Failed to upload image: ${uploadError.message}` },
+        { status: 500 }
+      );
+    }
+
+    // Get the public URL of the uploaded file
+    const { data: publicUrlData } = supabase.storage
+      .from('gift-images')
+      .getPublicUrl(fileName);
+
+    if (!publicUrlData || !publicUrlData.publicUrl) {
+      console.error('Failed to get public URL for uploaded image');
+      return NextResponse.json(
+        { error: 'Failed to get public URL for uploaded image' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      imageUrl: publicUrl,
+      imageUrl: publicUrlData.publicUrl,
       fileName: fileName
     });
 
