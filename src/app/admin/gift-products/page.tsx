@@ -399,7 +399,6 @@ export default function GiftProductsPage() {
           ))}
         </div>
       )}
-      </div>
     </>
   );
 }
