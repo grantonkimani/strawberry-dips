@@ -4,13 +4,14 @@ import { supabase } from '@/lib/supabase';
 // GET /api/gift-products/[id] - Get a specific gift product
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { data, error } = await supabase
       .from('gift_products')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error) {
@@ -34,9 +35,10 @@ export async function GET(
 // PUT /api/gift-products/[id] - Update a gift product (Admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { name, description, price, category, image_url, is_active } = body;
 
@@ -66,7 +68,7 @@ export async function PUT(
         is_active: is_active !== undefined ? is_active : true,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
@@ -91,13 +93,14 @@ export async function PUT(
 // DELETE /api/gift-products/[id] - Delete a gift product (Admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { error } = await supabase
       .from('gift_products')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) {
       console.error('Error deleting gift product:', error);
