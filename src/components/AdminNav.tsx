@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Package, ShoppingBag, Settings, Home, FileText, LogOut, User, Tag, MessageSquare, Gift } from 'lucide-react';
+import { Package, ShoppingBag, Settings, Home, FileText, LogOut, User, Tag, MessageSquare, Gift, Clock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSessionTimeout } from '@/hooks/useSessionTimeout';
 
 export function AdminNav() {
   const pathname = usePathname();
@@ -22,6 +23,12 @@ export function AdminNav() {
       router.push('/admin/login');
     };
   }
+
+  // Session timeout info (only for display, actual timeout handled in layout)
+  const { timeLeft, formatTime } = useSessionTimeout({
+    timeoutMinutes: 30,
+    warningMinutes: 5
+  });
 
   const navItems = [
     { href: '/admin', label: 'Dashboard', icon: Home },
@@ -71,6 +78,12 @@ export function AdminNav() {
           
           {/* User Info and Logout */}
           <div className="hidden md:flex items-center space-x-4 ml-4 flex-shrink-0">
+            {/* Session Timer */}
+            <div className="flex items-center space-x-2 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+              <Clock className="h-3 w-3" />
+              <span>{formatTime(timeLeft)}</span>
+            </div>
+            
             <div className="flex items-center space-x-2 text-sm text-gray-800">
               <User className="h-4 w-4" />
               <span>{user?.full_name || 'Admin'}</span>

@@ -2,13 +2,29 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { AdminNav } from '@/components/AdminNav';
+import { SessionTimeoutWarning } from '@/components/SessionTimeoutWarning';
+import { useSessionTimeout } from '@/hooks/useSessionTimeout';
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isLoading } = useAuth();
+  const { isLoading, logout } = useAuth();
+  
+  // Session timeout configuration
+  const {
+    isWarning,
+    timeLeft,
+    formatTime,
+    extendSession
+  } = useSessionTimeout({
+    timeoutMinutes: 30, // 30 minutes timeout
+    warningMinutes: 5,  // Show warning 5 minutes before
+    onTimeout: async () => {
+      await logout();
+    }
+  });
 
   // Show loading while checking authentication
   if (isLoading) {
@@ -31,6 +47,15 @@ export default function AdminLayout({
       <div className="max-w-7xl mx-auto px-4 py-8">
         {children}
       </div>
+      
+      {/* Session Timeout Warning */}
+      <SessionTimeoutWarning
+        isVisible={isWarning}
+        timeLeft={timeLeft}
+        formatTime={formatTime}
+        onExtend={extendSession}
+        onLogout={logout}
+      />
     </div>
   );
 }
