@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
+// Ensure this route runs in a Node.js runtime (not Edge)
+export const runtime = 'nodejs';
+
 // GET /api/gift-categories - Get all gift categories
 export async function GET(request: NextRequest) {
   try {
@@ -93,6 +96,15 @@ export async function POST(request: NextRequest) {
 
     // Prefer admin client (bypasses RLS) if available; otherwise use public client
     const db = supabaseAdmin ?? supabase;
+
+    // Hard guard: if admin client is missing in a server environment, inserts may be blocked by RLS
+    if (!supabaseAdmin) {
+      console.warn('[gift-categories POST] supabaseAdmin is null - missing SUPABASE_SERVICE_ROLE_KEY');
+      return NextResponse.json(
+        { error: 'Server missing service role key. Set SUPABASE_SERVICE_ROLE_KEY in production env.' },
+        { status: 500 }
+      );
+    }
 
     // Check if gift_categories table exists
     const { data: tableCheck, error: tableError } = await db
