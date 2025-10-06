@@ -18,8 +18,20 @@ interface GiftProduct {
   updated_at: string;
 }
 
+interface GiftCategory {
+  id: string;
+  name: string;
+  description: string | null;
+  icon: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export default function GiftProductsPage() {
   const [giftProducts, setGiftProducts] = useState<GiftProduct[]>([]);
+  const [giftCategories, setGiftCategories] = useState<GiftCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<GiftProduct | null>(null);
@@ -46,8 +58,20 @@ export default function GiftProductsPage() {
     }
   };
 
+  // Fetch gift categories
+  const fetchGiftCategories = async () => {
+    try {
+      const response = await fetch('/api/gift-categories?includeInactive=true');
+      const data = await response.json();
+      setGiftCategories(data.giftCategories || []);
+    } catch (error) {
+      console.error('Error fetching gift categories:', error);
+    }
+  };
+
   useEffect(() => {
     fetchGiftProducts();
+    fetchGiftCategories();
   }, []);
 
   // Handle form submission
@@ -233,11 +257,14 @@ export default function GiftProductsPage() {
                   required
                 >
                   <option value="">Select Category</option>
-                  <option value="Flowers">Flowers</option>
-                  <option value="Liquor">Liquor</option>
-                  <option value="Chocolates">Chocolates</option>
-                  <option value="Services">Services</option>
-                  <option value="Other">Other</option>
+                  {giftCategories
+                    .filter(cat => cat.is_active)
+                    .sort((a, b) => a.display_order - b.display_order)
+                    .map((category) => (
+                      <option key={category.id} value={category.name}>
+                        {category.icon} {category.name}
+                      </option>
+                    ))}
                 </select>
               </div>
               <div>
@@ -319,20 +346,19 @@ export default function GiftProductsPage() {
         </Card>
       ) : (
         <div className="space-y-8">
-          {Object.entries(groupedProducts).map(([category, products]) => (
-            <div key={category}>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4 flex items-center">
-                <span className="text-2xl mr-2">
-                  {category === 'Flowers' ? '🌸' : 
-                   category === 'Liquor' ? '🍷' : 
-                   category === 'Chocolates' ? '🍫' : 
-                   category === 'Services' ? '🎁' : '🎁'}
-                </span>
-                {category}
-                <span className="ml-2 text-sm font-normal text-gray-500">
-                  ({products.length} products)
-                </span>
-              </h2>
+          {Object.entries(groupedProducts).map(([category, products]) => {
+            const categoryInfo = giftCategories.find(cat => cat.name === category);
+            return (
+              <div key={category}>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-4 flex items-center">
+                  <span className="text-2xl mr-2">
+                    {categoryInfo?.icon || '🎁'}
+                  </span>
+                  {category}
+                  <span className="ml-2 text-sm font-normal text-gray-500">
+                    ({products.length} products)
+                  </span>
+                </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {products.map((product) => (
                   <Card key={product.id} className="p-4">
@@ -396,7 +422,8 @@ export default function GiftProductsPage() {
                 ))}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </>

@@ -16,6 +16,17 @@ interface GiftProduct {
   is_active: boolean;
 }
 
+interface GiftCategory {
+  id: string;
+  name: string;
+  description: string | null;
+  icon: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 interface GiftProductGridProps {
   category?: string;
   limit?: number;
@@ -24,11 +35,12 @@ interface GiftProductGridProps {
 
 export function GiftProductGrid({ category, limit, showCategory = true }: GiftProductGridProps) {
   const [giftProducts, setGiftProducts] = useState<GiftProduct[]>([]);
+  const [giftCategories, setGiftCategories] = useState<GiftCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchGiftProducts = async () => {
+    const fetchData = async () => {
       try {
         const url = category 
           ? `/api/gift-products?category=${encodeURIComponent(category)}`
@@ -49,6 +61,13 @@ export function GiftProductGrid({ category, limit, showCategory = true }: GiftPr
         } else {
           setError(data.error || 'Failed to load gift products');
         }
+
+        // Also fetch categories for icons
+        const categoriesResponse = await fetch('/api/gift-categories?includeInactive=true');
+        const categoriesData = await categoriesResponse.json();
+        if (categoriesResponse.ok) {
+          setGiftCategories(categoriesData.giftCategories || []);
+        }
       } catch (error) {
         console.error('Error fetching gift products:', error);
         setError('Failed to load gift products');
@@ -57,8 +76,14 @@ export function GiftProductGrid({ category, limit, showCategory = true }: GiftPr
       }
     };
 
-    fetchGiftProducts();
+    fetchData();
   }, [category, limit]);
+
+  // Get category icon
+  const getCategoryIcon = (categoryName: string) => {
+    const categoryInfo = giftCategories.find(cat => cat.name === categoryName);
+    return categoryInfo?.icon || '🎁';
+  };
 
   if (loading) {
     return (
@@ -123,7 +148,8 @@ export function GiftProductGrid({ category, limit, showCategory = true }: GiftPr
             {/* Category Badge */}
             {showCategory && (
               <div className="mb-2">
-                <span className="px-2 py-1 bg-pink-100 text-pink-800 text-xs font-medium rounded-full">
+                <span className="px-2 py-1 bg-pink-100 text-pink-800 text-xs font-medium rounded-full flex items-center w-fit">
+                  <span className="mr-1">{getCategoryIcon(product.category)}</span>
                   {product.category}
                 </span>
               </div>
