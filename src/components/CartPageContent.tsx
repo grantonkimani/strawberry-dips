@@ -312,6 +312,5 @@ export function CartPageContent() {
       </div>
     </div>
 
-    {/* No drawer in cart - original behavior restored */}
   );
 }
