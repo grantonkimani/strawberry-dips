@@ -106,32 +106,7 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
                 <span className="font-medium">Track Order</span>
               </Link>
               
-              <Link 
-                href="/about" 
-                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors"
-                onClick={onClose}
-              >
-                <span className="text-lg">ℹ️</span>
-                <span className="font-medium">About</span>
-              </Link>
-              
-              <Link 
-                href="/support" 
-                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors"
-                onClick={onClose}
-              >
-                <span className="text-lg">💬</span>
-                <span className="font-medium">Support</span>
-              </Link>
-              
-              <Link 
-                href="/contact" 
-                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors"
-                onClick={onClose}
-              >
-                <span className="text-lg">📞</span>
-                <span className="font-medium">Contact</span>
-              </Link>
+              {/* About/Support/Contact removed per footer duplication */}
             </nav>
 
             {/* Additional Mobile Actions */}
