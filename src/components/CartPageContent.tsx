@@ -17,7 +17,7 @@ interface GiftProduct {
 }
 
 export function CartPageContent() {
-  const { state, updateQuantity, removeItem, clearCart, getTotalPrice } = useCart();
+  const { state, updateQuantity, removeItem, clearCart, getTotalPrice, addItem } = useCart();
   const [selectedGifts, setSelectedGifts] = useState<string[]>([]);
   const [giftProducts, setGiftProducts] = useState<GiftProduct[]>([]);
   const [loadingGifts, setLoadingGifts] = useState(true);
