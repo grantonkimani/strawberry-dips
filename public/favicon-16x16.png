@@ -1,0 +1,19 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Scalloped outer circle -->
+  <path d="M8 1.5C10 1.5 12 2.5 13 3.5C14 4.5 14.5 6 14.5 8C14.5 10 14 11.5 13 12.5C12 13.5 10 14.5 8 14.5C6 14.5 4 13.5 3 12.5C2 11.5 1.5 10 1.5 8C1.5 6 2 4.5 3 3.5C4 2.5 6 1.5 8 1.5Z" fill="#4DD0E1"/>
+  
+  <!-- Inner teal circle -->
+  <circle cx="8" cy="8" r="6" fill="#4DD0E1"/>
+  
+  <!-- Inner rings -->
+  <circle cx="8" cy="8" r="5.5" stroke="#B2EBF2" stroke-width="0.25" fill="none"/>
+  <circle cx="8" cy="8" r="5" stroke="#B2EBF2" stroke-width="0.25" fill="none"/>
+  
+  <!-- Main text "SD" for small size -->
+  <text x="8" y="7" text-anchor="middle" fill="white" font-family="cursive" font-size="3" font-weight="bold">
+    S
+  </text>
+  <text x="8" y="10" text-anchor="middle" fill="white" font-family="cursive" font-size="4" font-weight="bold">
+    D
+  </text>
+</svg>

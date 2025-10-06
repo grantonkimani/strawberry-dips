@@ -17,6 +17,16 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Strawberry Dip - Premium Chocolate Covered Strawberries",
   description: "Fresh strawberries dipped in premium chocolate. Perfect for gifts, celebrations, and special moments. Order online with same-day delivery.",
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: '/favicon-official.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: '16x16', type: 'image/x-icon' }
+    ],
+    apple: [
+      { url: '/favicon-official.svg', sizes: '180x180', type: 'image/svg+xml' }
+    ]
+  }
 };
 
 export default function RootLayout({

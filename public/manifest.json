@@ -1,0 +1,22 @@
+{
+  "name": "Strawberry Dip",
+  "short_name": "Strawberry Dip",
+  "description": "Premium Chocolate Covered Strawberries",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FCE4EC",
+  "theme_color": "#4DD0E1",
+  "icons": [
+    {
+      "src": "/favicon-official.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/strawberry-dip-logo-official.svg",
+      "sizes": "200x200",
+      "type": "image/svg+xml"
+    }
+  ]
+}
