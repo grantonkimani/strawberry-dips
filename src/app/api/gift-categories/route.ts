@@ -122,25 +122,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Use UPSERT on unique name to avoid duplicate errors and make the API idempotent
     const { data, error } = await db
       .from('gift_categories')
-      .insert([
-        {
-          name,
-          description: description || '',
-          icon: icon || '🎁',
-          display_order: display_order || 0,
-          is_active: true
-        }
-      ])
+      .upsert(
+        [
+          {
+            name,
+            description: description || '',
+            icon: icon || '🎁',
+            display_order: display_order || 0,
+            is_active: true,
+            updated_at: new Date().toISOString()
+          }
+        ],
+        { onConflict: 'name' }
+      )
       .select()
       .single();
 
     if (error) {
       console.error('Error creating gift category:', error);
+      const code = (error as any)?.code || '';
       const message = error.message?.toLowerCase().includes('permission')
         ? 'Permission denied creating gift category. Check Supabase RLS policies.'
-        : 'Failed to create gift category';
+        : code === '23505'
+          ? 'A gift category with this name already exists.'
+          : 'Failed to create gift category';
       return NextResponse.json({ error: message }, { status: 500 });
     }
 
