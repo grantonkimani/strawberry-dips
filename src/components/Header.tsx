@@ -66,11 +66,13 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3">
+          <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
             <img 
               src="/strawberry-dip-logo-header.svg" 
               alt="Strawberry Dip Logo" 
-              className="h-12 w-12 object-contain"
+              className="h-10 w-10 sm:h-12 sm:w-12 object-contain"
+              loading="eager"
+              decoding="async"
               onError={(e) => {
                 // Fallback to emoji if image fails to load
                 e.currentTarget.style.display = 'none';
@@ -81,10 +83,10 @@ export function Header() {
             />
             <span className="text-2xl" style={{display: 'none'}}>🍓</span>
             <div className="flex flex-col">
-              <span className="text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent leading-tight">
                 Strawberry Dip
               </span>
-              <span className="text-xs text-gray-500 uppercase tracking-wide">
+              <span className="hidden xs:block text-[10px] sm:text-xs text-gray-500 uppercase tracking-wide leading-tight">
                 Chocolate Covered Strawberries
               </span>
             </div>
