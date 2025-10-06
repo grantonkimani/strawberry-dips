@@ -1,9 +1,10 @@
 'use client';
 
-import { ShoppingCart, Heart, User, Menu } from "lucide-react";
+import { ShoppingCart, Heart, User, Menu, HelpCircle } from "lucide-react";
 import { Button } from "./ui/Button";
 import { useCart } from "@/contexts/CartContext";
 import { MobileNav } from "./CartSidebar";
+import { HelpDrawer } from "./HelpDrawer";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -12,6 +13,7 @@ export function Header() {
   const { state } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const router = useRouter();
@@ -111,6 +113,10 @@ export function Header() {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3 md:space-x-4">
+            {/* Help */}
+            <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 h-11 w-11 md:h-9 md:w-9" onClick={() => setIsHelpOpen(true)} aria-label="Help">
+              <HelpCircle className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.25} />
+            </Button>
             {/* Search - Hidden on mobile */}
             <div className="hidden lg:flex items-center">
               <div className="relative">
@@ -201,6 +207,9 @@ export function Header() {
         isOpen={isMobileMenuOpen} 
         onClose={() => setIsMobileMenuOpen(false)} 
       />
+
+      {/* Help Drawer */}
+      <HelpDrawer isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </header>
   );
 }
