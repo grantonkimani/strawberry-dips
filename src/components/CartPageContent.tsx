@@ -118,8 +118,22 @@ export function CartPageContent() {
                 {state.items.map((item) => (
                   <div key={item.id} className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
                     {/* Product Image */}
-                    <div className="w-16 h-16 bg-gradient-to-br from-pink-100 to-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="text-2xl">🍓</span>
+                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e as any).currentTarget.style.display = 'none';
+                            const next = (e as any).currentTarget.nextElementSibling as HTMLElement | null;
+                            if (next) next.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div style={{display: item.image ? 'none' as any : 'flex' as any}} className="w-full h-full items-center justify-center">
+                        <span className="text-2xl">🍓</span>
+                      </div>
                     </div>
 
                     {/* Product Info */}
