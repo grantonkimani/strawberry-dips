@@ -190,8 +190,13 @@ export default function CategoriesPage() {
 
   const handleEditGiftCategory = async (id: string) => {
     try {
-      const response = await fetch(`/api/gift-categories/${id}`, {
-        method: 'PUT',
+      // If this is a fallback category (derived from products), create a real one instead
+      const isFallback = id.startsWith('fallback-');
+      const endpoint = isFallback ? '/api/gift-categories' : `/api/gift-categories/${id}`;
+      const method = isFallback ? 'POST' : 'PUT';
+
+      const response = await fetch(endpoint, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingGiftCategory)
       });
