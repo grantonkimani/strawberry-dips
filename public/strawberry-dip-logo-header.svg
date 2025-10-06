@@ -1,0 +1,24 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Scalloped outer circle -->
+  <path d="M32 6C40 6 48 10 52 14C56 18 58 24 58 32C58 40 56 46 52 50C48 54 40 58 32 58C24 58 16 54 12 50C8 46 6 40 6 32C6 24 8 18 12 14C16 10 24 6 32 6Z" fill="#4DD0E1"/>
+  
+  <!-- Inner teal circle -->
+  <circle cx="32" cy="32" r="24" fill="#4DD0E1"/>
+  
+  <!-- Inner rings -->
+  <circle cx="32" cy="32" r="22" stroke="#B2EBF2" stroke-width="1" fill="none"/>
+  <circle cx="32" cy="32" r="20" stroke="#B2EBF2" stroke-width="1" fill="none"/>
+  
+  <!-- Main text "Strawberry Dip" -->
+  <text x="32" y="28" text-anchor="middle" fill="white" font-family="cursive" font-size="8" font-weight="bold">
+    Strawberry
+  </text>
+  <text x="32" y="38" text-anchor="middle" fill="white" font-family="cursive" font-size="10" font-weight="bold">
+    Dip
+  </text>
+  
+  <!-- Subtitle text -->
+  <text x="32" y="45" text-anchor="middle" fill="#D32F2F" font-family="Arial, sans-serif" font-size="3" font-weight="bold" text-transform="uppercase">
+    CHOCOLATE COVERED STRAWBERRIES
+  </text>
+</svg>

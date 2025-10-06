@@ -59,11 +59,11 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-pink-600 rounded-full mb-4">
+          <div className="inline-flex items-center justify-center mb-4">
             <img 
-              src="/strawberry-dip-logo-simple.svg" 
-              alt="Strawberrydips Logo" 
-              className="h-8 w-8 object-contain"
+              src="/strawberry-dip-logo-official.svg" 
+              alt="Strawberry Dip Logo" 
+              className="h-20 w-20 object-contain"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 if (e.currentTarget.nextElementSibling) {
@@ -71,9 +71,11 @@ export default function AdminLoginPage() {
                 }
               }}
             />
-            <Lock className="h-8 w-8 text-white" style={{display: 'none'}} />
+            <div className="w-16 h-16 bg-pink-600 rounded-full flex items-center justify-center" style={{display: 'none'}}>
+              <Lock className="h-8 w-8 text-white" />
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Strawberry Dips</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Strawberry Dip</h1>
           <p className="text-gray-600 mt-2">Admin Portal</p>
         </div>
 

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Strawberrydips - Premium Chocolate Covered Strawberries",
+  title: "Strawberry Dip - Premium Chocolate Covered Strawberries",
   description: "Fresh strawberries dipped in premium chocolate. Perfect for gifts, celebrations, and special moments. Order online with same-day delivery.",
 };
 
