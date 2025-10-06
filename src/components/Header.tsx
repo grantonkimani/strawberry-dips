@@ -13,6 +13,7 @@ export function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const router = useRouter();
 
   // Update body class when cart or mobile menu opens/closes
@@ -124,9 +125,20 @@ export function Header() {
               <div className="relative">
                 <input
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    const q = e.target.value;
+                    setSearchQuery(q);
+                    // debounce route updates for snappy UX
+                    if (debounceTimer) clearTimeout(debounceTimer);
+                    const t = setTimeout(() => {
+                      const term = q.trim();
+                      router.push(term ? `/?q=${encodeURIComponent(term)}` : '/');
+                    }, 200);
+                    setDebounceTimer(t);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
+                      if (debounceTimer) clearTimeout(debounceTimer);
                       const q = searchQuery.trim();
                       router.push(q ? `/?q=${encodeURIComponent(q)}` : '/');
                     }

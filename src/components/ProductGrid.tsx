@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { ProductCard } from "./ProductCard";
 import { CategoryTabs } from "./CategoryTabs";
 import { CategorySection } from "./CategorySection";
@@ -37,14 +38,11 @@ export function ProductGrid() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	// Read query from URL (?q=)
+	// Read query from URL (?q=) and react to changes
+	const searchParams = useSearchParams();
 	useEffect(() => {
-		if (typeof window !== 'undefined') {
-			const params = new URLSearchParams(window.location.search);
-			const q = params.get('q') || '';
-			setSearch(q);
-		}
-	}, []);
+		setSearch(searchParams.get('q') || '');
+	}, [searchParams]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -118,13 +116,15 @@ export function ProductGrid() {
 		: transformedProducts;
 
 	const normalized = (s: string) => s.toLowerCase();
-	const searchFiltered = search.trim()
-		? baseFiltered.filter(p =>
-			normalized(p.name).includes(normalized(search)) ||
-			normalized(p.description || '').includes(normalized(search)) ||
-			normalized(p.categories?.name || p.category || '').includes(normalized(search))
-		)
-		: baseFiltered;
+	const searchFiltered = useMemo(() => {
+		const term = normalized(search.trim());
+		if (!term) return baseFiltered;
+		return baseFiltered.filter(p =>
+			normalized(p.name).includes(term) ||
+			normalized(p.description || '').includes(term) ||
+			normalized(p.categories?.name || p.category || '').includes(term)
+		);
+	}, [baseFiltered, search]);
 
 	// Get categories with products
 	const categoriesWithProducts = categories.filter(cat => 
