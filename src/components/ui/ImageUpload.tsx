@@ -23,7 +23,7 @@ export function ImageUpload({ value, onChange, onError, className = '' }: ImageU
     if (!file) return;
 
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
     if (!allowedTypes.includes(file.type)) {
       onError?.('Invalid file type. Only JPEG, PNG, and WebP images are allowed.');
       return;
@@ -114,7 +114,7 @@ export function ImageUpload({ value, onChange, onError, className = '' }: ImageU
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/jpeg,image/jpg,image/png,image/webp"
+            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
             onChange={handleFileUpload}
             className="hidden"
             disabled={uploading}
