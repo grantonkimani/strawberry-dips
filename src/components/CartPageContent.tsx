@@ -48,23 +48,33 @@ export function CartPageContent() {
   };
 
   const handleGiftToggle = (giftId: string) => {
-    setSelectedGifts(prev => 
-      prev.includes(giftId) 
-        ? prev.filter(id => id !== giftId)
-        : [...prev, giftId]
-    );
-  };
+    setSelectedGifts(prev => {
+      const isSelected = prev.includes(giftId);
+      const next = isSelected ? prev.filter(id => id !== giftId) : [...prev, giftId];
 
-  const getGiftTotal = () => {
-    return selectedGifts.reduce((total, giftId) => {
+      // Sync with cart: add or remove the gift as a normal cart item
       const gift = giftProducts.find(g => g.id === giftId);
-      return total + (gift?.price || 0);
-    }, 0);
+      if (gift) {
+        if (!isSelected) {
+          addItem({
+            id: gift.id,
+            name: gift.name,
+            price: gift.price,
+            image: gift.image_url || '',
+            category: gift.category || 'Gift'
+          });
+        } else {
+          removeItem(gift.id);
+        }
+      }
+
+      return next;
+    });
   };
 
-  const getGrandTotal = () => {
-    return getTotalPrice() + getGiftTotal();
-  };
+  const getGiftTotal = () => 0; // gifts are now real cart items; totals come from cart
+
+  const getGrandTotal = () => getTotalPrice();
 
   // No grouping; render a flat grid like before
 
@@ -259,23 +269,7 @@ export function CartPageContent() {
                 <span className="font-medium">KSH {getTotalPrice().toFixed(2)}</span>
               </div>
               
-              {/* Gift Items */}
-              {selectedGifts.map((giftId) => {
-                const gift = giftProducts.find(g => g.id === giftId);
-                return gift ? (
-                  <div key={giftId} className="flex justify-between text-sm">
-                    <span className="text-gray-500">{gift.name}</span>
-                    <span className="text-gray-600">KSH {gift.price.toFixed(2)}</span>
-                  </div>
-                ) : null;
-              })}
-              
-              {selectedGifts.length > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Gifts</span>
-                  <span className="font-medium">KSH {getGiftTotal().toFixed(2)}</span>
-                </div>
-              )}
+              {/* Gift line items are now part of cart items and included above */}
             </div>
 
             {/* Total */}
