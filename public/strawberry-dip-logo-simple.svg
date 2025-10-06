@@ -1,0 +1,16 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle (Jumia-style) -->
+  <circle cx="32" cy="32" r="32" fill="#E91E63"/>
+  
+  <!-- Strawberry Icon (Simplified) -->
+  <path d="M32 16C28 16 24 20 24 24C24 28 28 32 32 32C36 32 40 28 40 24C40 20 36 16 32 16Z" fill="white"/>
+  
+  <!-- Strawberry Body -->
+  <path d="M32 32C28 32 24 36 24 40C24 44 28 48 32 48C36 48 40 44 40 40C40 36 36 32 32 32Z" fill="white"/>
+  
+  <!-- Seeds -->
+  <circle cx="28" cy="24" r="1" fill="#E91E63"/>
+  <circle cx="36" cy="24" r="1" fill="#E91E63"/>
+  <circle cx="28" cy="36" r="1" fill="#E91E63"/>
+  <circle cx="36" cy="36" r="1" fill="#E91E63"/>
+</svg>

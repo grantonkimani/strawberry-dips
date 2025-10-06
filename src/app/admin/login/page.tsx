@@ -60,7 +60,18 @@ export default function AdminLoginPage() {
         {/* Logo/Brand */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-pink-600 rounded-full mb-4">
-            <Lock className="h-8 w-8 text-white" />
+            <img 
+              src="/strawberry-dip-logo-simple.svg" 
+              alt="Strawberrydips Logo" 
+              className="h-8 w-8 object-contain"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                if (e.currentTarget.nextElementSibling) {
+                  (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'inline';
+                }
+              }}
+            />
+            <Lock className="h-8 w-8 text-white" style={{display: 'none'}} />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Strawberry Dips</h1>
           <p className="text-gray-600 mt-2">Admin Portal</p>
