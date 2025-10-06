@@ -7,6 +7,17 @@ export async function POST(request: NextRequest) {
 
     console.log('IntaSend webhook received:', body);
 
+    // Optional shared-secret validation (IntaSend "Challenge").
+    // If INTASEND_WEBHOOK_SECRET is set, require body.challenge to match.
+    const expectedSecret = process.env.INTASEND_WEBHOOK_SECRET;
+    if (expectedSecret) {
+      const provided = (body && (body.challenge || body.Challenge)) as string | undefined;
+      if (!provided || provided !== expectedSecret) {
+        console.error('Invalid IntaSend webhook secret/challenge');
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
     // IntaSend webhook payload structure
     const {
       invoice_id,
