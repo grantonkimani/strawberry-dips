@@ -3,12 +3,15 @@ import { ProductGrid } from "@/components/ProductGrid";
 import { Footer } from "@/components/Footer";
 import { SupportSection } from "@/components/SupportSection";
 import { WhyChoose } from "@/components/WhyChoose";
+import { Suspense } from "react";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-pink-50">
       <Header />
-      <ProductGrid />
+      <Suspense fallback={<div className="py-16 text-center text-gray-600">Loading products…</div>}>
+        <ProductGrid />
+      </Suspense>
       
       {/* Why Choose Section */}
       <WhyChoose />
