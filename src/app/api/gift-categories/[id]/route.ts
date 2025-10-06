@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 // GET /api/gift-categories/[id] - Get a specific gift category
 export async function GET(
@@ -50,7 +51,78 @@ export async function PUT(
       );
     }
 
-    const { data, error } = await supabase
+    // Prefer admin client (bypasses RLS) if available; otherwise use public client
+    const db = supabaseAdmin ?? supabase;
+
+    // If this is a fallback ID (generated from product categories), create or map to a real row
+    if (id.startsWith('fallback-')) {
+      // Try to find an existing real category by name
+      const { data: existingByName, error: findError } = await db
+        .from('gift_categories')
+        .select('*')
+        .ilike('name', name)
+        .limit(1)
+        .maybeSingle();
+
+      if (findError) {
+        console.error('Error looking up gift category by name:', findError);
+        return NextResponse.json({ error: 'Failed to update gift category' }, { status: 500 });
+      }
+
+      if (existingByName) {
+        // Update the existing real record
+        const { data: updated, error: updateExistingError } = await db
+          .from('gift_categories')
+          .update({
+            name,
+            description: description || '',
+            icon: icon || '🎁',
+            display_order: display_order || 0,
+            is_active: is_active !== undefined ? is_active : true,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingByName.id)
+          .select()
+          .single();
+
+        if (updateExistingError) {
+          console.error('Error updating existing gift category:', updateExistingError);
+          const message = updateExistingError.message?.toLowerCase().includes('permission')
+            ? 'Permission denied updating gift category. Check Supabase RLS policies.'
+            : 'Failed to update gift category';
+          return NextResponse.json({ error: message }, { status: 500 });
+        }
+
+        return NextResponse.json({ giftCategory: updated });
+      }
+
+      // Insert a new real record
+      const { data: created, error: insertError } = await db
+        .from('gift_categories')
+        .insert([
+          {
+            name,
+            description: description || '',
+            icon: icon || '🎁',
+            display_order: display_order || 0,
+            is_active: is_active !== undefined ? is_active : true
+          }
+        ])
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('Error creating gift category from fallback:', insertError);
+        const message = insertError.message?.toLowerCase().includes('permission')
+          ? 'Permission denied creating gift category. Check Supabase RLS policies.'
+          : 'Failed to create gift category';
+        return NextResponse.json({ error: message }, { status: 500 });
+      }
+
+      return NextResponse.json({ giftCategory: created });
+    }
+
+    const { data, error } = await db
       .from('gift_categories')
       .update({
         name,
@@ -66,10 +138,10 @@ export async function PUT(
 
     if (error) {
       console.error('Error updating gift category:', error);
-      return NextResponse.json(
-        { error: 'Failed to update gift category' },
-        { status: 500 }
-      );
+      const message = error.message?.toLowerCase().includes('permission')
+        ? 'Permission denied updating gift category. Check Supabase RLS policies.'
+        : 'Failed to update gift category';
+      return NextResponse.json({ error: message }, { status: 500 });
     }
 
     return NextResponse.json({ giftCategory: data });

@@ -283,17 +283,17 @@ export default function CategoriesPage() {
         </div>
       </div>
 
-      {/* Error/Success Messages */}
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800">{error}</p>
-        </div>
-      )}
-      {success && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-green-800">{success}</p>
-        </div>
-      )}
+        {/* Error/Success Messages */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-800">{error}</p>
+          </div>
+        )}
+        {success && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-green-800">{success}</p>
+          </div>
+        )}
 
       {/* Product Categories Tab */}
       {activeTab === 'products' && (
@@ -309,164 +309,164 @@ export default function CategoriesPage() {
             </Button>
           </div>
 
-          {/* Add Category Form */}
-          {showAddForm && (
-            <Card className="mb-6">
-              <CardHeader>
+        {/* Add Category Form */}
+        {showAddForm && (
+          <Card className="mb-6">
+            <CardHeader>
                 <CardTitle>Add New Product Category</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleAddCategory} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">
-                        Category Name *
-                      </label>
-                      <input
-                        type="text"
-                        value={newCategory.name}
-                        onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">
-                        Display Order
-                      </label>
-                      <input
-                        type="number"
-                        value={newCategory.display_order}
-                        onChange={(e) => setNewCategory({ ...newCategory, display_order: parseInt(e.target.value) || 0 })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <Button type="submit" className="mr-2 bg-green-600 hover:bg-green-700">
-                        <Save className="h-4 w-4 mr-1" />
-                        Save
-                      </Button>
-                      <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
-                        <X className="h-4 w-4 mr-1" />
-                        Cancel
-                      </Button>
-                    </div>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAddCategory} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-800 mb-1">
+                      Category Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={newCategory.name}
+                      onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      required
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-800 mb-1">
-                      Description
+                      Display Order
                     </label>
-                    <textarea
-                      value={newCategory.description}
-                      onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                    <input
+                      type="number"
+                      value={newCategory.display_order}
+                      onChange={(e) => setNewCategory({ ...newCategory, display_order: parseInt(e.target.value) || 0 })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
-                      rows={2}
                     />
                   </div>
-                </form>
-              </CardContent>
-            </Card>
-          )}
+                  <div className="flex items-end">
+                    <Button type="submit" className="mr-2 bg-green-600 hover:bg-green-700">
+                      <Save className="h-4 w-4 mr-1" />
+                      Save
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
+                      <X className="h-4 w-4 mr-1" />
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    value={newCategory.description}
+                    onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+                    rows={2}
+                  />
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
 
           {/* Product Categories List */}
-          <div className="grid gap-6">
-            {categories.map((category) => (
-              <Card key={category.id}>
-                <CardContent className="p-6">
-                  {editingId === category.id ? (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-800 mb-1">
-                            Category Name *
-                          </label>
-                          <input
-                            type="text"
-                            value={editingCategory.name || ''}
-                            onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-800 mb-1">
-                            Display Order
-                          </label>
-                          <input
-                            type="number"
-                            value={editingCategory.display_order || 0}
-                            onChange={(e) => setEditingCategory({ ...editingCategory, display_order: parseInt(e.target.value) || 0 })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
-                          />
-                        </div>
-                        <div className="flex items-end">
-                          <Button
-                            onClick={() => handleEditCategory(category.id)}
-                            className="mr-2 bg-green-600 hover:bg-green-700"
-                          >
-                            <Save className="h-4 w-4 mr-1" />
-                            Save
-                          </Button>
-                          <Button variant="outline" onClick={cancelEdit}>
-                            <X className="h-4 w-4 mr-1" />
-                            Cancel
-                          </Button>
-                        </div>
+        <div className="grid gap-6">
+          {categories.map((category) => (
+            <Card key={category.id}>
+              <CardContent className="p-6">
+                {editingId === category.id ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-800 mb-1">
+                          Category Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={editingCategory.name || ''}
+                          onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+                          required
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-gray-800 mb-1">
-                          Description
+                          Display Order
                         </label>
-                        <textarea
-                          value={editingCategory.description || ''}
-                          onChange={(e) => setEditingCategory({ ...editingCategory, description: e.target.value })}
+                        <input
+                          type="number"
+                          value={editingCategory.display_order || 0}
+                          onChange={(e) => setEditingCategory({ ...editingCategory, display_order: parseInt(e.target.value) || 0 })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
-                          rows={2}
                         />
                       </div>
-                    </div>
-                  ) : (
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                          {category.name}
-                        </h3>
-                        {category.description && (
-                          <p className="text-gray-600 mb-2">{category.description}</p>
-                        )}
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <span>Order: {category.display_order}</span>
-                          <span>Status: {category.is_active ? 'Active' : 'Inactive'}</span>
-                          <span>Created: {new Date(category.created_at).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
+                      <div className="flex items-end">
                         <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => startEdit(category)}
+                          onClick={() => handleEditCategory(category.id)}
+                          className="mr-2 bg-green-600 hover:bg-green-700"
                         >
-                          <Edit className="h-4 w-4" />
+                          <Save className="h-4 w-4 mr-1" />
+                          Save
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteCategory(category.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
+                        <Button variant="outline" onClick={cancelEdit}>
+                          <X className="h-4 w-4 mr-1" />
+                          Cancel
                         </Button>
                       </div>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 mb-1">
+                        Description
+                      </label>
+                      <textarea
+                        value={editingCategory.description || ''}
+                        onChange={(e) => setEditingCategory({ ...editingCategory, description: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+                        rows={2}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        {category.name}
+                      </h3>
+                      {category.description && (
+                        <p className="text-gray-600 mb-2">{category.description}</p>
+                      )}
+                      <div className="flex items-center space-x-4 text-sm text-gray-500">
+                        <span>Order: {category.display_order}</span>
+                        <span>Status: {category.is_active ? 'Active' : 'Inactive'}</span>
+                        <span>Created: {new Date(category.created_at).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => startEdit(category)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteCategory(category.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-          {categories.length === 0 && (
-            <Card>
-              <CardContent className="p-8 text-center">
+        {categories.length === 0 && (
+          <Card>
+            <CardContent className="p-8 text-center">
                 <p className="text-gray-500">No product categories found. Add your first category to get started.</p>
               </CardContent>
             </Card>
@@ -682,11 +682,11 @@ export default function CategoriesPage() {
                   <Plus className="h-4 w-4 mr-2" />
                   Add First Category
                 </Button>
-              </CardContent>
-            </Card>
+            </CardContent>
+          </Card>
           )}
         </>
-      )}
+        )}
     </>
   );
 }

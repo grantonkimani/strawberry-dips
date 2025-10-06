@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 // GET /api/gift-categories - Get all gift categories
 export async function GET(request: NextRequest) {
@@ -90,8 +91,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Prefer admin client (bypasses RLS) if available; otherwise use public client
+    const db = supabaseAdmin ?? supabase;
+
     // Check if gift_categories table exists
-    const { data: tableCheck, error: tableError } = await supabase
+    const { data: tableCheck, error: tableError } = await db
       .from('gift_categories')
       .select('id')
       .limit(1);
@@ -106,7 +110,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('gift_categories')
       .insert([
         {
@@ -122,10 +126,10 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error creating gift category:', error);
-      return NextResponse.json(
-        { error: 'Failed to create gift category' },
-        { status: 500 }
-      );
+      const message = error.message?.toLowerCase().includes('permission')
+        ? 'Permission denied creating gift category. Check Supabase RLS policies.'
+        : 'Failed to create gift category';
+      return NextResponse.json({ error: message }, { status: 500 });
     }
 
     return NextResponse.json({ giftCategory: data }, { status: 201 });
