@@ -23,7 +23,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AdminUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(typeof window === 'undefined');
+  // Always start in loading state to keep SSR and first client render consistent
+  const [isLoading, setIsLoading] = useState(true);
 
   // Check for existing session on mount (client-side only)
   useEffect(() => {
