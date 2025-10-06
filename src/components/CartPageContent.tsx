@@ -20,29 +20,15 @@ export function CartPageContent() {
   const { state, updateQuantity, removeItem, clearCart, getTotalPrice } = useCart();
   const [selectedGifts, setSelectedGifts] = useState<string[]>([]);
   const [giftProducts, setGiftProducts] = useState<GiftProduct[]>([]);
-  const [giftCategories, setGiftCategories] = useState<{ id: string; name: string; icon?: string; display_order: number; is_active: boolean; }[]>([]);
   const [loadingGifts, setLoadingGifts] = useState(true);
 
   // Fetch gift products from API
   useEffect(() => {
     const fetchGiftProducts = async () => {
       try {
-        const [productsRes, categoriesRes] = await Promise.all([
-          fetch('/api/gift-products'),
-          fetch('/api/gift-categories?includeInactive=true')
-        ]);
-
-        const productsData = await productsRes.json();
-        const categoriesData = await categoriesRes.json();
-
-        setGiftProducts(productsData.giftProducts || []);
-        setGiftCategories((categoriesData.giftCategories || []).map((c: any) => ({
-          id: c.id,
-          name: c.name,
-          icon: c.icon,
-          display_order: c.display_order ?? 0,
-          is_active: !!c.is_active
-        })));
+        const response = await fetch('/api/gift-products');
+        const data = await response.json();
+        setGiftProducts(data.giftProducts || []);
       } catch (error) {
         console.error('Error fetching gift products:', error);
       } finally {
@@ -80,21 +66,7 @@ export function CartPageContent() {
     return getTotalPrice() + getGiftTotal();
   };
 
-  // Group gifts by category for display
-  const activeCategories = giftCategories
-    .filter((c) => c.is_active)
-    .sort((a, b) => a.display_order - b.display_order || a.name.localeCompare(b.name));
-
-  const categoryToGifts: Record<string, GiftProduct[]> = giftProducts.reduce((acc, gift) => {
-    const key = gift.category || 'Other';
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(gift);
-    return acc;
-  }, {} as Record<string, GiftProduct[]>);
-
-  for (const key of Object.keys(categoryToGifts)) {
-    categoryToGifts[key].sort((a, b) => a.name.localeCompare(b.name));
-  }
+  // No grouping; render a flat grid like before
 
   return (
     <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
@@ -204,125 +176,68 @@ export function CartPageContent() {
                   <p className="text-gray-600">No gift products available at the moment</p>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {activeCategories.map((cat) => (
-                    categoryToGifts[cat.name] && categoryToGifts[cat.name].length > 0 ? (
-                      <div key={cat.id}>
-                        <div className="flex items-center mb-3">
-                          <span className="text-2xl mr-2">{cat.icon || '🎁'}</span>
-                          <h3 className="text-lg font-semibold text-gray-900">{cat.name}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {giftProducts.map((gift) => (
+                    <div
+                      key={gift.id}
+                      className={`group cursor-pointer transition-all duration-300 overflow-hidden rounded-lg border-2 ${
+                        selectedGifts.includes(gift.id)
+                          ? 'border-pink-500 bg-pink-50'
+                          : 'border-gray-200 hover:border-pink-300 hover:shadow-lg'
+                      }`}
+                      onClick={() => handleGiftToggle(gift.id)}
+                    >
+                      {/* Product Image */}
+                      <div className="aspect-square bg-gray-100 overflow-hidden">
+                        {gift.image_url ? (
+                          <img
+                            src={gift.image_url}
+                            alt={gift.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              e.currentTarget.src = '/images/placeholder-gift.svg';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-100 to-purple-100">
+                            <span className="text-4xl">🎁</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Product Details */}
+                      <div className="p-4">
+                        {/* Category Badge */}
+                        <div className="mb-2">
+                          <span className="px-2 py-1 bg-pink-100 text-pink-800 text-xs font-medium rounded-full">
+                            {gift.category}
+                          </span>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {categoryToGifts[cat.name].map((gift) => (
-                            <div
-                              key={gift.id}
-                              className={`group cursor-pointer transition-all duration-300 overflow-hidden rounded-lg border-2 ${
-                                selectedGifts.includes(gift.id)
-                                  ? 'border-pink-500 bg-pink-50'
-                                  : 'border-gray-200 hover:border-pink-300 hover:shadow-lg'
-                              }`}
-                              onClick={() => handleGiftToggle(gift.id)}
-                            >
-                              {/* Product Image */}
-                              <div className="aspect-square bg-gray-100 overflow-hidden">
-                                {gift.image_url ? (
-                                  <img
-                                    src={gift.image_url}
-                                    alt={gift.name}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                    onError={(e) => {
-                                      (e as any).currentTarget.src = '/images/placeholder-gift.svg';
-                                    }}
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-100 to-purple-100">
-                                    <span className="text-4xl">🎁</span>
-                                  </div>
-                                )}
-                              </div>
-                              
-                              {/* Product Details */}
-                              <div className="p-4">
-                                {/* Category Badge */}
-                                <div className="mb-2">
-                                  <span className="px-2 py-1 bg-pink-100 text-pink-800 text-xs font-medium rounded-full">
-                                    {gift.category}
-                                  </span>
-                                </div>
-                                
-                                {/* Product Name */}
-                                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors">
-                                  {gift.name}
-                                </h3>
-                                
-                                {/* Description */}
-                                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                                  {gift.description}
-                                </p>
-                                
-                                {/* Price and Selection Status */}
-                                <div className="flex items-center justify-between">
-                                  <span className="text-lg font-bold text-pink-600">
-                                    KSH {gift.price.toFixed(2)}
-                                  </span>
-                                  {selectedGifts.includes(gift.id) && (
-                                    <div className="flex items-center text-pink-600 font-medium">
-                                      <span className="text-sm">✓ Selected</span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
+                        
+                        {/* Product Name */}
+                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors">
+                          {gift.name}
+                        </h3>
+                        
+                        {/* Description */}
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                          {gift.description}
+                        </p>
+                        
+                        {/* Price and Selection Status */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-lg font-bold text-pink-600">
+                            KSH {gift.price.toFixed(2)}
+                          </span>
+                          {selectedGifts.includes(gift.id) && (
+                            <div className="flex items-center text-pink-600 font-medium">
+                              <span className="text-sm">✓ Selected</span>
                             </div>
-                          ))}
+                          )}
                         </div>
                       </div>
-                    ) : null
+                    </div>
                   ))}
-                  {/* Render gifts with categories not in active list */}
-                  {Object.keys(categoryToGifts)
-                    .filter((name) => !activeCategories.find((c) => c.name === name))
-                    .map((name) => (
-                      <div key={name}>
-                        <div className="flex items-center mb-3">
-                          <span className="text-2xl mr-2">🎁</span>
-                          <h3 className="text-lg font-semibold text-gray-900">{name}</h3>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {categoryToGifts[name].map((gift) => (
-                            <div
-                              key={gift.id}
-                              className={`group cursor-pointer transition-all duration-300 overflow-hidden rounded-lg border-2 ${
-                                selectedGifts.includes(gift.id)
-                                  ? 'border-pink-500 bg-pink-50'
-                                  : 'border-gray-200 hover:border-pink-300 hover:shadow-lg'
-                              }`}
-                              onClick={() => handleGiftToggle(gift.id)}
-                            >
-                              <div className="aspect-square bg-gray-100 overflow-hidden" />
-                              <div className="p-4">
-                                <div className="mb-2">
-                                  <span className="px-2 py-1 bg-pink-100 text-pink-800 text-xs font-medium rounded-full">
-                                    {name}
-                                  </span>
-                                </div>
-                                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors">
-                                  {gift.name}
-                                </h3>
-                                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{gift.description}</p>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-lg font-bold text-pink-600">KSH {gift.price.toFixed(2)}</span>
-                                  {selectedGifts.includes(gift.id) && (
-                                    <div className="flex items-center text-pink-600 font-medium">
-                                      <span className="text-sm">✓ Selected</span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
                 </div>
               )}
             </div>
@@ -396,5 +311,7 @@ export function CartPageContent() {
         </div>
       </div>
     </div>
+
+    {/* No drawer in cart - original behavior restored */}
   );
 }
