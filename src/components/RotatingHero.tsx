@@ -22,37 +22,12 @@ interface Slide {
 }
 
 export function RotatingHero() {
-  const [slides, setSlides] = useState<Slide[]>(builtIns.map((u) => ({ image_url: u })));
+  const [slides, setSlides] = useState<Slide[]>([]);
   const [overlay, setOverlay] = useState(0.55);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
-  // Try to prepend uploaded hero images if present (hero.webp, hero.jpg, hero-1.webp ...)
-  useEffect(() => {
-    const candidates = [
-      "/uploads/hero.webp",
-      "/uploads/hero.jpg",
-      "/uploads/hero-1.webp",
-      "/uploads/hero-2.webp",
-      "/uploads/hero-3.webp",
-    ];
-    const found: string[] = [];
-    let cancelled = false;
-    candidates.forEach((url) => {
-      const img = new Image();
-      img.onload = () => {
-        if (!cancelled) {
-          found.push(url);
-          const merged = [...found, ...builtIns.filter((b) => !found.includes(b))].map((u) => ({ image_url: u } as Slide));
-          setSlides(merged);
-        }
-      };
-      img.src = url;
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // No preloaded uploads/built-ins; we will only show admin banners when available
 
   // Auto-advance
   useEffect(() => {
@@ -81,9 +56,6 @@ export function RotatingHero() {
         if (apiSlides.length) {
           setSlides(apiSlides);
           if (typeof apiSlides[0]?.overlay === 'number') setOverlay(apiSlides[0].overlay as number);
-        } else {
-          // keep whatever the candidate/upload effect set; if still default, ensure at least one built-in
-          setSlides((prev) => (prev.length ? prev : builtIns.map((u) => ({ image_url: u }))));
         }
       } catch {}
     })();
