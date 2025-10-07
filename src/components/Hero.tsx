@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+// Using a standard img ensures immediate render on all hosts
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { useEffect, useState } from "react";
@@ -24,14 +24,13 @@ export function Hero() {
   return (
     <section className="relative isolate">
       <div className="relative h-[70vh] min-h-[420px] w-full overflow-hidden">
-        <Image
+        <img
           src={src}
           alt="Smash heart gift box with strawberries"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
+          className="absolute inset-0 h-full w-full object-cover"
           onError={() => setSrc("/images/valentines.jpg")}
+          loading="eager"
+          decoding="async"
         />
 
         {/* gradient + scrim */}

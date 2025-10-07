@@ -87,7 +87,7 @@ export function Header() {
             <span className="text-2xl" style={{display: 'none'}}>🍓</span>
             <div className="flex flex-col">
               <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent leading-tight">
-                Strawberry Dip
+                Strawberrydips
               </span>
               <span className="hidden xs:block text-[10px] sm:text-xs text-gray-500 uppercase tracking-wide leading-tight">
                 Chocolate Covered Strawberries
