@@ -61,7 +61,7 @@ export function RotatingHero() {
     return () => clearInterval(id);
   }, [paused, slides.length]);
 
-  // Fetch dynamic banners; append built-ins as fallback (de-duplicated)
+  // Fetch dynamic banners; use banners only. If none, fall back to uploaded or built-ins.
   useEffect(() => {
     (async () => {
       try {
@@ -79,14 +79,11 @@ export function RotatingHero() {
           }))
           .filter((s: Slide) => Boolean(s.image_url));
         if (apiSlides.length) {
-          const merged = [
-            ...apiSlides,
-            ...builtIns
-              .filter((u) => !apiSlides.some((s) => s.image_url === u))
-              .map((u) => ({ image_url: u } as Slide)),
-          ];
-          setSlides(merged);
+          setSlides(apiSlides);
           if (typeof apiSlides[0]?.overlay === 'number') setOverlay(apiSlides[0].overlay as number);
+        } else {
+          // keep whatever the candidate/upload effect set; if still default, ensure at least one built-in
+          setSlides((prev) => (prev.length ? prev : builtIns.map((u) => ({ image_url: u }))));
         }
       } catch {}
     })();
