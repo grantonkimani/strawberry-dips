@@ -45,6 +45,15 @@ export default function BannersAdminPage() {
     }
   };
 
+  const onUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch('/api/banners/upload', { method: 'POST', body: formData });
+    const json = await res.json();
+    if (json?.url) setForm((f) => ({ ...f, image_url: json.url }));
+    else alert(json.error || 'Upload failed');
+  };
+
   const toggleActive = async (id: string, active: boolean) => {
     await fetch(`/api/banners/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active }) });
     load();
@@ -69,7 +78,13 @@ export default function BannersAdminPage() {
       {/* Create form */}
       <div className="grid gap-3 rounded-lg border p-4 bg-white">
         <div className="grid sm:grid-cols-2 gap-3">
-          <input className="border p-2 rounded" placeholder="Image URL (e.g., /uploads/hero-2.webp)" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
+          <div className="flex gap-2">
+            <input className="flex-1 border p-2 rounded" placeholder="Image URL (or upload below)" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
+            <label className="inline-flex items-center px-3 py-2 rounded bg-pink-600 text-white text-sm cursor-pointer hover:bg-pink-700">
+              Upload
+              <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files && onUpload(e.target.files[0])} />
+            </label>
+          </div>
           <input className="border p-2 rounded" placeholder="Alt text" value={form.alt} onChange={(e) => setForm({ ...form, alt: e.target.value })} />
           <input className="border p-2 rounded" placeholder="Headline" value={form.headline} onChange={(e) => setForm({ ...form, headline: e.target.value })} />
           <input className="border p-2 rounded" placeholder="Subtext" value={form.subtext} onChange={(e) => setForm({ ...form, subtext: e.target.value })} />
