@@ -68,7 +68,7 @@ export function FeaturedProducts() {
                   name: p.name,
                   description: p.description || '',
                   base_price: p.base_price,
-                  image_url: p.image_url || '/api/placeholder/300/300',
+                  image_url: p.image_url || '/images/placeholder-gift.svg',
                   categories: undefined,
                   category: undefined,
                 }}

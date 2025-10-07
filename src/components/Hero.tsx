@@ -3,10 +3,33 @@
 // Using a standard img ensures immediate render on all hosts
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function Hero() {
-  const [src] = useState("/images/mixed-berry.jpg");
+  const [src, setSrc] = useState("/images/mixed-berry.jpg");
+
+  // Try uploaded hero.webp then hero.jpg, otherwise keep bundled fallback
+  useEffect(() => {
+    const candidates = ["/uploads/hero.webp", "/uploads/hero.jpg"];
+    let cancelled = false;
+    (async () => {
+      for (const url of candidates) {
+        try {
+          await new Promise<void>((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve();
+            img.onerror = () => reject();
+            img.src = url;
+          });
+          if (!cancelled) setSrc(url);
+          break;
+        } catch {}
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   return (
     <section className="relative isolate">
       <div className="relative h-[70vh] min-h-[420px] w-full overflow-hidden">

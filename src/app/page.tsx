@@ -3,7 +3,7 @@ import { ProductGrid } from "@/components/ProductGrid";
 import { Footer } from "@/components/Footer";
 import { SupportSection } from "@/components/SupportSection";
 import { WhyChoose } from "@/components/WhyChoose";
-import { Hero } from "@/components/Hero";
+import { RotatingHero } from "@/components/RotatingHero";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
 import { TrustStrip } from "@/components/TrustStrip";
 import { Testimonials } from "@/components/Testimonials";
@@ -13,7 +13,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-pink-50">
       <Header />
-      <Hero />
+      <RotatingHero />
       <TrustStrip />
       <FeaturedProducts />
       <Suspense fallback={<div className="py-16 text-center text-gray-600">Loading products…</div>}>

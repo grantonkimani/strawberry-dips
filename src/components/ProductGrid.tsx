@@ -186,7 +186,7 @@ export function ProductGrid() {
 											name: product.name,
 											description: product.description ?? '',
 											base_price: product.base_price,
-											image_url: product.image_url ?? '/api/placeholder/300/300',
+												image_url: product.image_url ?? '/images/placeholder-gift.svg',
 											categories: product.categories,
 											category: product.category, // Legacy support
 										}}
