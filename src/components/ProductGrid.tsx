@@ -146,7 +146,19 @@ export function ProductGrid() {
 				</div>
 
 				{loading ? (
-					<div className="text-center text-gray-600">Loading products...</div>
+					<div>
+						{/* Skeleton header spacing keeps layout stable */}
+						<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
+							{Array.from({ length: 10 }).map((_, i) => (
+								<div key={i} className="animate-pulse">
+									<div className="aspect-square rounded-lg bg-gray-200" />
+									<div className="mt-2 h-4 w-3/4 rounded bg-gray-200" />
+									<div className="mt-1 h-4 w-1/2 rounded bg-gray-200" />
+									<div className="mt-3 h-9 w-full rounded-md bg-gray-200" />
+								</div>
+							))}
+						</div>
+					</div>
 				) : error ? (
 					<div className="text-center text-red-600">{error}</div>
 				) : (
@@ -162,7 +174,11 @@ export function ProductGrid() {
 						{selectedCategory ? (
 						// Show single category
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
-							{searchFiltered.map((product) => (
+								{searchFiltered.length === 0 ? (
+									<div className="col-span-full text-center text-gray-600 py-8">
+										No products found.
+									</div>
+								) : searchFiltered.map((product) => (
 									<ProductCard
 										key={product.id}
 										product={{
@@ -180,7 +196,9 @@ export function ProductGrid() {
 						) : (
 						// Show all categories in sections
 							<div>
-								{categoriesWithProducts
+								{categoriesWithProducts.length === 0 ? (
+									<div className="text-center text-gray-600 py-8">No products available yet. Please check back soon.</div>
+								) : categoriesWithProducts
 									.sort((a, b) => a.display_order - b.display_order)
 									.map((category) => (
 										<CategorySection
