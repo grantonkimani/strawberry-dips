@@ -51,6 +51,9 @@ export function ProductCard({ product }: ProductCardProps) {
                 src={product.image_url} 
                 alt={product.name}
                 className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
                 onError={(e) => {
                   // Fallback to placeholder if image fails to load
                   e.currentTarget.style.display = 'none';

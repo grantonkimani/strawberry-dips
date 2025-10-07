@@ -73,13 +73,16 @@ export function RotatingHero() {
       >
         {/* Slides */}
         {slides.map((s, i) => (
-          <div
+          <img
             key={s.image_url + i}
-            className={`absolute inset-0 transition-opacity duration-700 ease-out bg-center bg-cover ${
+            src={s.image_url}
+            alt={s.alt || ''}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${
               i === index ? "opacity-100" : "opacity-0"
             }`}
-            style={{ backgroundImage: `url(${s.image_url})` }}
-            aria-hidden={i !== index}
+            loading={i === 0 ? 'eager' : 'lazy'}
+            decoding="async"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
           />
         ))}
 
