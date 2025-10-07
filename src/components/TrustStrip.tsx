@@ -8,14 +8,6 @@ export function TrustStrip() {
             Secure checkout
           </div>
           <div className="flex items-center gap-2">
-            <img src="/mpesa.png" alt="MPesa" className="h-5 w-auto" />
-            <span>MPesa</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <img src="/stripe.svg" alt="Stripe" className="h-5 w-auto" />
-            <span>Stripe</span>
-          </div>
-          <div className="flex items-center gap-2">
             <img src="/intasend.svg" alt="IntaSend" className="h-5 w-auto" />
             <span>IntaSend</span>
           </div>

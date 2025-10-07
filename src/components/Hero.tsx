@@ -3,17 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { useState } from "react";
 
 export function Hero() {
+  const [src, setSrc] = useState("/uploads/hero.jpg");
   return (
     <section className="relative isolate">
       <div className="relative h-[70vh] min-h-[420px] w-full overflow-hidden">
         <Image
-          src="/uploads/hero.jpg"
+          src={src}
           alt="Smash heart gift box with strawberries"
           fill
           priority
+          sizes="100vw"
           className="object-cover"
+          onError={() => setSrc("/images/valentines.jpg")}
         />
 
         {/* gradient + scrim */}
