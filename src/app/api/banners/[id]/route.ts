@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const body = await req.json();
   const { id } = await context.params;
+  if (!supabaseAdmin) return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
   const { data, error } = await supabaseAdmin
     .from('banners')
     .update(body)
@@ -16,6 +17,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
 
 export async function DELETE(_: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
+  if (!supabaseAdmin) return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
   const { error } = await supabaseAdmin
     .from('banners')
     .delete()

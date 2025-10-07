@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export async function GET() {
+  if (!supabaseAdmin) return NextResponse.json({ banners: [] });
   const { data, error } = await supabaseAdmin
     .from('banners')
     .select('*')
@@ -13,6 +14,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
+  if (!supabaseAdmin) return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
   const { data, error } = await supabaseAdmin.from('banners').insert({
     image_url: body.image_url,
     alt: body.alt ?? '',
