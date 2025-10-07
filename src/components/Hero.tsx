@@ -3,38 +3,21 @@
 // Using a standard img ensures immediate render on all hosts
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function Hero() {
-  const [src, setSrc] = useState("/images/valentines.jpg");
-  // Resolve the best available hero image explicitly to avoid blank state in production
-  useEffect(() => {
-    let isMounted = true;
-    fetch("/uploads/hero.jpg", { method: "HEAD" })
-      .then((res) => {
-        if (isMounted && res.ok) setSrc("/uploads/hero.jpg");
-      })
-      .catch(() => {
-        // keep fallback
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const [src] = useState("/images/mixed-berry.jpg");
   return (
     <section className="relative isolate">
       <div className="relative h-[70vh] min-h-[420px] w-full overflow-hidden">
-        <img
-          src={src}
-          alt="Smash heart gift box with strawberries"
-          className="absolute inset-0 h-full w-full object-cover"
-          onError={() => setSrc("/images/valentines.jpg")}
-          loading="eager"
-          decoding="async"
+        <div
+          aria-label="Hero background"
+          className="absolute inset-0 bg-center bg-cover"
+          style={{ backgroundImage: `url(${src})` }}
         />
 
         {/* gradient + scrim */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent" />
 
         <div className="absolute inset-0 flex items-center">
           <div className="mx-auto w-full max-w-7xl px-4">
