@@ -8,8 +8,7 @@ export function TrustStrip() {
             Secure checkout
           </div>
           <div className="flex items-center gap-2">
-            <img src="/intasend.svg" alt="IntaSend" className="h-5 w-auto" />
-            <span>IntaSend</span>
+            <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 border border-gray-200">IntaSend</span>
           </div>
         </div>
       </div>

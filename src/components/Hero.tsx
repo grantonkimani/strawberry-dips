@@ -3,10 +3,24 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function Hero() {
-  const [src, setSrc] = useState("/uploads/hero.jpg");
+  const [src, setSrc] = useState("/images/valentines.jpg");
+  // Resolve the best available hero image explicitly to avoid blank state in production
+  useEffect(() => {
+    let isMounted = true;
+    fetch("/uploads/hero.jpg", { method: "HEAD" })
+      .then((res) => {
+        if (isMounted && res.ok) setSrc("/uploads/hero.jpg");
+      })
+      .catch(() => {
+        // keep fallback
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
   return (
     <section className="relative isolate">
       <div className="relative h-[70vh] min-h-[420px] w-full overflow-hidden">
@@ -27,7 +41,7 @@ export function Hero() {
           <div className="mx-auto w-full max-w-7xl px-4">
             <div className="max-w-2xl text-white">
               <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-                Indulge in Handcrafted Strawberry Dips
+                Indulge in Handcrafted Strawberrydips
               </h1>
               <p className="mt-4 text-lg text-white/90">
                 Premium chocolate-dipped strawberries and gift boxes made fresh for every order.
