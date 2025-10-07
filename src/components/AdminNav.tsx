@@ -36,6 +36,7 @@ export function AdminNav() {
     { href: '/admin/products', label: 'Products', icon: Package },
     { href: '/admin/gift-products', label: 'Gift Products', icon: Gift },
     { href: '/admin/categories', label: 'Categories', icon: Tag },
+    { href: '/admin/banners', label: 'Banners', icon: Settings },
     { href: '/admin/support', label: 'Support', icon: MessageSquare },
     { href: '/admin/reports', label: 'Reports', icon: FileText },
   ];

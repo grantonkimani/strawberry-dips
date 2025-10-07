@@ -17,10 +17,10 @@ export default function AdminLoginPage() {
   const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
-  // Redirect if already authenticated
+  // Redirect immediately if already authenticated
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      router.push('/admin');
+      router.replace('/admin');
     }
   }, [isAuthenticated, authLoading, router]);
 
