@@ -11,8 +11,18 @@ const builtIns = [
   "/images/classic-milk.jpg",
 ];
 
+interface Slide {
+  image_url: string;
+  alt?: string;
+  headline?: string;
+  subtext?: string;
+  cta_label?: string;
+  cta_href?: string;
+  overlay?: number;
+}
+
 export function RotatingHero() {
-  const [images, setImages] = useState<string[]>([...builtIns]);
+  const [slides, setSlides] = useState<Slide[]>(builtIns.map((u) => ({ image_url: u })));
   const [overlay, setOverlay] = useState(0.55);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -33,7 +43,8 @@ export function RotatingHero() {
       img.onload = () => {
         if (!cancelled) {
           found.push(url);
-          setImages((prev) => [...found, ...builtIns.filter((b) => !found.includes(b))]);
+          const merged = [...found, ...builtIns.filter((b) => !found.includes(b))].map((u) => ({ image_url: u } as Slide));
+          setSlides(merged);
         }
       };
       img.src = url;
@@ -45,26 +56,44 @@ export function RotatingHero() {
 
   // Auto-advance
   useEffect(() => {
-    if (paused || images.length <= 1) return;
-    const id = setInterval(() => setIndex((i) => (i + 1) % images.length), 5500);
+    if (paused || slides.length <= 1) return;
+    const id = setInterval(() => setIndex((i) => (i + 1) % slides.length), 5500);
     return () => clearInterval(id);
-  }, [paused, images.length]);
+  }, [paused, slides.length]);
 
-  // Fetch dynamic banners if available
+  // Fetch dynamic banners; append built-ins as fallback (de-duplicated)
   useEffect(() => {
     (async () => {
       try {
         const res = await fetch('/api/banners', { cache: 'no-store' });
         const json = await res.json();
-        if (json?.banners?.length) {
-          setImages(json.banners.map((b: any) => b.image_url));
-          if (typeof json.banners[0]?.overlay === 'number') setOverlay(json.banners[0].overlay);
+        const apiSlides: Slide[] = (json?.banners || [])
+          .map((b: any) => ({
+            image_url: b.image_url,
+            alt: b.alt,
+            headline: b.headline,
+            subtext: b.subtext,
+            cta_label: b.cta_label,
+            cta_href: b.cta_href,
+            overlay: typeof b.overlay === 'number' ? b.overlay : undefined,
+          }))
+          .filter((s: Slide) => Boolean(s.image_url));
+        if (apiSlides.length) {
+          const merged = [
+            ...apiSlides,
+            ...builtIns
+              .filter((u) => !apiSlides.some((s) => s.image_url === u))
+              .map((u) => ({ image_url: u } as Slide)),
+          ];
+          setSlides(merged);
+          if (typeof apiSlides[0]?.overlay === 'number') setOverlay(apiSlides[0].overlay as number);
         }
       } catch {}
     })();
   }, []);
 
-  const current = useMemo(() => images[index] ?? builtIns[0], [images, index]);
+  const current = useMemo(() => slides[index] ?? { image_url: builtIns[0] }, [slides, index]);
+  const currentOverlay = current.overlay ?? overlay;
 
   return (
     <section className="relative isolate select-none">
@@ -74,37 +103,45 @@ export function RotatingHero() {
         onMouseLeave={() => setPaused(false)}
       >
         {/* Slides */}
-        {images.map((src, i) => (
+        {slides.map((s, i) => (
           <div
-            key={src + i}
+            key={s.image_url + i}
             className={`absolute inset-0 transition-opacity duration-700 ease-out bg-center bg-cover ${
               i === index ? "opacity-100" : "opacity-0"
             }`}
-            style={{ backgroundImage: `url(${src})` }}
+            style={{ backgroundImage: `url(${s.image_url})` }}
             aria-hidden={i !== index}
           />
         ))}
 
         {/* overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" style={{ opacity: overlay }} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" style={{ opacity: currentOverlay }} />
 
         {/* Content */}
         <div className="absolute inset-0 flex items-center">
           <div className="mx-auto w-full max-w-7xl px-4">
             <div className="max-w-2xl text-white">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
-                Indulge in Handcrafted Strawberrydips
+                {current.headline || 'Indulge in Handcrafted Strawberrydips'}
               </h1>
               <p className="mt-3 sm:mt-4 text-base sm:text-lg text-white/90">
-                Premium chocolate-dipped strawberries and gift boxes made fresh for every order.
+                {current.subtext || 'Premium chocolate-dipped strawberries and gift boxes made fresh for every order.'}
               </p>
               <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-3">
-                <Link href="/checkout">
-                  <Button className="h-11 px-6 text-base shadow-lg shadow-pink-700/30">Order Now</Button>
-                </Link>
-                <Link href="/menu">
-                  <Button variant="outline" className="h-11 px-6 text-base bg-white/90 backdrop-blur hover:bg-white">View Menu</Button>
-                </Link>
+                {current.cta_label && current.cta_href ? (
+                  <Link href={current.cta_href}>
+                    <Button className="h-11 px-6 text-base shadow-lg shadow-pink-700/30">{current.cta_label}</Button>
+                  </Link>
+                ) : (
+                  <>
+                    <Link href="/checkout">
+                      <Button className="h-11 px-6 text-base shadow-lg shadow-pink-700/30">Order Now</Button>
+                    </Link>
+                    <Link href="/menu">
+                      <Button variant="outline" className="h-11 px-6 text-base bg-white/90 backdrop-blur hover:bg-white">View Menu</Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -112,7 +149,7 @@ export function RotatingHero() {
 
         {/* Dots */}
         <div className="absolute bottom-3 sm:bottom-4 left-0 right-0 flex justify-center gap-2">
-          {images.map((_, i) => (
+          {slides.map((_, i) => (
             <button
               key={i}
               aria-label={`Go to slide ${i + 1}`}
