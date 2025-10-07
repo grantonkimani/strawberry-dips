@@ -13,6 +13,7 @@ const builtIns = [
 
 export function RotatingHero() {
   const [images, setImages] = useState<string[]>([...builtIns]);
+  const [overlay, setOverlay] = useState(0.55);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -49,6 +50,20 @@ export function RotatingHero() {
     return () => clearInterval(id);
   }, [paused, images.length]);
 
+  // Fetch dynamic banners if available
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/banners', { cache: 'no-store' });
+        const json = await res.json();
+        if (json?.banners?.length) {
+          setImages(json.banners.map((b: any) => b.image_url));
+          if (typeof json.banners[0]?.overlay === 'number') setOverlay(json.banners[0].overlay);
+        }
+      } catch {}
+    })();
+  }, []);
+
   const current = useMemo(() => images[index] ?? builtIns[0], [images, index]);
 
   return (
@@ -71,7 +86,7 @@ export function RotatingHero() {
         ))}
 
         {/* overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/25 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" style={{ opacity: overlay }} />
 
         {/* Content */}
         <div className="absolute inset-0 flex items-center">
