@@ -16,18 +16,30 @@ export function RotatingHero() {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
-  // Try to prepend uploaded hero if present
+  // Try to prepend uploaded hero images if present (hero.webp, hero.jpg, hero-1.webp ...)
   useEffect(() => {
-    const candidate = "/uploads/hero.webp";
-    const img = new Image();
-    img.onload = () => setImages((prev) => [candidate, ...prev]);
-    img.onerror = () => {
-      const jpg = "/uploads/hero.jpg";
-      const img2 = new Image();
-      img2.onload = () => setImages((prev) => [jpg, ...prev]);
-      img2.src = jpg;
+    const candidates = [
+      "/uploads/hero.webp",
+      "/uploads/hero.jpg",
+      "/uploads/hero-1.webp",
+      "/uploads/hero-2.webp",
+      "/uploads/hero-3.webp",
+    ];
+    const found: string[] = [];
+    let cancelled = false;
+    candidates.forEach((url) => {
+      const img = new Image();
+      img.onload = () => {
+        if (!cancelled) {
+          found.push(url);
+          setImages((prev) => [...found, ...builtIns.filter((b) => !found.includes(b))]);
+        }
+      };
+      img.src = url;
+    });
+    return () => {
+      cancelled = true;
     };
-    img.src = candidate;
   }, []);
 
   // Auto-advance
@@ -42,7 +54,7 @@ export function RotatingHero() {
   return (
     <section className="relative isolate select-none">
       <div
-        className="relative h-[70vh] min-h-[420px] w-full overflow-hidden"
+        className="relative h-[50vh] sm:h-[60vh] md:h-[70vh] min-h-[320px] sm:min-h-[380px] w-full overflow-hidden"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
@@ -59,19 +71,19 @@ export function RotatingHero() {
         ))}
 
         {/* overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/25 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/25 to-transparent" />
 
         {/* Content */}
         <div className="absolute inset-0 flex items-center">
           <div className="mx-auto w-full max-w-7xl px-4">
             <div className="max-w-2xl text-white">
-              <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
                 Indulge in Handcrafted Strawberrydips
               </h1>
-              <p className="mt-4 text-lg text-white/90">
+              <p className="mt-3 sm:mt-4 text-base sm:text-lg text-white/90">
                 Premium chocolate-dipped strawberries and gift boxes made fresh for every order.
               </p>
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-3">
                 <Link href="/checkout">
                   <Button className="h-11 px-6 text-base shadow-lg shadow-pink-700/30">Order Now</Button>
                 </Link>
@@ -84,13 +96,13 @@ export function RotatingHero() {
         </div>
 
         {/* Dots */}
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+        <div className="absolute bottom-3 sm:bottom-4 left-0 right-0 flex justify-center gap-2">
           {images.map((_, i) => (
             <button
               key={i}
               aria-label={`Go to slide ${i + 1}`}
               onClick={() => setIndex(i)}
-              className={`h-2.5 w-2.5 rounded-full transition-colors ${
+              className={`h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full transition-colors ${
                 i === index ? "bg-white" : "bg-white/50 hover:bg-white/80"
               }`}
             />)
