@@ -9,6 +9,10 @@ export interface CartItem {
   image: string;
   category: string;
   quantity?: number;
+  // Gift metadata
+  isGift?: boolean;
+  recipientName?: string;
+  giftNote?: string;
 }
 
 interface CartState {

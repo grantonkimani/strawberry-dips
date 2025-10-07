@@ -114,6 +114,10 @@ export async function POST(request: NextRequest) {
       unit_price: item.price,
       quantity: item.quantity,
       total_price: item.price * item.quantity,
+      // Gift metadata persisted
+      is_gift: item.isGift ?? false,
+      recipient_name: item.recipientName ?? null,
+      gift_note: item.giftNote ?? null,
     }));
 
     const { error: itemsError } = await supabase
