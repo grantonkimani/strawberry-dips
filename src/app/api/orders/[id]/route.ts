@@ -4,10 +4,10 @@ import { supabase } from '@/lib/supabase';
 // GET /api/orders/[id] - Get order details for tracking
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } } | any
 ) {
   try {
-    const orderId = params.id;
+    const orderId = (context as any)?.params?.id as string;
 
     if (!orderId) {
       return NextResponse.json(
