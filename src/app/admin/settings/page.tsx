@@ -595,11 +595,12 @@ export default function SettingsPage() {
 
       {/* Toast */}
       {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
+        <div className={`fixed bottom-4 right-4 px-4 py-3 rounded-md shadow-lg text-white ${toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}>
+          <div className="flex items-center justify-between gap-4">
+            <span>{toast.message}</span>
+            <button onClick={() => setToast(null)} aria-label="Close" className="text-white/80 hover:text-white">×</button>
+          </div>
+        </div>
       )}
     </div>
   );
