@@ -5,10 +5,10 @@ import { sendOrderEmail } from '@/lib/email';
 // POST /api/orders/[id]/resend-payment - Resend payment prompt to customer
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } } | any
 ) {
   try {
-    const orderId = params.id;
+    const orderId = (context as any)?.params?.id as string;
 
     if (!orderId) {
       return NextResponse.json(
