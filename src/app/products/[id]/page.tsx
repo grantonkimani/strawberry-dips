@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
+import { GiftProductGrid } from '@/components/GiftProductGrid';
+import { ProductCard } from '@/components/ProductCard';
 
 interface Product {
   id: string;
@@ -23,6 +25,9 @@ export default function ProductDetailPage() {
   const [gift, setGift] = useState(false);
   const [recipient, setRecipient] = useState('');
   const [note, setNote] = useState('');
+  const [bestSellers, setBestSellers] = useState<Product[]>([]);
+  const [giftsLoaded, setGiftsLoaded] = useState(false);
+  const [bestSellersLoaded, setBestSellersLoaded] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -35,6 +40,28 @@ export default function ProductDetailPage() {
       }
     })();
   }, [params.id]);
+
+  // Fetch best sellers for "You may also like"
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/products?available=true&limit=8');
+        const data = await res.json();
+        const items: Product[] = Array.isArray(data)
+          ? data
+          : (data.products ?? []);
+        if (!cancelled) setBestSellers(items);
+      } catch {
+        // ignore silently; section will hide
+      } finally {
+        if (!cancelled) setBestSellersLoaded(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (loading) return <div className="max-w-7xl mx-auto px-4 py-10">Loading…</div>;
   if (!product) return <div className="max-w-7xl mx-auto px-4 py-10">Product not found.</div>;
@@ -86,13 +113,50 @@ export default function ProductDetailPage() {
       {/* Recommended */}
       <section className="mt-10">
         <h2 className="text-xl font-semibold mb-3">You may also like</h2>
-        <div className="text-gray-600 text-sm">Coming soon: related products from same category.</div>
+        {!bestSellersLoaded ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="aspect-[6/5] rounded-lg bg-gray-200" />
+                <div className="mt-2 h-4 w-3/4 rounded bg-gray-200" />
+                <div className="mt-1 h-4 w-1/2 rounded bg-gray-200" />
+              </div>
+            ))}
+          </div>
+        ) : bestSellers.length === 0 ? (
+          <div className="text-gray-600 text-sm">No recommendations available.</div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {bestSellers
+              .slice()
+              .sort((a, b) => {
+                const ca = (a.categories as any)?.name || '';
+                const cb = (b.categories as any)?.name || '';
+                if (ca !== cb) return ca.localeCompare(cb);
+                return a.name.localeCompare(b.name);
+              })
+              .map((p) => (
+              <ProductCard
+                key={p.id}
+                product={{
+                  id: p.id,
+                  name: p.name,
+                  description: p.description ?? '',
+                  base_price: p.base_price,
+                  image_url: p.image_url,
+                  categories: p.categories as any,
+                }}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Gifts */}
       <section className="mt-8">
         <h2 className="text-xl font-semibold mb-3">Popular Gifts</h2>
-        <div className="text-gray-600 text-sm">Coming soon: top gift items.</div>
+        {/* Reuse existing grid; limit to 8, hide categories for compactness */}
+        <GiftProductGrid limit={8} showCategory={false} />
       </section>
     </div>
   );
