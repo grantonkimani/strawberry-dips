@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import nodemailer from 'nodemailer';
 
 // POST /api/admin/settings/test-email
 export async function POST(request: NextRequest) {
@@ -13,9 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Test email configuration
-    const nodemailer = require('nodemailer');
-    
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: process.env.GMAIL_USER,
