@@ -2,41 +2,86 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Package, Clock, CheckCircle, XCircle, Mail, MapPin, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
+import { Button } from '@/components/ui/Button';
+import { Clock, CheckCircle, Truck, Package, MapPin, Calendar, Phone, Mail } from 'lucide-react';
 
 interface OrderItem {
   id: string;
-  product_name: string;
-  product_category: string;
-  unit_price: number;
+  name: string;
   quantity: number;
-  total_price: number;
+  price: number;
 }
 
 interface Order {
   id: string;
   status: string;
-  subtotal: number;
-  delivery_fee: number;
   total: number;
+  customer_name: string;
   customer_email: string;
-  customer_first_name: string;
-  customer_last_name: string;
   customer_phone: string;
   delivery_address: string;
   delivery_city: string;
   delivery_state: string;
-  delivery_zip_code: string;
   delivery_date: string;
   delivery_time: string;
-  special_instructions: string;
+  special_instructions?: string;
   created_at: string;
-  tracking_code?: string;
-  order_items: OrderItem[];
+  updated_at: string;
+  items: OrderItem[];
 }
+
+const statusConfig = {
+  pending: { 
+    label: 'Payment Pending', 
+    icon: Clock, 
+    color: 'text-yellow-600', 
+    bgColor: 'bg-yellow-50',
+    description: 'Waiting for payment confirmation'
+  },
+  paid: { 
+    label: 'Payment Confirmed', 
+    icon: CheckCircle, 
+    color: 'text-green-600', 
+    bgColor: 'bg-green-50',
+    description: 'Payment received, preparing your order'
+  },
+  confirmed: { 
+    label: 'Order Confirmed', 
+    icon: CheckCircle, 
+    color: 'text-green-600', 
+    bgColor: 'bg-green-50',
+    description: 'Order confirmed and being prepared'
+  },
+  preparing: { 
+    label: 'Preparing', 
+    icon: Package, 
+    color: 'text-blue-600', 
+    bgColor: 'bg-blue-50',
+    description: 'Our chefs are preparing your fresh strawberries'
+  },
+  out_for_delivery: { 
+    label: 'Out for Delivery', 
+    icon: Truck, 
+    color: 'text-purple-600', 
+    bgColor: 'bg-purple-50',
+    description: 'Your order is on the way to you'
+  },
+  delivered: { 
+    label: 'Delivered', 
+    icon: CheckCircle, 
+    color: 'text-green-600', 
+    bgColor: 'bg-green-50',
+    description: 'Order delivered successfully'
+  },
+  cancelled: { 
+    label: 'Cancelled', 
+    icon: Clock, 
+    color: 'text-red-600', 
+    bgColor: 'bg-red-50',
+    description: 'Order has been cancelled'
+  }
+};
 
 export default function TrackOrderPage() {
   const params = useParams();
@@ -54,182 +99,157 @@ export default function TrackOrderPage() {
 
   const fetchOrder = async () => {
     try {
+      setLoading(true);
       const response = await fetch(`/api/orders/${orderId}`);
-      const data = await response.json();
-
-      if (data.success && data.order) {
-        setOrder(data.order);
-      } else {
-        setError(data.error || 'Order not found');
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          setError('Order not found. Please check your order ID and try again.');
+        } else {
+          setError('Failed to load order details. Please try again later.');
+        }
+        return;
       }
+
+      const data = await response.json();
+      setOrder(data);
     } catch (err) {
-      setError('Failed to fetch order details');
+      console.error('Error fetching order:', err);
+      setError('Failed to load order details. Please try again later.');
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return <CheckCircle className="h-6 w-6 text-green-500" />;
-      case 'preparing':
-        return <Package className="h-6 w-6 text-blue-500" />;
-      case 'out_for_delivery':
-        return <MapPin className="h-6 w-6 text-orange-500" />;
-      case 'delivered':
-        return <CheckCircle className="h-6 w-6 text-green-500" />;
-      case 'cancelled':
-        return <XCircle className="h-6 w-6 text-red-500" />;
-      default:
-        return <Clock className="h-6 w-6 text-gray-500" />;
-    }
+  const getStatusInfo = (status: string) => {
+    return statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'bg-green-100 text-green-800';
-      case 'preparing':
-        return 'bg-blue-100 text-blue-800';
-      case 'out_for_delivery':
-        return 'bg-orange-100 text-orange-800';
-      case 'delivered':
-        return 'bg-green-100 text-green-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
-  const getStatusMessage = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'Your order is being processed';
-      case 'paid':
-        return 'Payment confirmed! We\'re preparing your strawberries';
-      case 'preparing':
-        return 'Your strawberries are being prepared fresh';
-      case 'out_for_delivery':
-        return 'Your order is out for delivery';
-      case 'delivered':
-        return 'Your order has been delivered! Enjoy your strawberries';
-      case 'cancelled':
-        return 'This order has been cancelled';
-      default:
-        return 'Order status unknown';
-    }
+  const formatTime = (timeString: string) => {
+    return timeString;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-pink-50">
-        <Header />
-        <div className="flex items-center justify-center py-20">
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading order details...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading order details...</p>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }
 
-  if (error || !order) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-pink-50">
-        <Header />
-        <div className="flex items-center justify-center py-20">
-          <div className="text-center">
-            <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h1 className="text-xl font-semibold text-gray-900 mb-2">Order Not Found</h1>
-            <p className="text-gray-600">{error || 'The order you\'re looking for doesn\'t exist.'}</p>
-          </div>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          <Card>
+            <CardContent className="text-center py-12">
+              <div className="text-red-600 mb-4">
+                <Clock className="h-16 w-16 mx-auto" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Order Not Found</h2>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <div className="space-y-4">
+                <Button 
+                  onClick={() => window.location.href = '/'}
+                  className="bg-pink-600 hover:bg-pink-700"
+                >
+                  Back to Home
+                </Button>
+                <Button 
+                  onClick={() => window.location.href = '/contact'}
+                  variant="outline"
+                >
+                  Contact Support
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-        <Footer />
       </div>
     );
   }
+
+  if (!order) {
+    return null;
+  }
+
+  const statusInfo = getStatusInfo(order.status);
+  const StatusIcon = statusInfo.icon;
 
   return (
-    <div className="min-h-screen bg-pink-50">
-      <Header />
-      
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Order Header */}
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Tracking</h1>
-          <p className="text-gray-600">Track your strawberry order status</p>
+          <p className="text-gray-600">Track your Strawberry Dips order</p>
         </div>
 
-        {/* Order Status Card */}
+        {/* Order Status */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              {getStatusIcon(order.status)}
+            <CardTitle className="flex items-center justify-between">
               <span>Order #{order.id.slice(0, 8)}</span>
-              {order.tracking_code && (
-                <span className="text-sm font-normal text-gray-500">
-                  (Tracking: {order.tracking_code})
-                </span>
-              )}
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.bgColor} ${statusInfo.color}`}>
+                {statusInfo.label}
+              </span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-4">
+              <div className={`p-3 rounded-full ${statusInfo.bgColor}`}>
+                <StatusIcon className={`h-6 w-6 ${statusInfo.color}`} />
+              </div>
               <div>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                  {getStatusMessage(order.status)}
-                </span>
+                <p className="font-medium text-gray-900">{statusInfo.description}</p>
+                <p className="text-sm text-gray-500">
+                  Last updated: {formatDate(order.updated_at)}
+                </p>
               </div>
-              <div className="text-right">
-                <p className="text-sm text-gray-600">Ordered on</p>
-                <p className="font-medium">{new Date(order.created_at).toLocaleDateString()}</p>
-              </div>
-            </div>
-            
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-900 mb-2">Customer Information</h4>
-              <p className="text-sm text-gray-600">{order.customer_first_name} {order.customer_last_name}</p>
-              <p className="text-sm text-gray-600">{order.customer_email}</p>
-              <p className="text-sm text-gray-600">{order.customer_phone}</p>
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Order Items */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Order Details */}
           <Card>
             <CardHeader>
-              <CardTitle>Order Items</CardTitle>
+              <CardTitle className="flex items-center">
+                <Package className="h-5 w-5 mr-2" />
+                Order Details
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {order.order_items.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between py-2 border-b border-gray-100">
-                    <div>
-                      <p className="font-medium text-gray-900">{item.product_name}</p>
-                      <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+            <CardContent className="space-y-4">
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Items Ordered</h4>
+                <div className="space-y-2">
+                  {order.items.map((item) => (
+                    <div key={item.id} className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <div>
+                        <p className="font-medium text-gray-900">{item.name}</p>
+                        <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                      </div>
+                      <p className="font-medium text-gray-900">KSH {item.price.toFixed(2)}</p>
                     </div>
-                    <p className="font-medium text-gray-900">KSH {item.total_price.toFixed(2)}</p>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-600">Subtotal:</span>
-                  <span className="text-gray-900">KSH {order.subtotal.toFixed(2)}</span>
+                  ))}
                 </div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-600">Delivery:</span>
-                  <span className="text-gray-900">KSH {order.delivery_fee.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-lg font-semibold">
-                  <span>Total:</span>
-                  <span className="text-pink-600">KSH {order.total.toFixed(2)}</span>
+                <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+                  <p className="text-lg font-bold text-gray-900">Total</p>
+                  <p className="text-lg font-bold text-pink-600">KSH {order.total.toFixed(2)}</p>
                 </div>
               </div>
             </CardContent>
@@ -238,64 +258,82 @@ export default function TrackOrderPage() {
           {/* Delivery Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Calendar className="h-5 w-5 text-pink-600" />
-                <span>Delivery Information</span>
+              <CardTitle className="flex items-center">
+                <MapPin className="h-5 w-5 mr-2" />
+                Delivery Information
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Delivery Address</h4>
-                  <p className="text-sm text-gray-600">{order.delivery_address}</p>
-                  <p className="text-sm text-gray-600">{order.delivery_city}, {order.delivery_state}</p>
-                  <p className="text-sm text-gray-600">{order.delivery_zip_code}</p>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Delivery Schedule</h4>
-                  <p className="text-sm text-gray-600">
-                    <strong>Date:</strong> {new Date(order.delivery_date).toLocaleDateString()}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <strong>Time:</strong> {order.delivery_time}
-                  </p>
-                </div>
-                
-                {order.special_instructions && (
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Special Instructions</h4>
-                    <p className="text-sm text-gray-600">{order.special_instructions}</p>
+            <CardContent className="space-y-4">
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Customer Details</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <Mail className="h-4 w-4 mr-2 text-gray-400" />
+                    <span className="text-gray-600">{order.customer_email}</span>
                   </div>
-                )}
+                  <div className="flex items-center">
+                    <Phone className="h-4 w-4 mr-2 text-gray-400" />
+                    <span className="text-gray-600">{order.customer_phone}</span>
+                  </div>
+                </div>
               </div>
+
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Delivery Address</h4>
+                <p className="text-gray-600">{order.delivery_address}</p>
+                <p className="text-gray-600">{order.delivery_city}, {order.delivery_state}</p>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Delivery Schedule</h4>
+                <div className="flex items-center">
+                  <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                  <span className="text-gray-600">{formatDate(order.delivery_date)}</span>
+                </div>
+                <div className="flex items-center mt-1">
+                  <Clock className="h-4 w-4 mr-2 text-gray-400" />
+                  <span className="text-gray-600">{formatTime(order.delivery_time)}</span>
+                </div>
+              </div>
+
+              {order.special_instructions && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Special Instructions</h4>
+                  <p className="text-gray-600">{order.special_instructions}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Contact Information */}
-        <Card className="mt-6">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Need Help?</h3>
-              <p className="text-gray-600 mb-4">
-                If you have any questions about your order, please contact us.
-              </p>
-              <div className="flex justify-center space-x-4">
-                <a 
-                  href="mailto:support@strawberrydips.com" 
-                  className="flex items-center space-x-2 text-pink-600 hover:text-pink-700"
-                >
-                  <Mail className="h-4 w-4" />
-                  <span>Email Support</span>
-                </a>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Action Buttons */}
+        <div className="mt-8 text-center space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              onClick={() => window.location.href = '/'}
+              className="bg-pink-600 hover:bg-pink-700"
+            >
+              Order More Strawberries
+            </Button>
+            <Button 
+              onClick={() => window.location.href = '/account/signup'}
+              variant="outline"
+            >
+              Create Account for Easy Tracking
+            </Button>
+            <Button 
+              onClick={() => window.location.href = '/contact'}
+              variant="outline"
+            >
+              Contact Support
+            </Button>
+          </div>
+          
+          <p className="text-sm text-gray-500">
+            Need help? Contact us at support@strawberrydips.com or call +254 700 000 000
+          </p>
+        </div>
       </div>
-      
-      <Footer />
     </div>
   );
 }

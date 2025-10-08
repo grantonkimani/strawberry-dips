@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Package, Clock, CheckCircle, XCircle, DollarSign, Eye, MapPin, Calendar, Search, X } from 'lucide-react';
+import { Package, Clock, CheckCircle, XCircle, DollarSign, Eye, MapPin, Calendar, Search, X, Send } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
@@ -153,6 +153,28 @@ export default function AdminOrdersPage() {
       }
     } catch (error) {
       console.error('Failed to update order status:', error);
+    }
+  };
+
+  const resendPaymentPrompt = async (orderId: string) => {
+    try {
+      const response = await fetch(`/api/orders/${orderId}/resend-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to resend payment prompt');
+      }
+
+      const result = await response.json();
+      alert(`Payment prompt sent successfully! Customer will receive a new payment link via email.`);
+    } catch (error) {
+      console.error('Error resending payment prompt:', error);
+      alert(`Failed to resend payment prompt: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -405,6 +427,27 @@ export default function AdminOrdersPage() {
                       </Button>
                     </div>
                   </div>
+
+                  {/* Resend Payment */}
+                  {(selectedOrder.status === 'pending' || 
+                    selectedOrder.payment_status === 'intasend_timeout' || 
+                    selectedOrder.payment_status === 'failed' ||
+                    selectedOrder.payment_status === 'document_pending') && (
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2">Payment Actions</h3>
+                      <Button
+                        size="sm"
+                        onClick={() => resendPaymentPrompt(selectedOrder.id)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        Resend Payment Prompt
+                      </Button>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Send a new payment link to the customer via email
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ) : (

@@ -51,6 +51,8 @@ export async function POST(request: NextRequest) {
           first_name: customer.firstName,
           last_name: customer.lastName,
           phone: customer.phone,
+          email_verified: false, // Guest customers are not verified
+          is_active: true
         })
         .select('id')
         .single();
@@ -75,6 +77,7 @@ export async function POST(request: NextRequest) {
       .from('orders')
       .insert({
         customer_id: customerId,
+        customer_account_id: customerId, // Link to customer account
         stripe_payment_intent_id: paymentIntentId,
         status: 'paid',
         subtotal: total - 5.99, // Subtract delivery fee

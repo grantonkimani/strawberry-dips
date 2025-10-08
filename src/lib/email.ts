@@ -51,7 +51,24 @@ export const emailTemplates = {
         
         <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
           <h4 style="margin: 0 0 10px 0; color: #2e7d32;">What's Next?</h4>
-          <p style="margin: 0;">We'll send you updates as we prepare and deliver your order. You can track your order status anytime.</p>
+          <p style="margin: 0;">We'll send you updates as we prepare and deliver your order. You can track your order status anytime using the link below.</p>
+        </div>
+        
+        <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <h4 style="margin: 0 0 10px 0; color: #1976d2;">Create an Account for Better Experience</h4>
+          <p style="margin: 0 0 10px 0;">Want to track all your orders easily? Create a free account to:</p>
+          <ul style="margin: 0; padding-left: 20px;">
+            <li>View your complete order history</li>
+            <li>Save delivery addresses for faster checkout</li>
+            <li>Get exclusive offers and updates</li>
+            <li>Track multiple orders in one place</li>
+          </ul>
+          <div style="text-align: center; margin-top: 15px;">
+            <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://strawberrydips.com'}/account/signup" 
+               style="background: #1976d2; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block; font-size: 14px;">
+              Create Free Account
+            </a>
+          </div>
         </div>
         
         <div style="text-align: center; margin-top: 30px;">
@@ -183,6 +200,60 @@ export const emailTemplates = {
       </div>
     `,
   }),
+
+  emailVerification: (data: { firstName: string; verificationToken: string }) => ({
+    subject: 'Verify Your Email - Strawberry Dips Account',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #e91e63; margin: 0;">🍓 Strawberry Dips</h1>
+          <p style="color: #666; margin: 5px 0;">Premium Chocolate Covered Strawberries</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <h2 style="color: #e91e63; margin-top: 0;">Welcome ${data.firstName}! 👋</h2>
+          <p>Thank you for creating an account with Strawberry Dips! To complete your registration and start enjoying our premium chocolate-covered strawberries, please verify your email address.</p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://strawberrydips.com'}/verify-email?token=${data.verificationToken}" 
+             style="background: #e91e63; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-size: 16px; font-weight: bold;">
+            Verify My Email Address
+          </a>
+        </div>
+        
+        <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <h4 style="margin: 0 0 10px 0; color: #e65100;">What happens next?</h4>
+          <ul style="margin: 0; padding-left: 20px;">
+            <li>Click the verification button above</li>
+            <li>You'll be redirected to our website</li>
+            <li>Your account will be activated</li>
+            <li>You can start ordering delicious strawberries!</li>
+          </ul>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <h4 style="margin: 0 0 10px 0; color: #333;">Benefits of having an account:</h4>
+          <ul style="margin: 0; padding-left: 20px;">
+            <li>Track your orders easily</li>
+            <li>Save delivery addresses</li>
+            <li>Faster checkout process</li>
+            <li>Order history and receipts</li>
+            <li>Exclusive offers and updates</li>
+          </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; color: #666; font-size: 14px;">
+          <p><strong>Can't click the button?</strong> Copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; background: #f5f5f5; padding: 10px; border-radius: 4px; font-family: monospace;">
+            ${process.env.NEXT_PUBLIC_SITE_URL || 'https://strawberrydips.com'}/verify-email?token=${data.verificationToken}
+          </p>
+          <p style="margin-top: 20px;">This link will expire in 24 hours for security reasons.</p>
+          <p>Questions? Contact us at support@strawberrydips.com</p>
+        </div>
+      </div>
+    `,
+  }),
 };
 
 // Send email function
@@ -243,4 +314,37 @@ export async function sendStatusUpdateEmail(orderData: any, newStatus: string) {
   }
   
   return await sendOrderEmail(orderData.customer_email, template, orderData);
+}
+
+// Send email verification email
+export async function sendVerificationEmail(data: { 
+  email: string; 
+  firstName: string; 
+  verificationToken: string 
+}) {
+  try {
+    // Check if email is configured
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
+      console.log('Email not configured, skipping verification email send');
+      return { success: false, error: 'Email not configured' };
+    }
+
+    const transporter = createTransporter();
+    const emailTemplate = emailTemplates.emailVerification(data);
+
+    const mailOptions = {
+      from: `"Strawberry Dips" <${process.env.GMAIL_USER}>`,
+      to: data.email,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log('Verification email sent successfully:', result.messageId);
+    
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    console.error('Verification email sending failed:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
 }

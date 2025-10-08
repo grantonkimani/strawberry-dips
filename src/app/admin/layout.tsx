@@ -10,7 +10,7 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isLoading, logout } = useAuth();
+  const { isLoading, logout, isAuthenticated } = useAuth();
   
   // Session timeout configuration
   const {
@@ -40,22 +40,24 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-gray-50">
-      {/* Navigation */}
-      <AdminNav />
+      {/* Navigation - Only show when authenticated */}
+      {isAuthenticated && <AdminNav />}
       
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className={`max-w-7xl mx-auto px-4 ${isAuthenticated ? 'py-8' : ''}`}>
         {children}
       </div>
       
-      {/* Session Timeout Warning */}
-      <SessionTimeoutWarning
-        isVisible={isWarning}
-        timeLeft={timeLeft}
-        formatTime={formatTime}
-        onExtend={extendSession}
-        onLogout={logout}
-      />
+      {/* Session Timeout Warning - Only show when authenticated */}
+      {isAuthenticated && (
+        <SessionTimeoutWarning
+          isVisible={isWarning}
+          timeLeft={timeLeft}
+          formatTime={formatTime}
+          onExtend={extendSession}
+          onLogout={logout}
+        />
+      )}
     </div>
   );
 }

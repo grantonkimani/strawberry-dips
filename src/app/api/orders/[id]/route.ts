@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { sendStatusUpdateEmail } from '@/lib/email';
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+// GET /api/orders/[id] - Get order details for tracking
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { id: orderId } = await params;
+    const orderId = params.id;
 
     if (!orderId) {
       return NextResponse.json(
@@ -13,107 +16,55 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       );
     }
 
-    // Fetch order with order items
-    const { data: order, error } = await supabase
+    // Fetch order with items
+    const { data: order, error: orderError } = await supabase
       .from('orders')
       .select(`
         *,
-        order_items (*)
+        order_items (
+          id,
+          product_name,
+          quantity,
+          price
+        )
       `)
       .eq('id', orderId)
       .single();
 
-    if (error) {
-      console.error('Error fetching order:', error);
+    if (orderError) {
+      console.error('Error fetching order:', orderError);
       return NextResponse.json(
         { error: 'Order not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      order: order
-    });
+    if (!order) {
+      return NextResponse.json(
+        { error: 'Order not found' },
+        { status: 404 }
+      );
+    }
 
+    // Transform order items to match expected format
+    const transformedOrder = {
+      ...order,
+      items: order.order_items?.map((item: any) => ({
+        id: item.id,
+        name: item.product_name,
+        quantity: item.quantity,
+        price: item.price
+      })) || []
+    };
+
+    // Remove the order_items property as it's now transformed to items
+    delete transformedOrder.order_items;
+
+    return NextResponse.json(transformedOrder);
   } catch (error) {
-    console.error('Order fetch error:', error);
+    console.error('Error in order tracking API:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch order' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  try {
-    const { orderId, status } = await request.json();
-
-    if (!orderId || !status) {
-      return NextResponse.json(
-        { error: 'Missing required fields: orderId and status' },
-        { status: 400 }
-      );
-    }
-
-    // Valid statuses
-    const validStatuses = ['pending', 'paid', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json(
-        { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
-        { status: 400 }
-      );
-    }
-
-    // Update order status
-    const { data: updatedOrder, error: updateError } = await supabase
-      .from('orders')
-      .update({ 
-        status: status,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', orderId)
-      .select(`
-        *,
-        order_items (*)
-      `)
-      .single();
-
-    if (updateError) {
-      console.error('Error updating order status:', updateError);
-      return NextResponse.json(
-        { error: 'Failed to update order status', details: updateError.message },
-        { status: 500 }
-      );
-    }
-
-    // Send email notification for status changes that require emails
-    const emailStatuses = ['preparing', 'out_for_delivery', 'delivered'];
-    if (emailStatuses.includes(status)) {
-      try {
-        const emailResult = await sendStatusUpdateEmail(updatedOrder, status);
-        console.log('Email send result:', emailResult);
-        
-        if (!emailResult.success) {
-          console.warn('Email sending failed:', emailResult.error);
-          // Don't fail the request if email fails, just log it
-        }
-      } catch (emailError) {
-        console.error('Email sending error:', emailError);
-        // Don't fail the request if email fails
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      order: updatedOrder,
-      message: `Order status updated to ${status}${emailStatuses.includes(status) ? ' and email sent' : ''}`
-    });
-
-  } catch (error) {
-    console.error('Order status update error:', error);
-    return NextResponse.json(
-      { error: 'Failed to update order status' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

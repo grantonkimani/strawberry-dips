@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Package, ShoppingBag, Settings, Home, FileText, LogOut, User, Tag, MessageSquare, Gift, Clock } from 'lucide-react';
+import { Package, ShoppingBag, Settings, Home, FileText, LogOut, Tag, MessageSquare, Gift, Clock, Cog } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSessionTimeout } from '@/hooks/useSessionTimeout';
 
@@ -39,6 +39,7 @@ export function AdminNav() {
     { href: '/admin/banners', label: 'Banners', icon: Settings },
     { href: '/admin/support', label: 'Support', icon: MessageSquare },
     { href: '/admin/reports', label: 'Reports', icon: FileText },
+    { href: '/admin/settings', label: 'Settings', icon: Cog },
   ];
 
   const handleLogout = async () => {
@@ -77,7 +78,7 @@ export function AdminNav() {
             </div>
           </div>
           
-          {/* User Info and Logout */}
+          {/* Session Timer and Logout */}
           <div className="hidden md:flex items-center space-x-4 ml-4 flex-shrink-0">
             {/* Session Timer */}
             <div className="flex items-center space-x-2 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
@@ -85,10 +86,6 @@ export function AdminNav() {
               <span>{formatTime(timeLeft)}</span>
             </div>
             
-            <div className="flex items-center space-x-2 text-sm text-gray-800">
-              <User className="h-4 w-4" />
-              <span>{user?.full_name || 'Admin'}</span>
-            </div>
             <button
               onClick={handleLogout}
               className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:text-red-600 transition-colors"

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useReducer, ReactNode } from 'react';
+import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 
 export interface CartItem {
   id: string;
@@ -33,6 +33,36 @@ const initialState: CartState = {
   items: [],
   isOpen: false,
 };
+
+const STORAGE_KEY = 'strawberry_dips_cart_v1';
+
+function loadCartFromStorage(): CartState {
+  try {
+    if (typeof window === 'undefined') return initialState;
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return initialState;
+    const parsed = JSON.parse(raw) as Partial<CartState>;
+    if (!parsed || !Array.isArray(parsed.items)) return initialState;
+    // Sanitize items
+    const sanitizedItems = parsed.items.map((item: any) => ({
+      id: String(item.id),
+      name: String(item.name),
+      price: Number(item.price) || 0,
+      image: String(item.image || ''),
+      category: String(item.category || ''),
+      quantity: Number(item.quantity) > 0 ? Number(item.quantity) : 1,
+      isGift: Boolean(item.isGift),
+      recipientName: item.recipientName ? String(item.recipientName) : undefined,
+      giftNote: item.giftNote ? String(item.giftNote) : undefined,
+    }));
+    return {
+      items: sanitizedItems,
+      isOpen: Boolean(parsed.isOpen),
+    };
+  } catch {
+    return initialState;
+  }
+}
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
@@ -117,7 +147,40 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(cartReducer, initialState);
+  const [state, dispatch] = useReducer(cartReducer, initialState, () => loadCartFromStorage());
+
+  // Persist cart to localStorage on changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      // ignore storage errors (e.g., quota exceeded)
+    }
+  }, [state]);
+
+  // Sync cart across tabs/windows
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEY) return;
+      const next = loadCartFromStorage();
+      // Replace current items if they differ
+      if (JSON.stringify(next.items) !== JSON.stringify(state.items) || next.isOpen !== state.isOpen) {
+        // Rehydrate by clearing then re-adding to avoid adding a new reducer action type
+        // Clear
+        dispatch({ type: 'CLEAR_CART' });
+        // Re-add items
+        next.items.forEach(item => dispatch({ type: 'ADD_ITEM', payload: { ...item, quantity: item.quantity } }));
+        // Ensure cart open state matches (best-effort)
+        if (next.isOpen) {
+          dispatch({ type: 'OPEN_CART' });
+        } else {
+          dispatch({ type: 'CLOSE_CART' });
+        }
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [state.items, state.isOpen]);
 
   const addItem = (item: CartItem) => {
     dispatch({ type: 'ADD_ITEM', payload: item });

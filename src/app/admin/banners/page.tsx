@@ -72,32 +72,32 @@ export default function BannersAdminPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Banners</h1>
+    <div className="max-w-5xl mx-auto p-3 sm:p-4">
+      <h1 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Banners</h1>
 
       {/* Create form */}
-      <div className="grid gap-3 rounded-lg border p-4 bg-white">
-        <div className="grid sm:grid-cols-2 gap-3">
+      <div className="grid gap-3 rounded-lg border p-3 sm:p-4 bg-white">
+        <div className="grid gap-3 sm:grid-cols-2">
           <div className="flex gap-2">
-            <input className="flex-1 border p-2 rounded" placeholder="Image URL (or upload below)" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
-            <label className="inline-flex items-center px-3 py-2 rounded bg-pink-600 text-white text-sm cursor-pointer hover:bg-pink-700">
+            <input className="flex-1 border p-2 rounded text-sm" placeholder="Image URL (or upload below)" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
+            <label className="inline-flex items-center px-3 py-2 rounded bg-pink-600 text-white text-xs sm:text-sm cursor-pointer hover:bg-pink-700 whitespace-nowrap">
               Upload
               <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files && onUpload(e.target.files[0])} />
             </label>
           </div>
-          <input className="border p-2 rounded" placeholder="Alt text" value={form.alt} onChange={(e) => setForm({ ...form, alt: e.target.value })} />
-          <input className="border p-2 rounded" placeholder="Headline" value={form.headline} onChange={(e) => setForm({ ...form, headline: e.target.value })} />
-          <input className="border p-2 rounded" placeholder="Subtext" value={form.subtext} onChange={(e) => setForm({ ...form, subtext: e.target.value })} />
-          <input className="border p-2 rounded" placeholder="CTA label" value={form.cta_label} onChange={(e) => setForm({ ...form, cta_label: e.target.value })} />
-          <input className="border p-2 rounded" placeholder="CTA href (e.g., /menu)" value={form.cta_href} onChange={(e) => setForm({ ...form, cta_href: e.target.value })} />
+          <input className="border p-2 rounded text-sm" placeholder="Alt text" value={form.alt} onChange={(e) => setForm({ ...form, alt: e.target.value })} />
+          <input className="border p-2 rounded text-sm" placeholder="Headline" value={form.headline} onChange={(e) => setForm({ ...form, headline: e.target.value })} />
+          <input className="border p-2 rounded text-sm" placeholder="Subtext" value={form.subtext} onChange={(e) => setForm({ ...form, subtext: e.target.value })} />
+          <input className="border p-2 rounded text-sm" placeholder="CTA label" value={form.cta_label} onChange={(e) => setForm({ ...form, cta_label: e.target.value })} />
+          <input className="border p-2 rounded text-sm" placeholder="CTA href (e.g., /menu)" value={form.cta_href} onChange={(e) => setForm({ ...form, cta_href: e.target.value })} />
         </div>
-        <div className="flex items-center gap-3">
-          <label className="text-sm text-gray-600">Overlay</label>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="text-xs sm:text-sm text-gray-600">Overlay</label>
           <input type="range" min={0} max={1} step={0.05} value={form.overlay} onChange={(e) => setForm({ ...form, overlay: Number(e.target.value) })} />
-          <span className="text-sm text-gray-700">{form.overlay?.toFixed(2)}</span>
-          <label className="ml-4 text-sm text-gray-600">Active</label>
+          <span className="text-xs sm:text-sm text-gray-700">{form.overlay?.toFixed(2)}</span>
+          <label className="sm:ml-4 text-xs sm:text-sm text-gray-600">Active</label>
           <input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} />
-          <Button onClick={create} className="ml-auto">Add banner</Button>
+          <Button onClick={create} className="ml-auto w-full sm:w-auto">Add banner</Button>
         </div>
       </div>
 
@@ -110,17 +110,19 @@ export default function BannersAdminPage() {
         ) : (
           <div className="space-y-3">
             {banners.map((b, i) => (
-              <div key={b.id} className="flex items-center gap-3 border rounded p-3 bg-white">
-                <img src={b.image_url} alt={b.alt || ''} className="h-14 w-24 object-cover rounded" />
-                <div className="flex-1">
-                  <div className="font-medium">{b.headline || '(no headline)'}</div>
-                  <div className="text-xs text-gray-600">{b.image_url}</div>
+              <div key={b.id} className="flex flex-col sm:flex-row sm:items-center gap-3 border rounded p-3 bg-white">
+                <img src={b.image_url} alt={b.alt || ''} className="h-16 w-full sm:w-28 object-cover rounded" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium truncate">{b.headline || '(no headline)'}</div>
+                  <div className="text-xs text-gray-600 truncate">{b.image_url}</div>
                 </div>
-                <label className="text-sm mr-2">Active</label>
-                <input type="checkbox" checked={!!b.active} onChange={(e) => toggleActive(b.id!, e.target.checked)} />
-                <div className="flex items-center gap-2 ml-3">
-                  <Button size="sm" onClick={() => move(i, -1)} className="px-2">↑</Button>
-                  <Button size="sm" onClick={() => move(i, 1)} className="px-2">↓</Button>
+                <div className="flex items-center gap-2 sm:ml-3">
+                  <label className="text-xs sm:text-sm">Active</label>
+                  <input type="checkbox" checked={!!b.active} onChange={(e) => toggleActive(b.id!, e.target.checked)} />
+                  <div className="flex items-center gap-2 ml-auto sm:ml-3">
+                    <Button size="sm" onClick={() => move(i, -1)} className="px-2">↑</Button>
+                    <Button size="sm" onClick={() => move(i, 1)} className="px-2">↓</Button>
+                  </div>
                 </div>
               </div>
             ))}

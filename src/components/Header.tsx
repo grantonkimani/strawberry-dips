@@ -8,6 +8,7 @@ import { HelpDrawer } from "./HelpDrawer";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 
 export function Header() {
   const { state } = useCart();
@@ -17,6 +18,7 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const router = useRouter();
+  const { isAuthenticated } = useCustomerAuth();
 
   // Update body class when cart or mobile menu opens/closes
   useEffect(() => {
@@ -183,7 +185,7 @@ export function Header() {
             </Link>
 
             {/* User Account */}
-            <Link href="/account">
+            <Link href={isAuthenticated ? "/account" : "/account/login"}>
               <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 h-11 w-11 md:h-9 md:w-9">
                 <User className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.25} />
               </Button>

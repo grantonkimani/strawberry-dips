@@ -1,404 +1,500 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Download, FileText, Calendar, TrendingUp, Users, Package, ShoppingBag } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  DollarSign, 
+  ShoppingCart, 
+  Users, 
+  Package,
+  Calendar,
+  Download,
+  RefreshCw,
+  Eye,
+  CheckCircle,
+  Clock,
+  XCircle
+} from 'lucide-react';
 
-interface Order {
+interface AnalyticsData {
+  period: string;
+  orderStats: {
+    total_orders: number;
+    total_revenue: number;
+    pending_orders: number;
+    completed_orders: number;
+    cancelled_orders: number;
+    average_order_value: number;
+  };
+  topProducts: Array<{
+    name: string;
+    quantity_sold: number;
+    revenue: number;
+    orders: number;
+  }>;
+  paymentMethods: Record<string, number>;
+  customerStats: {
+    new_customers: number;
+    verified_customers: number;
+    verification_rate: number;
+  };
+  recentOrders: Array<{
   id: string;
+    status: string;
+    total: number;
+    created_at: string;
   customer_first_name: string;
   customer_last_name: string;
   customer_email: string;
-  customer_phone: string;
-  total: number;
-  status: string;
-  created_at: string;
-  order_items: Array<{
-    id: string;
-    product_name: string;
-    quantity: number;
-    unit_price: number;
-    total_price: number;
   }>;
 }
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  base_price: number;
-  is_available: boolean;
-  created_at: string;
-}
-
 export default function ReportsPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [reportType, setReportType] = useState<'sales' | 'products' | 'customers'>('sales');
-  const [dateRange, setDateRange] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
+  const [selectedPeriod, setSelectedPeriod] = useState('week');
+  const [customDateRange, setCustomDateRange] = useState({
+    startDate: '',
+    endDate: ''
+  });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const periods = [
+    { value: 'day', label: 'Today' },
+    { value: 'week', label: 'Last 7 Days' },
+    { value: 'month', label: 'Last 30 Days' },
+    { value: 'year', label: 'Last Year' },
+    { value: 'custom', label: 'Custom Range' }
+  ];
 
-  const fetchData = async () => {
+  const fetchAnalytics = async () => {
+    setLoading(true);
     try {
-      const [ordersRes, productsRes] = await Promise.all([
-        fetch('/api/orders'),
-        fetch('/api/products')
-      ]);
+      const params = new URLSearchParams();
+      if (selectedPeriod === 'custom') {
+        if (customDateRange.startDate) params.append('startDate', customDateRange.startDate);
+        if (customDateRange.endDate) params.append('endDate', customDateRange.endDate);
+      } else {
+        params.append('period', selectedPeriod);
+      }
 
-      const ordersData = await ordersRes.json();
-      const productsData = await productsRes.json();
+      const response = await fetch(`/api/admin/analytics?${params}`);
+      const result = await response.json();
 
-      // Ensure we have arrays
-      setOrders(Array.isArray(ordersData) ? ordersData : Array.isArray(ordersData?.orders) ? ordersData.orders : []);
-      setProducts(Array.isArray(productsData) ? productsData : Array.isArray(productsData?.products) ? productsData.products : []);
+      if (result.success) {
+        setData(result.data);
+      } else {
+        console.error('Failed to fetch analytics:', result.error);
+      }
     } catch (error) {
-      console.error('Error fetching data:', error);
-      setOrders([]);
-      setProducts([]);
+      console.error('Analytics fetch error:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getDateRangeFilter = () => {
-    const now = new Date();
-    const startDate = new Date();
+  useEffect(() => {
+    fetchAnalytics();
+  }, [selectedPeriod]);
 
-    switch (dateRange) {
-      case 'week':
-        startDate.setDate(now.getDate() - 7);
-        break;
-      case 'month':
-        startDate.setMonth(now.getMonth() - 1);
-        break;
-      case 'quarter':
-        startDate.setMonth(now.getMonth() - 3);
-        break;
-      case 'year':
-        startDate.setFullYear(now.getFullYear() - 1);
-        break;
-    }
-
-    return startDate;
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES'
+    }).format(amount);
   };
 
-  const getFilteredOrders = () => {
-    if (!Array.isArray(orders)) {
-      return [];
-    }
-    const startDate = getDateRangeFilter();
-    return orders.filter(order => new Date(order.created_at) >= startDate);
-  };
-
-  const getSalesStats = () => {
-    const filteredOrders = getFilteredOrders();
-    const totalRevenue = filteredOrders.reduce((sum, order) => sum + order.total, 0);
-    const totalOrders = filteredOrders.length;
-    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-
-    return {
-      totalRevenue,
-      totalOrders,
-      averageOrderValue,
-      orders: filteredOrders
-    };
-  };
-
-  const getProductStats = () => {
-    const filteredOrders = getFilteredOrders();
-    const productSales: { [key: string]: { name: string; quantity: number; revenue: number } } = {};
-
-    filteredOrders.forEach(order => {
-      order.order_items.forEach(item => {
-        if (!productSales[item.product_name]) {
-          productSales[item.product_name] = {
-            name: item.product_name,
-            quantity: 0,
-            revenue: 0
-          };
-        }
-        productSales[item.product_name].quantity += item.quantity;
-        productSales[item.product_name].revenue += item.total_price;
-      });
-    });
-
-    return Object.values(productSales).sort((a, b) => b.revenue - a.revenue);
-  };
-
-  const getCustomerStats = () => {
-    const filteredOrders = getFilteredOrders();
-    const customerOrders: { [key: string]: { name: string; email: string; orders: number; total: number } } = {};
-
-    filteredOrders.forEach(order => {
-      const key = order.customer_email;
-      if (!customerOrders[key]) {
-        customerOrders[key] = {
-          name: `${order.customer_first_name} ${order.customer_last_name}`,
-          email: order.customer_email,
-          orders: 0,
-          total: 0
-        };
+  const handleExport = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (selectedPeriod === 'custom') {
+        if (customDateRange.startDate) params.append('startDate', customDateRange.startDate);
+        if (customDateRange.endDate) params.append('endDate', customDateRange.endDate);
+      } else {
+        params.append('period', selectedPeriod);
       }
-      customerOrders[key].orders += 1;
-      customerOrders[key].total += order.total;
-    });
+      params.append('format', 'csv');
 
-    return Object.values(customerOrders).sort((a, b) => b.total - a.total);
+      const response = await fetch(`/api/admin/analytics/export?${params}`);
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `strawberry-dips-analytics-${selectedPeriod}-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        console.error('Export failed:', response.statusText);
+        alert('Export failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Export failed. Please try again.');
+    }
   };
 
-  const generateReport = () => {
-    const stats = getSalesStats();
-    const productStats = getProductStats();
-    const customerStats = getCustomerStats();
-    const dateRangeText = dateRange.charAt(0).toUpperCase() + dateRange.slice(1);
-
-    let reportContent = `
-STRAWBERRY DIPS - BUSINESS REPORT
-Generated: ${new Date().toLocaleDateString()}
-Period: ${dateRangeText}
-
-=== SALES SUMMARY ===
-Total Revenue: KSH ${stats.totalRevenue.toFixed(2)}
-Total Orders: ${stats.totalOrders}
-Average Order Value: KSH ${stats.averageOrderValue.toFixed(2)}
-
-=== TOP PRODUCTS ===
-`;
-
-    productStats.slice(0, 10).forEach((product, index) => {
-      reportContent += `${index + 1}. ${product.name}
-   Quantity Sold: ${product.quantity}
-   Revenue: KSH ${product.revenue.toFixed(2)}
-
-`;
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-KE', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
+  };
 
-    reportContent += `
-=== TOP CUSTOMERS ===
-`;
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'delivered': return 'text-green-600 bg-green-100';
+      case 'preparing': return 'text-yellow-600 bg-yellow-100';
+      case 'pending': return 'text-blue-600 bg-blue-100';
+      case 'cancelled': return 'text-red-600 bg-red-100';
+      default: return 'text-gray-600 bg-gray-100';
+    }
+  };
 
-    customerStats.slice(0, 10).forEach((customer, index) => {
-      reportContent += `${index + 1}. ${customer.name} (${customer.email})
-   Orders: ${customer.orders}
-   Total Spent: KSH ${customer.total.toFixed(2)}
-
-`;
-    });
-
-    reportContent += `
-=== RECENT ORDERS ===
-`;
-
-    stats.orders.slice(0, 20).forEach(order => {
-      reportContent += `Order #${order.id}
-Customer: ${order.customer_first_name} ${order.customer_last_name}
-Date: ${new Date(order.created_at).toLocaleDateString()}
-Total: KSH ${order.total.toFixed(2)}
-Status: ${order.status}
-
-`;
-    });
-
-    // Create and download the report
-    const blob = new Blob([reportContent], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `strawberry-dips-report-${dateRange}-${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'delivered': return <CheckCircle className="h-4 w-4" />;
+      case 'preparing': return <Clock className="h-4 w-4" />;
+      case 'pending': return <Clock className="h-4 w-4" />;
+      case 'cancelled': return <XCircle className="h-4 w-4" />;
+      default: return <Clock className="h-4 w-4" />;
+    }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-center h-64">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-gray-50 flex items-center justify-center">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading report data...</p>
-            </div>
-          </div>
+          <p className="text-gray-600">Loading analytics...</p>
         </div>
       </div>
     );
   }
 
-  // Show empty state if no data
-  if (!Array.isArray(orders) || orders.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Business Reports</h1>
-            <p className="text-gray-600">Generate and download comprehensive business reports</p>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
-            <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Data Available</h3>
-            <p className="text-gray-600 mb-6">
-              There are no orders or products to generate reports from yet.
-            </p>
-            <div className="space-y-2 text-sm text-gray-500">
-              <p>• Add some products to your inventory</p>
-              <p>• Process some orders</p>
-              <p>• Come back to generate reports</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const stats = getSalesStats();
-  const productStats = getProductStats();
-  const customerStats = getCustomerStats();
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-gray-50">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent mb-2">Business Reports</h1>
-          <p className="text-gray-600">Generate and download comprehensive business reports</p>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Reports & Analytics</h1>
+            <p className="text-gray-600 mt-2">Business insights and performance metrics</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Button
+              onClick={fetchAnalytics}
+              variant="outline"
+              className="flex items-center space-x-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span>Refresh</span>
+            </Button>
+            <Button 
+              onClick={handleExport}
+              className="bg-pink-600 hover:bg-pink-700 text-white flex items-center space-x-2"
+            >
+              <Download className="h-4 w-4" />
+              <span>Export CSV</span>
+            </Button>
+          </div>
         </div>
 
-        {/* Controls */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-          <div className="flex flex-wrap gap-4 items-center">
+        {/* Period Selector */}
+        <div className="mb-8">
+          <div className="flex items-center space-x-4">
+            <label className="text-sm font-medium text-gray-700">Time Period:</label>
+            <div className="flex space-x-2">
+              {periods.map((period) => (
+                <Button
+                  key={period.value}
+                  onClick={() => setSelectedPeriod(period.value)}
+                  variant={selectedPeriod === period.value ? 'default' : 'outline'}
+                  size="sm"
+                  className={selectedPeriod === period.value ? 'bg-pink-600 hover:bg-pink-700' : ''}
+                >
+                  {period.label}
+                </Button>
+              ))}
+            </div>
+        </div>
+
+          {selectedPeriod === 'custom' && (
+            <div className="mt-4 flex items-center space-x-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
-              <select
-                value={reportType}
-                onChange={(e) => setReportType(e.target.value as any)}
-                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
-              >
-                <option value="sales">Sales Report</option>
-                <option value="products">Product Performance</option>
-                <option value="customers">Customer Analysis</option>
-              </select>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                <input
+                  type="date"
+                  value={customDateRange.startDate}
+                  onChange={(e) => setCustomDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
-              <select
-                value={dateRange}
-                onChange={(e) => setDateRange(e.target.value as any)}
-                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
-              >
-                <option value="week">Last Week</option>
-                <option value="month">Last Month</option>
-                <option value="quarter">Last Quarter</option>
-                <option value="year">Last Year</option>
-              </select>
+                <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                <input
+                  type="date"
+                  value={customDateRange.endDate}
+                  onChange={(e) => setCustomDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                />
             </div>
-            <div className="flex items-end">
               <Button
-                onClick={generateReport}
-                className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 flex items-center space-x-2"
+                onClick={fetchAnalytics}
+                className="mt-6 bg-pink-600 hover:bg-pink-700 text-white"
               >
-                <Download className="h-4 w-4" />
-                <span>Generate Report</span>
+                Apply
               </Button>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {data && (
+          <>
+            {/* Key Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {formatCurrency(data.orderStats.total_revenue)}
+                      </p>
+                    </div>
+                    <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
+                      <DollarSign className="h-6 w-6 text-green-600" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-green-600">
+                    <TrendingUp className="h-4 w-4 mr-1" />
+                    <span>Revenue growth</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {data.orderStats.total_orders}
+                      </p>
+                    </div>
+                    <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
+                      <ShoppingCart className="h-6 w-6 text-blue-600" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-blue-600">
+                    <TrendingUp className="h-4 w-4 mr-1" />
+                    <span>Order volume</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Avg Order Value</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {formatCurrency(data.orderStats.average_order_value)}
+                      </p>
+                    </div>
+                    <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
+                      <TrendingUp className="h-6 w-6 text-purple-600" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-purple-600">
+                    <TrendingUp className="h-4 w-4 mr-1" />
+                    <span>Value per order</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">New Customers</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {data.customerStats.new_customers}
+                      </p>
+                    </div>
+                    <div className="h-12 w-12 bg-pink-100 rounded-full flex items-center justify-center">
+                      <Users className="h-6 w-6 text-pink-600" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-pink-600">
+                    <TrendingUp className="h-4 w-4 mr-1" />
+                    <span>Customer growth</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Order Status Breakdown */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <TrendingUp className="h-4 w-4 text-green-600" />
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span>Completed Orders</span>
+                  </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">KSH {stats.totalRevenue.toFixed(2)}</div>
-              <p className="text-xs text-gray-500">Last {dateRange}</p>
+                  <div className="text-3xl font-bold text-green-600 mb-2">
+                    {data.orderStats.completed_orders}
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    {data.orderStats.total_orders > 0 
+                      ? `${((data.orderStats.completed_orders / data.orderStats.total_orders) * 100).toFixed(1)}% completion rate`
+                      : 'No orders yet'
+                    }
+                  </p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-              <ShoppingBag className="h-4 w-4 text-blue-600" />
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Clock className="h-5 w-5 text-yellow-600" />
+                    <span>In Progress</span>
+                  </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalOrders}</div>
-              <p className="text-xs text-gray-500">Last {dateRange}</p>
+                  <div className="text-3xl font-bold text-yellow-600 mb-2">
+                    {data.orderStats.pending_orders}
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Orders being prepared
+                  </p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Average Order</CardTitle>
-              <Users className="h-4 w-4 text-purple-600" />
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <CheckCircle className="h-5 w-5 text-blue-600" />
+                    <span>Confirmed Orders</span>
+                  </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">KSH {stats.averageOrderValue.toFixed(2)}</div>
-              <p className="text-xs text-gray-500">Per order</p>
+                  <div className="text-3xl font-bold text-blue-600 mb-2">
+                    {data.orderStats.total_orders - data.orderStats.completed_orders - data.orderStats.pending_orders}
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Orders confirmed and paid
+                  </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Report Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Top Products & Recent Orders */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Top Products */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Package className="h-5 w-5" />
+                    <Package className="h-5 w-5 text-pink-600" />
                 <span>Top Products</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {productStats.slice(0, 5).map((product, index) => (
-                  <div key={product.name} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    {data.topProducts.slice(0, 5).map((product, index) => (
+                      <div key={product.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-bold text-pink-600">#{index + 1}</span>
+                          </div>
                     <div>
-                      <p className="font-medium">{product.name}</p>
-                      <p className="text-sm text-gray-500">Qty: {product.quantity}</p>
+                            <p className="font-medium text-gray-900">{product.name}</p>
+                            <p className="text-sm text-gray-600">{product.quantity_sold} sold</p>
+                          </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">KSH {product.revenue.toFixed(2)}</p>
+                          <p className="font-semibold text-gray-900">{formatCurrency(product.revenue)}</p>
+                          <p className="text-sm text-gray-600">{product.orders} orders</p>
                     </div>
                   </div>
                 ))}
+                    {data.topProducts.length === 0 && (
+                      <p className="text-gray-500 text-center py-8">No product data available</p>
+                    )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Top Customers */}
+              {/* Recent Orders */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Users className="h-5 w-5" />
-                <span>Top Customers</span>
+                    <Calendar className="h-5 w-5 text-pink-600" />
+                    <span>Recent Orders</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {customerStats.slice(0, 5).map((customer, index) => (
-                  <div key={customer.email} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    {data.recentOrders.map((order) => (
+                      <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className={`p-2 rounded-full ${getStatusColor(order.status)}`}>
+                            {getStatusIcon(order.status)}
+                          </div>
                     <div>
-                      <p className="font-medium">{customer.name}</p>
-                      <p className="text-sm text-gray-500">{customer.orders} orders</p>
+                            <p className="font-medium text-gray-900">
+                              {order.customer_first_name} {order.customer_last_name}
+                            </p>
+                            <p className="text-sm text-gray-600">#{order.id.slice(0, 8)}</p>
+                          </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">KSH {customer.total.toFixed(2)}</p>
+                          <p className="font-semibold text-gray-900">{formatCurrency(order.total)}</p>
+                          <p className="text-sm text-gray-600">{formatDate(order.created_at)}</p>
+                        </div>
                     </div>
+                    ))}
+                    {data.recentOrders.length === 0 && (
+                      <p className="text-gray-500 text-center py-8">No recent orders</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Payment Methods */}
+            <div className="mt-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <DollarSign className="h-5 w-5 text-pink-600" />
+                    <span>Payment Methods</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {Object.entries(data.paymentMethods).map(([method, count]) => (
+                      <div key={method} className="text-center p-4 bg-gray-50 rounded-lg">
+                        <p className="text-2xl font-bold text-gray-900">{count}</p>
+                        <p className="text-sm text-gray-600 capitalize">{method}</p>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
         </div>
+          </>
+        )}
       </div>
     </div>
   );

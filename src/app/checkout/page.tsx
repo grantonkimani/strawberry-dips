@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { ArrowLeft, Smartphone, MapPin, User, Phone, Mail } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Smartphone, MapPin, User, Phone, Mail, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useCart } from '@/contexts/CartContext';
+import { useCustomerAuth } from '@/contexts/CustomerAuthContext';
 import { PaymentOptions } from '@/components/PaymentOptions';
+import CustomerLoginModal from '@/components/CustomerLoginModal';
 import Link from 'next/link';
 
 // Major Kenyan Cities
@@ -131,10 +133,12 @@ const KENYAN_AREAS = [
 
 export default function CheckoutPage() {
   const { state, clearCart, getTotalPrice } = useCart();
+  const { customer, isAuthenticated, logout } = useCustomerAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -154,6 +158,19 @@ export default function CheckoutPage() {
     // Payment Info
     paymentMethod: 'mpesa',
   });
+
+  // Pre-fill form with customer data when authenticated
+  useEffect(() => {
+    if (isAuthenticated && customer) {
+      setFormData(prev => ({
+        ...prev,
+        firstName: customer.firstName || '',
+        lastName: customer.lastName || '',
+        email: customer.email || '',
+        phone: customer.phone || '',
+      }));
+    }
+  }, [isAuthenticated, customer]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -235,6 +252,23 @@ export default function CheckoutPage() {
     setIsProcessing(false);
   };
 
+  const handleCustomerLoginSuccess = (customerData: any) => {
+    // Form will be automatically updated by useEffect
+    setShowLoginModal(false);
+  };
+
+  const handleCustomerLogout = async () => {
+    await logout();
+    // Clear form data
+    setFormData(prev => ({
+      ...prev,
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+    }));
+  };
+
   if (state.items.length === 0 && !isProcessing) {
     return (
       <div className="min-h-screen bg-pink-50 flex items-center justify-center">
@@ -304,10 +338,37 @@ export default function CheckoutPage() {
               {/* Customer Information */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <User className="h-5 w-5 text-pink-600" />
-                    <span>Customer Information</span>
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center space-x-2">
+                      <User className="h-5 w-5 text-pink-600" />
+                      <span>Customer Information</span>
+                    </CardTitle>
+                    {isAuthenticated ? (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-600">
+                          Welcome, {customer?.firstName}!
+                        </span>
+                        <Button
+                          onClick={handleCustomerLogout}
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                        >
+                          <LogOut className="h-3 w-3 mr-1" />
+                          Sign Out
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={() => setShowLoginModal(true)}
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                      >
+                        Sign In
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -624,6 +685,13 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      {/* Customer Login Modal */}
+      <CustomerLoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLoginSuccess={handleCustomerLoginSuccess}
+      />
     </div>
   );
 }

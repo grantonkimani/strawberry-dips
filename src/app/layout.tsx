@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CustomerAuthProvider } from "@/contexts/CustomerAuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,8 +21,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   icons: {
     icon: [
-      { url: '/favicon-official.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: '16x16', type: 'image/x-icon' }
+      { url: '/favicon-official.svg', type: 'image/svg+xml' }
     ],
     apple: [
       { url: '/favicon-official.svg', sizes: '180x180', type: 'image/svg+xml' }
@@ -40,9 +40,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <CartProvider>
-            {children}
-          </CartProvider>
+          <CustomerAuthProvider>
+            <CartProvider>
+              {children}
+            </CartProvider>
+          </CustomerAuthProvider>
         </AuthProvider>
       </body>
     </html>
