@@ -1,6 +1,5 @@
 "use client";
 
-// Using a standard img ensures immediate render on all hosts
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { useEffect, useState } from "react";
