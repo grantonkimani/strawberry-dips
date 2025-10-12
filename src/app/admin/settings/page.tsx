@@ -35,8 +35,6 @@ interface StoreSettings {
   intasendTestMode: boolean;
   
   // Email Settings
-  gmailUser: string;
-  gmailPass: string;
   siteUrl: string;
   
   // Admin Settings
@@ -73,8 +71,6 @@ export default function SettingsPage() {
     intasendTestMode: true,
     
     // Email Settings
-    gmailUser: '',
-    gmailPass: '',
     siteUrl: 'https://strawberrydips.shop',
     
     // Admin Settings
@@ -285,37 +281,6 @@ export default function SettingsPage() {
   const renderEmailSettings = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Gmail User
-          </label>
-          <input
-            type="email"
-            value={settings.gmailUser}
-            onChange={(e) => setSettings({...settings, gmailUser: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Gmail App Password
-          </label>
-          <div className="relative">
-            <input
-              type={showSecrets.gmailPass ? 'text' : 'password'}
-              value={settings.gmailPass}
-              onChange={(e) => setSettings({...settings, gmailPass: e.target.value})}
-              className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="button"
-              onClick={() => toggleSecretVisibility('gmailPass')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2"
-            >
-              {showSecrets.gmailPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
-        </div>
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Site URL
@@ -327,6 +292,13 @@ export default function SettingsPage() {
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
+      </div>
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h3 className="text-lg font-semibold text-blue-900 mb-2">Email Configuration</h3>
+        <p className="text-blue-800 text-sm">
+          Email settings are now managed through your hosting provider or email service configuration. 
+          Contact your system administrator for email setup assistance.
+        </p>
       </div>
     </div>
   );

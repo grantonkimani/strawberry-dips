@@ -5,6 +5,10 @@ import { useSearchParams } from "next/navigation";
 import { ProductCard } from "./ProductCard";
 import { CategoryTabs } from "./CategoryTabs";
 import { CategorySection } from "./CategorySection";
+import { GiftProductGrid } from "./GiftProductGrid";
+import Link from "next/link";
+import { Button } from "./ui/Button";
+import { Gift } from "lucide-react";
 
 interface ApiProduct {
 	id: string;
@@ -47,10 +51,16 @@ export function ProductGrid() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				// Fetch products and categories in parallel
+				// Fetch products and categories in parallel with caching
 				const [productsRes, categoriesRes] = await Promise.all([
-					fetch('/api/products?available=true&limit=100'),
-					fetch('/api/categories')
+					fetch('/api/products?available=true&limit=100', {
+						cache: 'force-cache',
+						next: { revalidate: 300 } // Revalidate every 5 minutes
+					}),
+					fetch('/api/categories', {
+						cache: 'force-cache',
+						next: { revalidate: 600 } // Categories change less frequently
+					})
 				]);
 
 				const productsData = await productsRes.json();
@@ -215,6 +225,41 @@ export function ProductGrid() {
 							</div>
 						)}
 					</>
+				)}
+				
+				{/* Gift Collection Section - Only show when no specific category is selected */}
+				{!selectedCategory && !loading && !error && (
+					<div className="mt-20">
+						{/* Gift Collection Header */}
+						<div className="text-center mb-12">
+							<div className="flex items-center justify-center mb-4">
+								<Gift className="h-8 w-8 text-pink-600 mr-3" />
+								<h2 className="text-4xl font-bold text-gray-900">
+									Gift Collection
+								</h2>
+							</div>
+							<p className="text-xl text-gray-600 max-w-2xl mx-auto">
+								Perfect gifts for every occasion. Hand-crafted with love and delivered with care.
+							</p>
+						</div>
+						
+						{/* Gift Products Grid */}
+						<GiftProductGrid limit={8} showCategory={true} />
+						
+						{/* View All Gifts Button */}
+						<div className="text-center mt-8">
+							<Link href="/gifts">
+								<Button 
+									variant="outline" 
+									size="lg"
+									className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white border-0 px-8 py-3"
+								>
+									<Gift className="h-5 w-5 mr-2" />
+									View All Gifts
+								</Button>
+							</Link>
+						</div>
+					</div>
 				)}
 			</div>
 		</section>

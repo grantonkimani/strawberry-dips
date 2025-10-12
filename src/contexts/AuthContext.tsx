@@ -37,7 +37,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const checkSession = async () => {
     try {
       const response = await fetch('/api/auth/verify', {
-        credentials: 'include'
+        credentials: 'include',
+        cache: 'no-store', // Always check fresh session
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       if (response.ok) {
@@ -61,10 +65,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setToken(null);
     } finally {
-      // Add a small delay to prevent rapid loading states
+      // Reduce delay for better performance
       setTimeout(() => {
         setIsLoading(false);
-      }, 500);
+      }, 200);
     }
   };
 

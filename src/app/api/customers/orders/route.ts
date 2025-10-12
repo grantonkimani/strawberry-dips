@@ -78,10 +78,14 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      return NextResponse.json({
+      const response = NextResponse.json({
         success: true,
         orders: orders || []
       });
+      
+      // Add caching headers to improve performance
+      response.headers.set('Cache-Control', 'private, max-age=60'); // Cache for 1 minute
+      return response;
 
     } catch (jwtError) {
       console.error('JWT verification failed:', jwtError);

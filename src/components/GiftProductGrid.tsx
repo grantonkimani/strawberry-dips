@@ -46,7 +46,10 @@ export function GiftProductGrid({ category, limit, showCategory = true }: GiftPr
           ? `/api/gift-products?category=${encodeURIComponent(category)}`
           : '/api/gift-products';
         
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          cache: 'force-cache',
+          next: { revalidate: 300 } // Cache for 5 minutes
+        });
         const data = await response.json();
         
         if (response.ok) {
@@ -63,7 +66,10 @@ export function GiftProductGrid({ category, limit, showCategory = true }: GiftPr
         }
 
         // Also fetch categories for icons
-        const categoriesResponse = await fetch('/api/gift-categories?includeInactive=true');
+        const categoriesResponse = await fetch('/api/gift-categories?includeInactive=true', {
+          cache: 'force-cache',
+          next: { revalidate: 600 } // Categories change less frequently
+        });
         const categoriesData = await categoriesResponse.json();
         if (categoriesResponse.ok) {
           setGiftCategories(categoriesData.giftCategories || []);

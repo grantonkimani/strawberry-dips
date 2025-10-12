@@ -74,26 +74,51 @@ export default function AdminOrdersPage() {
     setFilteredOrders(filtered);
   }, [searchQuery, orders, showFailedOrders]);
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (retryCount = 0) => {
     try {
-      const response = await fetch('/api/orders');
+      const response = await fetch('/api/orders', {
+        cache: 'no-store', // Always fetch fresh data
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       const data = await response.json();
       
       if (Array.isArray(data)) {
         setOrders(data);
         setFilteredOrders(data);
+        setError(null); // Clear any previous errors
       } else if (data.orders) {
         setOrders(data.orders);
         setFilteredOrders(data.orders);
+        setError(null); // Clear any previous errors
       } else if (data.error) {
         setError(data.error);
       } else {
         setError('Failed to fetch orders');
       }
     } catch (err) {
-      setError('Failed to fetch orders');
+      console.error('Orders fetch error:', err);
+      
+      // Retry logic for network errors
+      if (retryCount < 2) {
+        console.log(`Retrying orders fetch (attempt ${retryCount + 1})...`);
+        setTimeout(() => {
+          fetchOrders(retryCount + 1);
+        }, 1000 * (retryCount + 1)); // Exponential backoff
+        return; // Don't set loading to false yet
+      }
+      
+      setError(`Failed to fetch orders: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
-      setLoading(false);
+      if (retryCount === 0) { // Only set loading to false on first attempt
+        setLoading(false);
+      }
     }
   };
 
@@ -203,7 +228,17 @@ export default function AdminOrdersPage() {
         <div className="text-center">
           <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h1 className="text-xl font-semibold text-gray-900 mb-2">Error</h1>
-          <p className="text-gray-600">{error}</p>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button 
+            onClick={() => {
+              setError(null);
+              setLoading(true);
+              fetchOrders();
+            }}
+            className="bg-pink-600 hover:bg-pink-700 text-white"
+          >
+            Try Again
+          </Button>
         </div>
       </div>
     );

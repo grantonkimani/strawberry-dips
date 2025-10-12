@@ -11,7 +11,11 @@ export async function POST(request: NextRequest) {
     const form = await request.formData();
     const file = form.get('file') as File | null;
     if (!file) return NextResponse.json({ error: 'file is required' }, { status: 400 });
-    if (!file.type.startsWith('image/')) return NextResponse.json({ error: 'Only images allowed' }, { status: 400 });
+    
+    // Check if file has type property and is an image
+    if (!file.type || !file.type.startsWith('image/')) {
+      return NextResponse.json({ error: 'Only images allowed' }, { status: 400 });
+    }
     const maxBytes = 6 * 1024 * 1024; // 6MB
     if (file.size > maxBytes) return NextResponse.json({ error: 'Image too large (max 6MB)' }, { status: 400 });
 

@@ -40,7 +40,16 @@ export function RotatingHero() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/banners', { cache: 'no-store' });
+        // Add caching and timeout for better performance
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        const res = await fetch('/api/banners', { 
+          cache: 'force-cache', // Enable caching
+          signal: controller.signal 
+        });
+        clearTimeout(timeoutId);
+        
         const json = await res.json();
         const apiSlides: Slide[] = (json?.banners || [])
           .map((b: any) => ({
@@ -57,7 +66,10 @@ export function RotatingHero() {
           setSlides(apiSlides);
           if (typeof apiSlides[0]?.overlay === 'number') setOverlay(apiSlides[0].overlay as number);
         }
-      } catch {}
+      } catch (error) {
+        // Fallback to built-in images if API fails
+        console.warn('Failed to load banners, using fallback images');
+      }
     })();
   }, []);
 
@@ -83,8 +95,26 @@ export function RotatingHero() {
             loading={i === 0 ? 'eager' : 'lazy'}
             decoding="async"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
+            onError={(e) => {
+              // Fallback to built-in images if external image fails
+              if (builtIns.includes(s.image_url)) return;
+              const fallbackIndex = i % builtIns.length;
+              e.currentTarget.src = builtIns[fallbackIndex];
+            }}
           />
         ))}
+        
+        {/* Fallback for when no slides are loaded yet */}
+        {slides.length === 0 && (
+          <img
+            src={builtIns[0]}
+            alt="Strawberry Dips Hero"
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="eager"
+            decoding="async"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
+          />
+        )}
 
         {/* overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" style={{ opacity: currentOverlay }} />

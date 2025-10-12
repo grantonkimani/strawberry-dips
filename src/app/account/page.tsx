@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCustomerAuth } from '@/contexts/CustomerAuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { User, Mail, Phone, Package, MapPin, LogOut, ArrowLeft } from 'lucide-react';
+import { User, Mail, Phone, Package, LogOut, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 interface Order {
@@ -18,33 +18,19 @@ interface Order {
 }
 
 export default function CustomerAccountPage() {
-  const { customer, isAuthenticated, logout, isLoading, refreshSession } = useCustomerAuth();
+  const { customer, isAuthenticated, logout, isLoading } = useCustomerAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const hasFetched = useRef(false);
-  const [sessionChecked, setSessionChecked] = useState(false);
+  // Remove sessionChecked state since we don't need it anymore
   const router = useRouter();
 
-  // Ensure session is fresh on entry to the account page
+  // Remove unnecessary session refresh - the context already handles this
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        await refreshSession();
-      } finally {
-        if (mounted) setSessionChecked(true);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [refreshSession]);
-
-  useEffect(() => {
-    if (sessionChecked && !isLoading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       router.push('/account/login');
     }
-  }, [isAuthenticated, isLoading, sessionChecked, router]);
+  }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {
     if (!isAuthenticated || !customer) return;
@@ -55,16 +41,27 @@ export default function CustomerAccountPage() {
 
   const fetchOrders = async () => {
     try {
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
       const response = await fetch('/api/customers/orders', {
-        credentials: 'include'
+        credentials: 'include',
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (response.ok) {
         const data = await response.json();
         setOrders(data.orders || []);
       }
-    } catch (error) {
-      console.error('Failed to fetch orders:', error);
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.warn('Orders fetch timed out - this is normal for slow connections');
+      } else {
+        console.error('Failed to fetch orders:', error);
+      }
     } finally {
       setOrdersLoading(false);
     }
@@ -75,7 +72,7 @@ export default function CustomerAccountPage() {
     router.push('/');
   };
 
-  if (isLoading || !sessionChecked) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-pink-50 flex items-center justify-center">
         <div className="text-center">

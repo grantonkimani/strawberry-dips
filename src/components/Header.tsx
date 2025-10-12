@@ -1,6 +1,6 @@
 'use client';
 
-import { ShoppingCart, Heart, User, Menu, HelpCircle } from "lucide-react";
+import { ShoppingCart, Heart, User, Menu, HelpCircle, Instagram } from "lucide-react";
 import { Button } from "./ui/Button";
 import { useCart } from "@/contexts/CartContext";
 import { MobileNav } from "./CartSidebar";
@@ -17,8 +17,14 @@ export function Header() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
   const router = useRouter();
   const { isAuthenticated } = useCustomerAuth();
+
+  // Mark as hydrated after client-side mount
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   // Update body class when cart or mobile menu opens/closes
   useEffect(() => {
@@ -115,6 +121,30 @@ export function Header() {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3 md:space-x-4">
+            {/* Social Media Icons */}
+            <div className="hidden md:flex items-center space-x-2">
+              <a 
+                href="https://www.instagram.com/strawberrydips_?igsh=NTJuNXhxb3hiYm55" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-600 hover:text-pink-600 transition-colors"
+                aria-label="Follow us on Instagram"
+              >
+                <Instagram className="h-5 w-5" strokeWidth={2.25} />
+              </a>
+              <a 
+                href="https://www.tiktok.com/@strawberrydips_ke?_t=ZM-8zfZO0XFS6y&_r=1" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-600 hover:text-pink-600 transition-colors"
+                aria-label="Follow us on TikTok"
+              >
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                </svg>
+              </a>
+            </div>
+
             {/* Help */}
             <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 h-11 w-11 md:h-9 md:w-9" onClick={() => setIsHelpOpen(true)} aria-label="Help">
               <HelpCircle className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.25} />
@@ -176,11 +206,9 @@ export function Header() {
                 className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-11 w-11 md:h-9 md:w-9"
               >
                 <ShoppingCart className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.25} />
-                {state.items.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] md:text-xs rounded-full h-5 min-w-[1.25rem] px-1 md:px-0 flex items-center justify-center">
-                    {state.items.reduce((total, item) => total + (item.quantity || 1), 0)}
-                  </span>
-                )}
+                <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] md:text-xs rounded-full h-5 min-w-[1.25rem] px-1 md:px-0 flex items-center justify-center">
+                  {isHydrated ? state.items.reduce((total, item) => total + (item.quantity || 1), 0) : 0}
+                </span>
               </Button>
             </Link>
 

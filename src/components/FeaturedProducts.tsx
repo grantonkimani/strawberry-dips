@@ -20,10 +20,14 @@ export function FeaturedProducts() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/products?available=true&limit=12');
+        // Add caching and reduce limit for better performance
+        const res = await fetch('/api/products?available=true&limit=6', {
+          cache: 'force-cache', // Enable caching
+          next: { revalidate: 300 } // Revalidate every 5 minutes
+        });
         const data = await res.json();
         const list: ApiProduct[] = Array.isArray(data) ? data : (data.products || []);
-        // naive featured: top price or first 6 items; adapt when backend flag exists
+        // Use first 6 items as featured products
         const selected = list.slice(0, 6);
         setProducts(selected);
       } catch (e) {

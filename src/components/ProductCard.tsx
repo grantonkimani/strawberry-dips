@@ -2,6 +2,7 @@ import { ShoppingCart, Heart } from "lucide-react";
 import { Button } from "./ui/Button";
 import { Card, CardContent, CardFooter } from "./ui/Card";
 import { useCart } from "@/contexts/CartContext";
+import Link from "next/link";
 
 interface Product {
   id: string;
@@ -47,7 +48,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="relative overflow-hidden rounded-t-lg">
           {product.image_url ? (
             <div className="aspect-[6/5] bg-gray-100">
-              <a href={`/products/${product.id}`}>
+              <Link href={`/products/${product.id}`} prefetch={true}>
                 <img 
                   src={product.image_url} 
                   alt={product.name}
@@ -61,25 +62,25 @@ export function ProductCard({ product }: ProductCardProps) {
                     e.currentTarget.nextElementSibling?.classList.remove('hidden');
                   }}
                 />
-              </a>
-              <div className="aspect-[6/5] bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center hidden">
+              </Link>
+              <Link href={`/products/${product.id}`} prefetch={true} className="aspect-[6/5] bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center hidden">
                 <div className="text-center space-y-2">
                   <div className="w-20 h-20 bg-gradient-to-br from-pink-200 to-red-200 rounded-full mx-auto flex items-center justify-center">
                     <span className="text-2xl">🍓</span>
                   </div>
                   <p className="text-sm text-gray-600 font-medium">{categoryName}</p>
                 </div>
-              </div>
+              </Link>
             </div>
           ) : (
-            <div className="aspect-[6/5] bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center">
+            <Link href={`/products/${product.id}`} prefetch={true} className="aspect-[6/5] bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center">
               <div className="text-center space-y-2">
                 <div className="w-20 h-20 bg-gradient-to-br from-pink-200 to-red-200 rounded-full mx-auto flex items-center justify-center">
                   <span className="text-2xl">🍓</span>
                 </div>
                 <p className="text-sm text-gray-600 font-medium">{categoryName}</p>
               </div>
-            </div>
+            </Link>
           )}
           
           {/* Wishlist Button */}
@@ -116,7 +117,6 @@ export function ProductCard({ product }: ProductCardProps) {
               <span className="text-2xl font-bold text-gray-900">
                 KSH {price.toFixed(2)}
               </span>
-              <span className="text-sm text-gray-500 ml-1">per dozen</span>
             </div>
           </div>
         </div>

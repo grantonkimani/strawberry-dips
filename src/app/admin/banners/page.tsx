@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { Trash2 } from 'lucide-react';
 
 interface Banner {
   id?: string;
@@ -57,6 +58,25 @@ export default function BannersAdminPage() {
   const toggleActive = async (id: string, active: boolean) => {
     await fetch(`/api/banners/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active }) });
     load();
+  };
+
+  const deleteBanner = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this banner? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/banners/${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (!json.error) {
+        load(); // Reload the list
+      } else {
+        alert(`Failed to delete banner: ${json.error}`);
+      }
+    } catch (error) {
+      console.error('Delete banner error:', error);
+      alert('Failed to delete banner. Please try again.');
+    }
   };
 
   const move = async (idx: number, dir: -1 | 1) => {
@@ -122,6 +142,14 @@ export default function BannersAdminPage() {
                   <div className="flex items-center gap-2 ml-auto sm:ml-3">
                     <Button size="sm" onClick={() => move(i, -1)} className="px-2">↑</Button>
                     <Button size="sm" onClick={() => move(i, 1)} className="px-2">↓</Button>
+                    <Button 
+                      size="sm" 
+                      onClick={() => deleteBanner(b.id!)} 
+                      className="px-2 bg-red-600 hover:bg-red-700 text-white"
+                      title="Delete banner"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </div>

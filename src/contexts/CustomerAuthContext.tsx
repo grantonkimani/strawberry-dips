@@ -37,9 +37,17 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
 
   const checkCustomerSession = async () => {
     try {
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+      
       const response = await fetch('/api/customers/verify-session', {
-        credentials: 'include'
+        credentials: 'include',
+        signal: controller.signal,
+        cache: 'no-store' // Ensure fresh session check
       });
+      
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
@@ -54,8 +62,13 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
         setCustomer(null);
         setToken(null);
       }
-    } catch (error) {
-      console.error('Customer session check failed:', error);
+    } catch (error: any) {
+      // Handle timeout gracefully - this is expected behavior
+      if (error.name === 'AbortError') {
+        console.warn('Customer session check timed out - this is normal for slow connections');
+      } else {
+        console.error('Customer session check failed:', error);
+      }
       setCustomer(null);
       setToken(null);
     } finally {
@@ -65,14 +78,21 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
       const response = await fetch('/api/customers/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
+        signal: controller.signal,
         body: JSON.stringify({ email, password }),
       });
+      
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
@@ -81,8 +101,13 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
         return true;
       }
       return false;
-    } catch (error) {
-      console.error('Customer login failed:', error);
+    } catch (error: any) {
+      // Handle timeout gracefully
+      if (error.name === 'AbortError') {
+        console.warn('Customer login timed out - please try again');
+      } else {
+        console.error('Customer login failed:', error);
+      }
       return false;
     }
   };
