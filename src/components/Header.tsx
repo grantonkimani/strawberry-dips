@@ -120,7 +120,7 @@ export function Header() {
           </nav>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-3 md:space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 pr-2 sm:pr-4">
             {/* Social Media Icons */}
             <div className="hidden md:flex items-center space-x-2">
               <a 
@@ -146,8 +146,8 @@ export function Header() {
             </div>
 
             {/* Help */}
-            <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 h-11 w-11 md:h-9 md:w-9" onClick={() => setIsHelpOpen(true)} aria-label="Help">
-              <HelpCircle className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.25} />
+            <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 h-10 w-10 sm:h-11 sm:w-11 md:h-9 md:w-9" onClick={() => setIsHelpOpen(true)} aria-label="Help">
+              <HelpCircle className="h-6 w-6 sm:h-7 sm:w-7 md:h-5 md:w-5" strokeWidth={2.25} />
             </Button>
             {/* Search - Hidden on mobile */}
             <div className="hidden lg:flex items-center">
@@ -191,8 +191,8 @@ export function Header() {
             </div>
 
             {/* Wishlist */}
-            <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-11 w-11 md:h-9 md:w-9">
-              <Heart className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.25} />
+            <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-10 w-10 sm:h-11 sm:w-11 md:h-9 md:w-9">
+              <Heart className="h-6 w-6 sm:h-7 sm:w-7 md:h-5 md:w-5" strokeWidth={2.25} />
               <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] md:text-xs rounded-full h-5 min-w-[1.25rem] px-1 md:px-0 flex items-center justify-center">
                 0
               </span>
@@ -203,9 +203,9 @@ export function Header() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-11 w-11 md:h-9 md:w-9"
+                className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-10 w-10 sm:h-11 sm:w-11 md:h-9 md:w-9"
               >
-                <ShoppingCart className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.25} />
+                <ShoppingCart className="h-6 w-6 sm:h-7 sm:w-7 md:h-5 md:w-5" strokeWidth={2.25} />
                 <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] md:text-xs rounded-full h-5 min-w-[1.25rem] px-1 md:px-0 flex items-center justify-center">
                   {isHydrated ? state.items.reduce((total, item) => total + (item.quantity || 1), 0) : 0}
                 </span>
@@ -214,8 +214,8 @@ export function Header() {
 
             {/* User Account */}
             <Link href={isAuthenticated ? "/account" : "/account/login"}>
-              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 h-11 w-11 md:h-9 md:w-9">
-                <User className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.25} />
+              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 h-10 w-10 sm:h-11 sm:w-11 md:h-9 md:w-9">
+                <User className="h-6 w-6 sm:h-7 sm:w-7 md:h-5 md:w-5" strokeWidth={2.25} />
               </Button>
             </Link>
 
@@ -223,10 +223,10 @@ export function Header() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="md:hidden text-gray-600 hover:text-pink-600 active:bg-pink-50 h-11 w-11"
+              className="md:hidden text-gray-600 hover:text-pink-600 active:bg-pink-50 h-10 w-10 sm:h-11 sm:w-11"
               onClick={() => setIsMobileMenuOpen(true)}
             >
-              <Menu className="h-7 w-7" strokeWidth={2.25} />
+              <Menu className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={2.25} />
             </Button>
           </div>
         </div>
