@@ -45,12 +45,14 @@ export default function AdminOrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFailedOrders, setShowFailedOrders] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'pending' | 'cancelled' | 'out_for_delivery' | 'confirmed' | 'failed' | 'timeout' | 'document_pending'>('all');
+  const [sortBy, setSortBy] = useState<'date_desc' | 'date_asc' | 'status'>('date_desc');
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  // Filter orders based on search query and failed orders toggle
+  // Filter and sort orders
   useEffect(() => {
     let filtered = orders;
 
@@ -58,6 +60,18 @@ export default function AdminOrdersPage() {
     if (!showFailedOrders) {
       const failedStatuses = ['intasend_timeout', 'failed', 'document_pending'];
       filtered = orders.filter(order => !failedStatuses.includes(order.payment_status));
+    }
+
+    // Apply explicit status filter if selected
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(order => {
+        if (statusFilter === 'failed') return order.payment_status === 'failed';
+        if (statusFilter === 'timeout') return order.payment_status === 'intasend_timeout';
+        if (statusFilter === 'document_pending') return order.payment_status === 'document_pending';
+        if (statusFilter === 'confirmed') return order.status === 'paid' || order.status === 'confirmed';
+        if (statusFilter === 'out_for_delivery') return order.status === 'out_for_delivery';
+        return order.status === statusFilter;
+      });
     }
 
     // Then apply search filter
@@ -71,8 +85,39 @@ export default function AdminOrdersPage() {
       ));
     }
 
+    // Sort
+    if (sortBy === 'date_desc') {
+      filtered = [...filtered].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    } else if (sortBy === 'date_asc') {
+      filtered = [...filtered].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    } else if (sortBy === 'status') {
+      const precedence: Record<string, number> = {
+        // delivery lifecycle first if present
+        out_for_delivery: 5,
+        confirmed: 4,
+        paid: 4,
+        pending: 3,
+        cancelled: 1,
+        // payment failure buckets
+        document_pending: 2,
+        intasend_timeout: 2,
+        failed: 0,
+        default: 2,
+      };
+      filtered = [...filtered].sort((a, b) => {
+        const aKey = (a.status || 'default').toLowerCase();
+        const bKey = (b.status || 'default').toLowerCase();
+        const aPay = (a.payment_status || '').toLowerCase();
+        const bPay = (b.payment_status || '').toLowerCase();
+        const aRank = precedence[aKey] ?? precedence[aPay] ?? precedence.default;
+        const bRank = precedence[bKey] ?? precedence[bPay] ?? precedence.default;
+        if (aRank !== bRank) return bRank - aRank; // higher first
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+    }
+
     setFilteredOrders(filtered);
-  }, [searchQuery, orders, showFailedOrders]);
+  }, [searchQuery, orders, showFailedOrders, statusFilter, sortBy]);
 
   const fetchOrders = async (retryCount = 0) => {
     try {
@@ -270,6 +315,32 @@ export default function AdminOrdersPage() {
                       />
                       <span>Show failed orders</span>
                     </label>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value as any)}
+                      className="text-sm border border-gray-300 rounded-md px-2 py-1"
+                      title="Filter by status"
+                    >
+                      <option value="all">All statuses</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="out_for_delivery">Out for delivery</option>
+                      <option value="paid">Paid</option>
+                      <option value="pending">Pending</option>
+                      <option value="cancelled">Cancelled</option>
+                      <option value="failed">Failed</option>
+                      <option value="timeout">Timeout</option>
+                      <option value="document_pending">Document pending</option>
+                    </select>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as any)}
+                      className="text-sm border border-gray-300 rounded-md px-2 py-1"
+                      title="Sort orders"
+                    >
+                      <option value="date_desc">Newest first</option>
+                      <option value="date_asc">Oldest first</option>
+                      <option value="status">Status</option>
+                    </select>
                   </div>
                 </div>
                 {/* Search Bar */}
