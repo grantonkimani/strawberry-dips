@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Heart, ShoppingCart, Star } from 'lucide-react';
 import Link from 'next/link';
+import { useCart } from '@/contexts/CartContext';
 
 interface GiftProduct {
   id: string;
@@ -38,6 +39,7 @@ export function GiftProductGrid({ category, limit, showCategory = true }: GiftPr
   const [giftCategories, setGiftCategories] = useState<GiftCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { addItem, openCart } = useCart();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -193,8 +195,17 @@ export function GiftProductGrid({ category, limit, showCategory = true }: GiftPr
                 className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white text-sm py-2"
                 disabled={!product.is_active}
                 onClick={() => {
-                  // Add to cart logic here
-                  alert('Gift products will be added to cart in the next update!');
+                  // Add gift product to cart immediately
+                  addItem({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image_url || '/images/placeholder-gift.svg',
+                    category: product.category || 'Gifts',
+                    isGift: true,
+                  });
+                  // Optionally open the cart to show the addition
+                  try { openCart(); } catch {}
                 }}
               >
                 <ShoppingCart className="h-4 w-4 mr-1" />

@@ -24,8 +24,10 @@ export async function GET(
         order_items (
           id,
           product_name,
+          product_category,
+          unit_price,
           quantity,
-          price
+          total_price
         )
       `)
       .eq('id', orderId)
@@ -47,20 +49,19 @@ export async function GET(
     }
 
     // Transform order items to match expected format
-    const transformedOrder = {
+    const transformedOrder: any = {
       ...order,
-      items: order.order_items?.map((item: any) => ({
+      order_items: order.order_items?.map((item: any) => ({
         id: item.id,
-        name: item.product_name,
+        product_name: item.product_name,
+        product_category: item.product_category,
+        unit_price: item.unit_price,
         quantity: item.quantity,
-        price: item.price
+        total_price: item.total_price
       })) || []
     };
 
-    // Remove the order_items property as it's now transformed to items
-    delete transformedOrder.order_items;
-
-    return NextResponse.json(transformedOrder);
+    return NextResponse.json({ order: transformedOrder });
   } catch (error) {
     console.error('Error in order tracking API:', error);
     return NextResponse.json(
