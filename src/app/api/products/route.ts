@@ -95,16 +95,16 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json({ error: 'Database not configured. Please set up Supabase environment variables.' }, { status: 500 })
 		}
 
-		const body = await request.json()
-		const { name, description, base_price, category_id, image_url, is_available = true } = body
+    const body = await request.json()
+    const { name, description, base_price, category_id, image_url, video_url, poster_url, is_available = true } = body
 
 		if (!name || !base_price || !category_id) {
 			return NextResponse.json({ error: 'Missing required fields: name, base_price, and category_id are required' }, { status: 400 })
 		}
 
-		const { data, error } = await supabase
+    const { data, error } = await supabase
 			.from('products')
-			.insert({ name, description, base_price, category_id, image_url, is_available })
+      .insert({ name, description, base_price, category_id, image_url, video_url, poster_url, is_available })
 			.select(`
 				*,
 				categories (

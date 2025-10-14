@@ -16,6 +16,8 @@ interface Product {
   description: string;
   base_price: number;
   image_url?: string;
+  video_url?: string; // optional product video
+  poster_url?: string; // optional poster image for video
   categories?: { id: string; name: string };
 }
 
@@ -111,6 +113,29 @@ export default function ProductDetailPage() {
 
       <div className="grid md:grid-cols-2 gap-6">
         <div className="bg-gray-100 rounded-lg overflow-hidden">
+          {/* Prefer video if available; gracefully fall back to image */}
+          {product.video_url ? (
+            <video
+              key={product.video_url}
+              className="w-full h-full object-cover"
+              playsInline
+              muted
+              autoPlay
+              loop
+              preload="none"
+              poster={product.poster_url || product.image_url || '/images/placeholder-gift.svg'}
+              onError={(e) => {
+                // If video fails, hide it and show the image below
+                const target = e.currentTarget as HTMLVideoElement;
+                target.style.display = 'none';
+                const img = target.nextElementSibling as HTMLImageElement | null;
+                if (img) img.style.display = 'block';
+              }}
+            >
+              {/* Provide common formats for better compatibility */}
+              <source src={product.video_url} type="video/mp4" />
+            </video>
+          ) : null}
           <img 
             src={product.image_url || '/images/placeholder-gift.svg'} 
             alt={product.name} 
@@ -118,6 +143,7 @@ export default function ProductDetailPage() {
             loading="eager"
             decoding="async"
             sizes="(max-width: 768px) 100vw, 50vw"
+            style={{ display: product.video_url ? 'none' : 'block' }}
           />
         </div>
         <div>

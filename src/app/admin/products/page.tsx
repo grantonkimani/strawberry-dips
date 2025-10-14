@@ -13,6 +13,8 @@ interface Product {
 	base_price: number
 	category_id: string | null
 	image_url: string | null
+	video_url?: string | null
+	poster_url?: string | null
 	is_available: boolean
 	created_at: string
 	categories?: {
@@ -39,6 +41,8 @@ const emptyForm = {
 	base_price: 0,
 	category_id: '',
 	image_url: '',
+	video_url: '',
+	poster_url: '',
 	is_available: true,
 }
 
@@ -157,10 +161,12 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 		}
 
 		try {
-			// Normalize image_url to public URL if needed
+			// Normalize URLs to public paths if needed
 			const normalizedForm = {
 				...form,
-				image_url: normalizePublicUrl(form.image_url)
+				image_url: normalizePublicUrl(form.image_url),
+				poster_url: normalizePublicUrl(form.poster_url),
+				video_url: form.video_url
 			}
 			const res = await fetch('/api/products', {
 				method: 'POST',
@@ -190,6 +196,8 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 			base_price: product.base_price,
 			category_id: product.category_id,
 			image_url: product.image_url,
+			video_url: product.video_url || null,
+			poster_url: product.poster_url || null,
 			is_available: product.is_available
 		})
     setOriginalEditImageUrl(product.image_url || null)
@@ -231,10 +239,12 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 		}
 
 		try {
-			// Normalize image_url to public URL if needed
+			// Normalize URLs to public paths if needed
 			const normalizedEdit = {
 				...editForm,
-				image_url: normalizePublicUrl(editForm.image_url || '')
+				image_url: normalizePublicUrl(editForm.image_url || ''),
+				poster_url: normalizePublicUrl(editForm.poster_url || ''),
+				video_url: editForm.video_url
 			}
 			const res = await fetch(`/api/products/${id}`, {
 				method: 'PATCH',
@@ -334,6 +344,35 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 										)}
 									</div>
 								</div>
+				<div>
+					<label className="block text-sm font-semibold text-gray-800 mb-1">Product Video (MP4/WebM)</label>
+					<input name="video_url" value={form.video_url} onChange={handleChange} placeholder="https://... (optional if you upload)" className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 mb-2" />
+					<div className="flex items-center space-x-3 mb-2">
+						<label className="inline-block">
+							<span className="sr-only">Upload video</span>
+							<input type="file" accept="video/mp4,video/webm" onChange={async (e) => {
+								const file = e.target.files?.[0]
+								if (!file) return
+								setIsUploadingCreate(true)
+								try {
+									const fd = new FormData()
+									fd.append('file', file)
+									const res = await fetch('/api/uploads/product-video', { method: 'POST', body: fd })
+									const data = await res.json()
+									if (!res.ok) throw new Error(data.error || 'Upload failed')
+									setForm(prev => ({ ...prev, video_url: data.url }))
+								} catch {
+									setError('Failed to upload video. Please try again.')
+								} finally {
+									setIsUploadingCreate(false)
+								}
+							}} className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100" />
+						</label>
+						{isUploadingCreate && <span className="text-sm text-gray-600">Uploading...</span>}
+					</div>
+					<label className="block text-sm font-semibold text-gray-800 mb-1">Video Poster (optional)</label>
+					<input name="poster_url" value={form.poster_url} onChange={handleChange} placeholder="https://... (optional if you upload)" className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" />
+				</div>
 								<div className="md:col-span-2">
 									<label className="block text-sm font-semibold text-gray-800 mb-1">Description</label>
 									<textarea name="description" value={form.description} onChange={handleChange} rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" />
@@ -381,7 +420,7 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 														placeholder="Product name"
 														className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" 
 													/>
-										<label className="block text-sm font-semibold text-gray-800 mb-1">Image</label>
+								<label className="block text-sm font-semibold text-gray-800 mb-1">Image</label>
 										<input 
 											value={editForm.image_url || ''} 
 											onChange={e => handleEditChange('image_url', e.target.value)} 
@@ -395,6 +434,39 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 										{editForm.image_url && (
 											<img src={editForm.image_url} alt="Preview" className="h-24 rounded border" />
 										)}
+								<label className="block text-sm font-semibold text-gray-800 mb-1 mt-2">Product Video (MP4/WebM)</label>
+								<input 
+									value={editForm.video_url || ''} 
+									onChange={e => handleEditChange('video_url', e.target.value)} 
+									placeholder="https://... (optional if you upload)"
+									className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 mb-2" 
+								/>
+								<div className="flex items-center space-x-3 mb-2">
+									<input type="file" accept="video/mp4,video/webm" onChange={async (e) => {
+										const file = e.target.files?.[0]
+										if (!file) return
+										setIsUploadingEdit(true)
+										try {
+											const fd = new FormData()
+											fd.append('file', file)
+											const res = await fetch('/api/uploads/product-video', { method: 'POST', body: fd })
+											const data = await res.json()
+											if (!res.ok) throw new Error(data.error || 'Upload failed')
+											handleEditChange('video_url', data.url)
+										} catch {
+											setError('Failed to upload video. Please try again.')
+										} finally {
+											setIsUploadingEdit(false)
+										}
+									}} className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100" />
+								</div>
+								<label className="block text-sm font-semibold text-gray-800 mb-1">Video Poster (optional)</label>
+								<input 
+									value={editForm.poster_url || ''} 
+									onChange={e => handleEditChange('poster_url', e.target.value)} 
+									placeholder="https://... (optional if you upload)"
+									className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 mb-2" 
+								/>
 													<textarea 
 														value={editForm.description || ''} 
 														onChange={e => handleEditChange('description', e.target.value)} 
