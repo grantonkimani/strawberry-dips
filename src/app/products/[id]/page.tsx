@@ -125,7 +125,7 @@ export default function ProductDetailPage() {
       </nav>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="relative bg-gray-100 rounded-lg overflow-hidden">
+        <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-[6/5] md:aspect-square">
           {/* Always show image first */}
           <div className="relative w-full h-full">
             <Image
