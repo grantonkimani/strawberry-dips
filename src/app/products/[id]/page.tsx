@@ -3,12 +3,13 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
 import { GiftProductGrid } from '@/components/GiftProductGrid';
 import { ProductCard } from '@/components/ProductCard';
 import { Card, CardContent } from '@/components/ui/Card';
-import { ChevronLeft, Home, Menu } from 'lucide-react';
+import { ChevronLeft, Home, Menu, Play, X } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -26,6 +27,8 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const { addItem } = useCart();
   const [loading, setLoading] = useState(true);
+  const [isTouch, setIsTouch] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
   const [gift, setGift] = useState(false);
   const [recipient, setRecipient] = useState('');
   const [note, setNote] = useState('');
@@ -38,8 +41,8 @@ export default function ProductDetailPage() {
       try {
         // Add caching for better performance
         const res = await fetch(`/api/products/${params.id}`, {
-          cache: 'force-cache',
-          next: { revalidate: 300 } // Revalidate every 5 minutes
+          // Fresh data when viewing a product to reflect recent edits/uploads
+          cache: 'no-store'
         });
         const json = await res.json();
         if (json?.product) setProduct(json.product);
@@ -48,6 +51,16 @@ export default function ProductDetailPage() {
       }
     })();
   }, [params.id]);
+
+  useEffect(() => {
+    // Detect coarse pointer/touch devices to avoid autoplay and show controls
+    try {
+      const coarse = typeof window !== 'undefined' && (('ontouchstart' in window) || window.matchMedia('(pointer: coarse)').matches);
+      setIsTouch(!!coarse);
+    } catch {
+      setIsTouch(false);
+    }
+  }, []);
 
   // Fetch best sellers for "You may also like" - Defer this to improve initial load
   useEffect(() => {
@@ -112,39 +125,64 @@ export default function ProductDetailPage() {
       </nav>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-gray-100 rounded-lg overflow-hidden">
-          {/* Prefer video if available; gracefully fall back to image */}
-          {product.video_url ? (
-            <video
-              key={product.video_url}
-              className="w-full h-full object-cover"
-              playsInline
-              muted
-              autoPlay
-              loop
-              preload="none"
-              poster={product.poster_url || product.image_url || '/images/placeholder-gift.svg'}
-              onError={(e) => {
-                // If video fails, hide it and show the image below
-                const target = e.currentTarget as HTMLVideoElement;
-                target.style.display = 'none';
-                const img = target.nextElementSibling as HTMLImageElement | null;
-                if (img) img.style.display = 'block';
-              }}
+        <div className="relative bg-gray-100 rounded-lg overflow-hidden">
+          {/* Always show image first */}
+          <div className="relative w-full h-full">
+            <Image
+              src={product.image_url || '/images/placeholder-gift.svg'}
+              alt={product.name}
+              fill
+              priority
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              style={{ visibility: showVideo ? 'hidden' : 'visible' }}
+            />
+          </div>
+
+          {/* If there is a video, show play overlay until user clicks */}
+          {product.video_url && !showVideo && (
+            <button
+              aria-label="Play product video"
+              className="absolute inset-0 flex items-center justify-center group"
+              onClick={() => setShowVideo(true)}
             >
-              {/* Provide common formats for better compatibility */}
-              <source src={product.video_url} type="video/mp4" />
-            </video>
-          ) : null}
-          <img 
-            src={product.image_url || '/images/placeholder-gift.svg'} 
-            alt={product.name} 
-            className="w-full h-full object-cover"
-            loading="eager"
-            decoding="async"
-            sizes="(max-width: 768px) 100vw, 50vw"
-            style={{ display: product.video_url ? 'none' : 'block' }}
-          />
+              <span className="sr-only">Play video</span>
+              <div className="bg-black/40 w-full h-full absolute inset-0" />
+              <div className="relative z-10 flex items-center justify-center w-16 h-16 rounded-full bg-white text-gray-900 shadow-lg group-hover:scale-105 transition-transform">
+                <Play className="w-8 h-8 ml-1" />
+              </div>
+            </button>
+          )}
+
+          {/* Render video only after user intent (click) */}
+          {product.video_url && showVideo && (
+            <div className="absolute inset-0">
+              <video
+                key={product.video_url}
+                className="w-full h-full object-cover"
+                playsInline
+                // User initiated, so autoplay with controls
+                autoPlay
+                controls
+                poster={product.poster_url || product.image_url || '/images/placeholder-gift.svg'}
+                onError={(e) => {
+                  // Hide video and fall back to image if it fails
+                  setShowVideo(false);
+                }}
+              >
+                <source src={product.video_url} type="video/mp4" />
+              </video>
+
+              {/* Close button to return to image */}
+              <button
+                aria-label="Close video"
+                className="absolute top-3 right-3 p-2 rounded-full bg-black/60 text-white hover:bg-black/80"
+                onClick={() => setShowVideo(false)}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          )}
         </div>
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
@@ -236,6 +274,7 @@ export default function ProductDetailPage() {
                     description: p.description ?? '',
                     base_price: p.base_price,
                     image_url: p.image_url,
+                    video_url: (p as any).video_url,
                     categories: p.categories as any,
                   }}
                 />

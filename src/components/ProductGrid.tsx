@@ -17,6 +17,7 @@ interface ApiProduct {
 	base_price: number;
 	category_id: string | null;
 	image_url: string | null;
+	video_url?: string | null;
 	categories?: {
 		id: string;
 		name: string;
@@ -52,16 +53,14 @@ export function ProductGrid() {
 		const fetchData = async () => {
 			try {
 				// Fetch products and categories in parallel with caching
-				const [productsRes, categoriesRes] = await Promise.all([
-					fetch('/api/products?available=true&limit=100', {
-						cache: 'force-cache',
-						next: { revalidate: 300 } // Revalidate every 5 minutes
-					}),
-					fetch('/api/categories', {
-						cache: 'force-cache',
-						next: { revalidate: 600 } // Categories change less frequently
-					})
-				]);
+							const [productsRes, categoriesRes] = await Promise.all([
+								fetch('/api/products?available=true&limit=100', {
+									cache: 'no-store'
+								}),
+								fetch('/api/categories', {
+									cache: 'no-store'
+								})
+							]);
 
 				const productsData = await productsRes.json();
 				const categoriesData = await categoriesRes.json();
@@ -196,7 +195,8 @@ export function ProductGrid() {
 											name: product.name,
 											description: product.description ?? '',
 											base_price: product.base_price,
-												image_url: product.image_url ?? '/images/placeholder-gift.svg',
+										image_url: product.image_url ?? '/images/placeholder-gift.svg',
+										video_url: product.video_url || undefined,
 											categories: product.categories,
 											category: product.category, // Legacy support
 										}}

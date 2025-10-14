@@ -1,8 +1,9 @@
-import { ShoppingCart, Heart } from "lucide-react";
+import { ShoppingCart, Heart, Play } from "lucide-react";
 import { Button } from "./ui/Button";
 import { Card, CardContent, CardFooter } from "./ui/Card";
 import { useCart } from "@/contexts/CartContext";
 import Link from "next/link";
+import Image from "next/image";
 
 interface Product {
   id: string;
@@ -10,6 +11,7 @@ interface Product {
   description: string;
   base_price: number;
   image_url?: string;
+  video_url?: string;
   categories?: {
     id: string;
     name: string;
@@ -53,18 +55,14 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.image_url ? (
             <div className="aspect-[6/5] bg-gray-100">
               <Link href={`/products/${product.id}`} prefetch={true}>
-                <img 
-                  src={product.image_url} 
+                <Image 
+                  src={product.image_url}
                   alt={product.name}
+                  width={800}
+                  height={650}
                   className="w-full h-full object-cover"
                   loading="lazy"
-                  decoding="async"
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                  onError={(e) => {
-                    // Fallback to placeholder if image fails to load
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                  }}
                 />
               </Link>
               <Link href={`/products/${product.id}`} prefetch={true} className="aspect-[6/5] bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center hidden">
@@ -75,6 +73,15 @@ export function ProductCard({ product }: ProductCardProps) {
                   <p className="text-sm text-gray-600 font-medium">{categoryName}</p>
                 </div>
               </Link>
+              {/* Play badge when product has video */}
+              {product.video_url && (
+                <div className="absolute bottom-2 right-2 z-10">
+                  <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-black/60 text-white backdrop-blur-sm">
+                    <Play className="w-3.5 h-3.5" />
+                    Video
+                  </span>
+                </div>
+              )}
             </div>
           ) : (
             <Link href={`/products/${product.id}`} prefetch={true} className="aspect-[6/5] bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center">

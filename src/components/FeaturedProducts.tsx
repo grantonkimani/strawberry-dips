@@ -9,6 +9,7 @@ interface ApiProduct {
   description: string | null;
   base_price: number;
   image_url: string | null;
+  video_url?: string | null;
   featured?: boolean;
 }
 
@@ -22,8 +23,7 @@ export function FeaturedProducts() {
       try {
         // Add caching and reduce limit for better performance
         const res = await fetch('/api/products?available=true&limit=6', {
-          cache: 'force-cache', // Enable caching
-          next: { revalidate: 300 } // Revalidate every 5 minutes
+          cache: 'no-store'
         });
         const data = await res.json();
         const list: ApiProduct[] = Array.isArray(data) ? data : (data.products || []);
@@ -73,6 +73,7 @@ export function FeaturedProducts() {
                   description: p.description || '',
                   base_price: p.base_price,
                   image_url: p.image_url || '/images/placeholder-gift.svg',
+                  video_url: p.video_url || undefined,
                   categories: undefined,
                   category: undefined,
                 }}
