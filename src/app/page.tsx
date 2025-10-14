@@ -90,13 +90,61 @@ export default function HomePage() {
         <LazyFeaturedProducts />
       </Suspense>
       
-      <Suspense fallback={<div className="py-16 text-center text-gray-600">Loading products…</div>}>
+      <Suspense fallback={
+        <section className="py-16 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Fresh Products</h2>
+              <p className="text-gray-600">Handcrafted with love, delivered fresh</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="aspect-square rounded-xl bg-gradient-to-br from-pink-100 to-purple-100 mb-4" />
+                  <div className="h-5 w-3/4 rounded bg-gray-200 mb-2" />
+                  <div className="h-4 w-1/2 rounded bg-gray-200 mb-3" />
+                  <div className="h-10 w-full rounded-lg bg-gradient-to-r from-pink-200 to-purple-200" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      }>
         <ProductGrid />
       </Suspense>
       
       {/* Static content loads immediately */}
       <WhyChoose />
       <Testimonials />
+      
+      {/* Trust Section */}
+      <section className="py-16 px-4 bg-gradient-to-r from-pink-50 to-purple-50">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <span className="text-2xl">✅</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Fresh Guarantee</h3>
+              <p className="text-gray-600">Made fresh daily or your money back</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <span className="text-2xl">🚚</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Same Day Delivery</h3>
+              <p className="text-gray-600">Order by 2PM for same-day delivery</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                <span className="text-2xl">💝</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Perfect Gifts</h3>
+              <p className="text-gray-600">Beautifully packaged for any occasion</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Support Section - Lazy loaded */}
       <section className="py-16 px-4">

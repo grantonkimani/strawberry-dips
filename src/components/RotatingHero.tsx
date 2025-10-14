@@ -132,15 +132,21 @@ export function RotatingHero() {
               <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-3">
                 {current.cta_label && current.cta_href ? (
                   <Link href={current.cta_href}>
-                    <Button className="h-11 px-6 text-base shadow-lg shadow-pink-700/30">{current.cta_label}</Button>
+                    <Button className="h-12 px-8 text-lg font-semibold bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-700 hover:to-red-700 shadow-xl shadow-pink-700/40 transform hover:scale-105 transition-all duration-200">
+                      {current.cta_label}
+                    </Button>
                   </Link>
                 ) : (
                   <>
-                    <Link href="/checkout">
-                      <Button className="h-11 px-6 text-base shadow-lg shadow-pink-700/30">Order Now</Button>
-                    </Link>
                     <Link href="/menu">
-                      <Button variant="outline" className="h-11 px-6 text-base bg-white/90 backdrop-blur hover:bg-white">View Menu</Button>
+                      <Button className="h-12 px-8 text-lg font-semibold bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-700 hover:to-red-700 shadow-xl shadow-pink-700/40 transform hover:scale-105 transition-all duration-200">
+                        🍓 Shop Now
+                      </Button>
+                    </Link>
+                    <Link href="/gifts">
+                      <Button variant="outline" className="h-12 px-8 text-lg font-semibold bg-white/95 backdrop-blur hover:bg-white border-2 border-white/50 hover:border-white shadow-lg">
+                        🎁 Gift Boxes
+                      </Button>
                     </Link>
                   </>
                 )}

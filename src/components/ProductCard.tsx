@@ -30,6 +30,10 @@ export function ProductCard({ product }: ProductCardProps) {
   // Get category name (new structure or legacy)
   const categoryName = product.categories?.name || product.category || 'Uncategorized';
   const price = product.base_price || 0;
+  
+  // Mock stock status for now - in real implementation, this would come from the database
+  const stockStatus = Math.random() > 0.7 ? 'low' : 'in-stock';
+  const stockCount = stockStatus === 'low' ? Math.floor(Math.random() * 3) + 1 : null;
 
   const handleAddToCart = () => {
     addItem({
@@ -98,6 +102,24 @@ export function ProductCard({ product }: ProductCardProps) {
               {categoryName}
             </span>
           </div>
+          
+          {/* Stock Status Badge */}
+          {stockStatus === 'low' && stockCount && (
+            <div className="absolute top-2 right-12">
+              <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium animate-pulse">
+                Only {stockCount} left!
+              </span>
+            </div>
+          )}
+          
+          {/* In Stock Badge */}
+          {stockStatus === 'in-stock' && (
+            <div className="absolute bottom-2 left-2">
+              <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                ✓ In Stock
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Product Info */}
@@ -125,10 +147,14 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardFooter className="p-4 pt-0">
         <Button 
           onClick={handleAddToCart}
-          className="w-full bg-pink-600 hover:bg-pink-700 text-white h-10 md:h-9 text-sm"
+          className={`w-full h-10 md:h-9 text-sm ${
+            stockStatus === 'low' 
+              ? 'bg-red-600 hover:bg-red-700 animate-pulse' 
+              : 'bg-pink-600 hover:bg-pink-700'
+          } text-white`}
         >
           <ShoppingCart className="h-3.5 w-3.5 mr-2" />
-          Add to Cart
+          {stockStatus === 'low' ? 'Order Now!' : 'Add to Cart'}
         </Button>
       </CardFooter>
     </Card>
