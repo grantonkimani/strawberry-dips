@@ -143,11 +143,11 @@ export default function ProductDetailPage() {
           {product.video_url && !showVideo && (
             <button
               aria-label="Play product video"
-              className="absolute inset-0 flex items-center justify-center group"
+              className="absolute inset-0 z-20 flex items-center justify-center group"
               onClick={() => setShowVideo(true)}
             >
               <span className="sr-only">Play video</span>
-              <div className="bg-black/40 w-full h-full absolute inset-0" />
+              <div className="bg-black/40 w-full h-full absolute inset-0 z-10" />
               <div className="relative z-10 flex items-center justify-center w-16 h-16 rounded-full bg-white text-gray-900 shadow-lg group-hover:scale-105 transition-transform">
                 <Play className="w-8 h-8 ml-1" />
               </div>
@@ -156,7 +156,7 @@ export default function ProductDetailPage() {
 
           {/* Render video only after user intent (click) */}
           {product.video_url && showVideo && (
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 z-30">
               <video
                 key={product.video_url}
                 className="w-full h-full object-cover"
