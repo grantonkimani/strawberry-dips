@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
+import ConfirmDeleteButton from '@/components/ConfirmDeleteButton';
 
 interface CustomRequest {
   id: string;
@@ -83,12 +84,8 @@ export default async function AdminCustomRequestsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right whitespace-nowrap text-sm">
-                      <form action={async () => {
-                        'use server'
-                        await deleteRequest(r.id);
-                      }}>
-                        <button type="submit" className="text-red-600 hover:text-red-700 font-medium">Delete</button>
-                      </form>
+                      {/* Client confirm dialog */}
+                      <ConfirmDeleteButton id={r.id} />
                     </td>
                   </tr>
                 ))}
