@@ -105,6 +105,15 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
                 <span className="text-lg">📦</span>
                 <span className="font-medium">Track Order</span>
               </Link>
+
+              <Link 
+                href="/custom" 
+                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors"
+                onClick={onClose}
+              >
+                <span className="text-lg">✨</span>
+                <span className="font-medium">Custom Order</span>
+              </Link>
               
               {/* About/Support/Contact removed per footer duplication */}
             </nav>

@@ -117,6 +117,9 @@ export function Header() {
             <Link href="/track" className="text-gray-600 hover:text-pink-600 font-medium transition-colors">
               Track Order
             </Link>
+            <Link href="/custom" className="text-gray-600 hover:text-pink-600 font-medium transition-colors">
+              Custom Order
+            </Link>
           </nav>
 
           {/* Right Side Actions */}
