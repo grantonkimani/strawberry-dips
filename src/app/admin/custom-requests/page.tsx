@@ -60,6 +60,7 @@ export default async function AdminCustomRequestsPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Occasion</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Event Date</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Area</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Images</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Budget</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="px-4 py-3" />
@@ -77,6 +78,22 @@ export default async function AdminCustomRequestsPage() {
                     <td className="px-4 py-3 text-sm text-gray-700 hidden lg:table-cell">{r.occasion || '-'}</td>
                     <td className="px-4 py-3 text-sm text-gray-700 hidden md:table-cell">{r.event_date || '-'}</td>
                     <td className="px-4 py-3 text-sm text-gray-700 hidden md:table-cell">{r.area || '-'}</td>
+                    <td className="px-4 py-3 text-sm hidden md:table-cell">
+                      {Array.isArray(r.image_urls) && r.image_urls.length > 0 ? (
+                        <div className="flex items-center gap-2">
+                          {r.image_urls.slice(0,3).map((url, i) => (
+                            <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block h-10 w-10 overflow-hidden rounded border border-gray-200">
+                              <img src={url} alt={`ref-${i+1}`} className="h-full w-full object-cover" />
+                            </a>
+                          ))}
+                          {r.image_urls.length > 3 && (
+                            <span className="text-xs text-gray-500">+{r.image_urls.length - 3} more</span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-gray-500">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-sm text-gray-700 hidden lg:table-cell">{r.budget || '-'}</td>
                     <td className="px-4 py-3 text-sm">
                       <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">

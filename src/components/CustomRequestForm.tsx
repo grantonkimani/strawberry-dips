@@ -26,10 +26,33 @@ export default function CustomRequestForm() {
   async function handleUpload(file: File): Promise<UploadResult> {
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch('/api/uploads/product-image', { method: 'POST', body: formData });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error || 'Upload failed');
-    return data as UploadResult;
+    const base =
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      (process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : '');
+    // Try banners upload first; fall back to product-image route if needed
+    const urls = [
+      base ? `${base}/api/banners/upload` : '/api/banners/upload',
+      base ? `${base}/api/uploads/product-image` : '/api/uploads/product-image',
+    ];
+    let lastErr: any = null;
+    for (const url of urls) {
+      try {
+        const res = await fetch(url, { method: 'POST', body: formData });
+        let data: any = null;
+        try {
+          data = await res.json();
+        } catch {
+          const text = await res.text();
+          throw new Error(text || 'Upload failed');
+        }
+        if (!res.ok) throw new Error(data?.error || 'Upload failed');
+        return data as UploadResult;
+      } catch (e) {
+        lastErr = e;
+        continue;
+      }
+    }
+    throw new Error(lastErr?.message || 'Upload failed');
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -51,7 +74,11 @@ export default function CustomRequestForm() {
         uploaded.push(result);
       }
 
-      const res = await fetch('/api/custom', {
+      const base =
+        process.env.NEXT_PUBLIC_BASE_URL ||
+        (process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : '');
+      const url = base ? `${base}/api/custom` : '/api/custom';
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -66,7 +93,13 @@ export default function CustomRequestForm() {
           image_urls: uploaded.map(u => u.url),
         }),
       });
-      const data = await res.json();
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        const text = await res.text();
+        throw new Error(text || 'Failed to submit request');
+      }
       if (!res.ok) throw new Error(data?.error || 'Failed to submit request');
 
       setSuccess('Request submitted! We will contact you shortly.');
@@ -189,19 +222,25 @@ export default function CustomRequestForm() {
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Reference images (up to 3)</label>
-        <div className="mt-2 rounded-lg border-2 border-dashed border-gray-300 bg-white hover:border-pink-400 transition-colors">
+        <div
+          className="mt-2 rounded-lg border-2 border-dashed border-gray-300 bg-white hover:border-pink-400 transition-colors cursor-pointer"
+          onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Click to upload reference images"
+        >
           <div className="px-4 py-6 text-center">
             <svg className="mx-auto h-8 w-8 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h10a4 4 0 004-4V7a4 4 0 00-4-4H7a4 4 0 00-4 4v8z" />
             </svg>
             <p className="mt-3 text-sm text-gray-700">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="font-medium text-pink-600 hover:text-pink-700"
-              >
-                Click to upload
-              </button>
+              <span className="font-medium text-pink-600 hover:text-pink-700">Click to upload</span>
               <span className="text-gray-500"> or drag and drop</span>
             </p>
             <p className="mt-1 text-xs text-gray-500">JPG/PNG, up to 5MB each.</p>
