@@ -4,43 +4,57 @@ import { supabase } from '@/lib/supabase';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const period = searchParams.get('period') || 'week'; // day, week, month, year
+    const period = searchParams.get('period') || 'week'; // day, week, month, year, all
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
     // Calculate date ranges
     const now = new Date();
-    let dateFilter = '';
-    
+    let rangeStart: string | null = null;
+    let rangeEnd: string | null = null;
     if (startDate && endDate) {
-      dateFilter = `AND created_at >= '${startDate}' AND created_at <= '${endDate}'`;
+      rangeStart = new Date(startDate).toISOString();
+      rangeEnd = new Date(endDate).toISOString();
     } else {
       switch (period) {
-        case 'day':
-          const today = now.toISOString().split('T')[0];
-          dateFilter = `AND created_at >= '${today}'`;
+        case 'day': {
+          const todayStart = new Date(now);
+          todayStart.setHours(0, 0, 0, 0);
+          rangeStart = todayStart.toISOString();
+          rangeEnd = now.toISOString();
           break;
-        case 'week':
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-          dateFilter = `AND created_at >= '${weekAgo}'`;
+        }
+        case 'week': {
+          rangeStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+          rangeEnd = now.toISOString();
           break;
-        case 'month':
-          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
-          dateFilter = `AND created_at >= '${monthAgo}'`;
+        }
+        case 'month': {
+          rangeStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+          rangeEnd = now.toISOString();
           break;
-        case 'year':
-          const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString();
-          dateFilter = `AND created_at >= '${yearAgo}'`;
+        }
+        case 'year': {
+          rangeStart = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString();
+          rangeEnd = now.toISOString();
           break;
+        }
+        case 'all':
+        default: {
+          rangeStart = null;
+          rangeEnd = null;
+        }
       }
     }
 
     // Get order statistics - only confirmed/paid orders for accurate analytics
-    const { data: orders, error: ordersError } = await supabase
+    let ordersQuery = supabase
       .from('orders')
       .select('*')
-      .gte('created_at', startDate || new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString())
-      .in('status', ['delivered', 'preparing', 'confirmed', 'paid']); // Only include successful orders
+      .in('status', ['delivered', 'preparing', 'confirmed', 'paid']);
+    if (rangeStart) ordersQuery = ordersQuery.gte('created_at', rangeStart);
+    if (rangeEnd) ordersQuery = ordersQuery.lte('created_at', rangeEnd);
+    const { data: orders, error: ordersError } = await ordersQuery; // Only include successful orders
 
     if (ordersError) {
       return NextResponse.json({ error: 'Failed to fetch order statistics' }, { status: 500 });
@@ -57,14 +71,16 @@ export async function GET(request: NextRequest) {
     const orderStats = {
       total_orders: totalOrders,
       total_revenue: totalRevenue,
-      pending_orders: preparingOrders, // Renamed to be more accurate
+      pending_orders: preparingOrders, // preparing
       completed_orders: completedOrders,
-      cancelled_orders: 0, // Not included in our query anymore
+      confirmed_orders: confirmedOrders,
+      paid_orders: paidOrders,
+      cancelled_orders: 0,
       average_order_value: totalOrders > 0 ? totalRevenue / totalOrders : 0
     };
 
     // Get product performance - only for confirmed orders
-    const { data: productStats, error: productError } = await supabase
+    let productQuery = supabase
       .from('order_items')
       .select(`
         product_name,
@@ -72,8 +88,10 @@ export async function GET(request: NextRequest) {
         total_price,
         orders!inner(created_at, status)
       `)
-      .gte('orders.created_at', startDate || new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString())
       .in('orders.status', ['delivered', 'preparing', 'confirmed', 'paid']);
+    if (rangeStart) productQuery = productQuery.gte('orders.created_at', rangeStart);
+    if (rangeEnd) productQuery = productQuery.lte('orders.created_at', rangeEnd);
+    const { data: productStats, error: productError } = await productQuery;
 
     // Process product data
     const productPerformance = productStats?.reduce((acc: any, item: any) => {
@@ -97,10 +115,12 @@ export async function GET(request: NextRequest) {
       .slice(0, 10);
 
     // Get payment method statistics
-    const { data: paymentStats, error: paymentError } = await supabase
+    let paymentQuery = supabase
       .from('orders')
-      .select('payment_method')
-      .gte('created_at', startDate || new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString());
+      .select('payment_method');
+    if (rangeStart) paymentQuery = paymentQuery.gte('created_at', rangeStart);
+    if (rangeEnd) paymentQuery = paymentQuery.lte('created_at', rangeEnd);
+    const { data: paymentStats, error: paymentError } = await paymentQuery;
 
     const paymentMethods = paymentStats?.reduce((acc: any, order: any) => {
       const method = order.payment_method || 'unknown';
@@ -109,10 +129,12 @@ export async function GET(request: NextRequest) {
     }, {}) || {};
 
     // Get customer statistics
-    const { data: customerStats, error: customerError } = await supabase
+    let customerQuery = supabase
       .from('customers')
-      .select('id, created_at, email_verified')
-      .gte('created_at', startDate || new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString());
+      .select('id, created_at, email_verified');
+    if (rangeStart) customerQuery = customerQuery.gte('created_at', rangeStart);
+    if (rangeEnd) customerQuery = customerQuery.lte('created_at', rangeEnd);
+    const { data: customerStats, error: customerError } = await customerQuery;
 
     const newCustomers = customerStats?.length || 0;
     const verifiedCustomers = customerStats?.filter(c => c.email_verified).length || 0;

@@ -45,9 +45,12 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [showFailedOrders, setShowFailedOrders] = useState(false);
+  const [analyticsTotals, setAnalyticsTotals] = useState<{ totalRevenue: number; totalOrders: number; avgOrder: number; paidOrders: number; confirmedOrders: number; pendingOrders: number } | null>(null);
+  const [period, setPeriod] = useState<'day' | 'week' | 'month' | 'year' | 'all'>('all');
 
   useEffect(() => {
     fetchOrders();
+    fetchAnalyticsTotals('all');
   }, []);
 
   // Filter orders based on failed orders toggle
@@ -84,6 +87,25 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Always-on totals from analytics endpoint (not affected by pagination)
+  const fetchAnalyticsTotals = async (p: 'day' | 'week' | 'month' | 'year' | 'all') => {
+    try {
+      const res = await fetch(`/api/admin/analytics?period=${p}`, { cache: 'no-store' });
+      const json = await res.json();
+      if (json?.success && json?.data?.orderStats) {
+        const os = json.data.orderStats;
+        setAnalyticsTotals({
+          totalRevenue: Number(os.total_revenue || 0),
+          totalOrders: Number(os.total_orders || 0),
+          avgOrder: Number(os.average_order_value || 0),
+          paidOrders: Number(os.paid_orders || 0),
+          confirmedOrders: Number(os.confirmed_orders || 0),
+          pendingOrders: Number(os.pending_orders || 0),
+        });
+      }
+    } catch {}
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
@@ -191,6 +213,21 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Admin Dashboard</h1>
           <p className="text-gray-600">Manage orders and track business performance</p>
+          <div className="mt-3 flex items-center gap-2">
+            <label className="text-sm text-gray-600">Range:</label>
+            <select
+              value={period}
+              onChange={(e) => { const p = e.target.value as any; setPeriod(p); fetchAnalyticsTotals(p); }}
+              className="text-sm border border-gray-300 rounded-md px-2 py-1"
+              title="Analytics range"
+            >
+              <option value="day">Today</option>
+              <option value="week">Last 7 Days</option>
+              <option value="month">Last 30 Days</option>
+              <option value="year">Last Year</option>
+              <option value="all">All Time</option>
+            </select>
+          </div>
         </div>
       </div>
         {/* Stats Cards */}
@@ -201,7 +238,7 @@ export default function AdminDashboard() {
                 <Package className="h-8 w-8 text-pink-500" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                  <p className="text-2xl font-bold text-gray-900">{filteredOrders?.length || 0}</p>
+                  <p className="text-2xl font-bold text-gray-900">{analyticsTotals?.totalOrders ?? (filteredOrders?.length || 0)}</p>
                 </div>
               </div>
             </CardContent>
@@ -213,9 +250,7 @@ export default function AdminDashboard() {
                 <CheckCircle className="h-8 w-8 text-pink-500" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Paid Orders</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {filteredOrders?.filter(o => o.status === 'paid').length || 0}
-                  </p>
+                  <p className="text-2xl font-bold text-gray-900">{analyticsTotals?.paidOrders ?? (filteredOrders?.filter(o => o.status === 'paid').length || 0)}</p>
                 </div>
               </div>
             </CardContent>
@@ -241,13 +276,7 @@ export default function AdminDashboard() {
                 <DollarSign className="h-8 w-8 text-pink-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    KSH {filteredOrders?.filter(order => 
-                      order.status === 'paid' || 
-                      order.status === 'completed' || 
-                      order.status === 'confirmed'
-                    ).reduce((sum, order) => sum + order.total, 0).toFixed(2) || '0.00'}
-                  </p>
+                  <p className="text-2xl font-bold text-gray-900">KSH {(analyticsTotals?.totalRevenue ?? 0).toFixed(2)}</p>
                 </div>
               </div>
             </CardContent>

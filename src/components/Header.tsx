@@ -161,10 +161,15 @@ export function Header() {
               </a>
             </div>
 
-            {/* Help: hidden on mobile, shown on md+; moved to MobileNav on small screens */}
-            <Button variant="ghost" size="icon" className="hidden md:inline-flex text-gray-600 hover:text-pink-600 active:bg-pink-50 h-10 w-10 sm:h-11 sm:w-11 md:h-9 md:w-9" onClick={() => setIsHelpOpen(true)} aria-label="Help">
-              <HelpCircle className="h-6 w-6 sm:h-7 sm:w-7 md:h-5 md:w-5" strokeWidth={2.25} />
-            </Button>
+            {/* Help: render with plain button to avoid hydration class mismatch; hidden on mobile via utility */}
+            <button
+              type="button"
+              onClick={() => setIsHelpOpen(true)}
+              aria-label="Help"
+              className="hidden md:inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 w-10 md:h-9 md:w-9 text-gray-600 hover:text-pink-600 active:bg-pink-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <HelpCircle className="h-5 w-5" strokeWidth={2.25} />
+            </button>
             {/* Search - Hidden on mobile */}
             <div className="hidden lg:flex items-center">
               <div className="relative">
