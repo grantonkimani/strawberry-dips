@@ -14,7 +14,12 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
-    const limit = searchParams.get('limit') || '50';
+    const pageParam = parseInt(searchParams.get('page') || '1', 10);
+    const pageSizeParam = parseInt(searchParams.get('pageSize') || '20', 10);
+    const page = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
+    const pageSize = Number.isNaN(pageSizeParam) || pageSizeParam < 1 ? 20 : Math.min(pageSizeParam, 100);
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
 
     // Add timeout to prevent hanging requests
     const timeoutPromise = new Promise((_, reject) => {
@@ -22,33 +27,37 @@ export async function GET(request: NextRequest) {
     });
 
     const queryPromise = (async () => {
+      // Only fetch fields needed for list view (exclude heavy nested relations)
       let query = supabase
         .from('orders')
-        .select(`
-          *,
-          order_items (*)
-        `)
+        .select(
+          `id, stripe_payment_intent_id, status, payment_status, subtotal, delivery_fee, total, customer_email, customer_first_name, customer_last_name, customer_phone, delivery_address, delivery_city, delivery_state, delivery_zip_code, delivery_date, delivery_time, special_instructions, created_at`,
+          { count: 'exact' }
+        )
         .order('created_at', { ascending: false })
-        .limit(parseInt(limit));
+        .range(from, to);
 
       if (status) {
         query = query.eq('status', status);
       }
 
-      const { data: orders, error } = await query;
+      const { data: orders, error, count } = await query;
 
       if (error) {
         console.error('Supabase query error:', error);
         throw error;
       }
 
-      return orders;
+      return { orders, count: count || 0 };
     })();
 
-    const orders = await Promise.race([queryPromise, timeoutPromise]);
+    const result = (await Promise.race([queryPromise, timeoutPromise])) as { orders: any[]; count: number };
 
-    console.log('Orders fetched successfully:', Array.isArray(orders) ? orders.length : 0);
-    return NextResponse.json({ orders: orders || [] });
+    const total = result?.count || 0;
+    const hasMore = from + (result?.orders?.length || 0) < total;
+
+    console.log('Orders fetched successfully:', Array.isArray(result?.orders) ? result.orders.length : 0);
+    return NextResponse.json({ orders: result?.orders || [], page, pageSize, total, hasMore });
 
   } catch (error) {
     console.error('Error fetching orders:', error);

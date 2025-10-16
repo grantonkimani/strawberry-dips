@@ -35,7 +35,7 @@ interface Order {
   delivery_time: string;
   special_instructions: string;
   created_at: string;
-  order_items: OrderItem[];
+  order_items?: OrderItem[]; // may be absent in list payload
 }
 
 export default function AdminDashboard() {
@@ -337,7 +337,7 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {order.order_items.length} item{order.order_items.length !== 1 ? 's' : ''}
+                            {(order.order_items?.length ?? 0)} item{(order.order_items?.length ?? 0) !== 1 ? 's' : ''}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">

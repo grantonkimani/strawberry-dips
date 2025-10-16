@@ -72,6 +72,19 @@ export function Header() {
     }
   }, []);
 
+  // Listen for mobile nav "open-help" event to trigger HelpDrawer
+  useEffect(() => {
+    const handler = () => setIsHelpOpen(true);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('open-help', handler as EventListener);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('open-help', handler as EventListener);
+      }
+    };
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-pink-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4">
@@ -148,8 +161,8 @@ export function Header() {
               </a>
             </div>
 
-            {/* Help */}
-            <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 h-10 w-10 sm:h-11 sm:w-11 md:h-9 md:w-9" onClick={() => setIsHelpOpen(true)} aria-label="Help">
+            {/* Help: hidden on mobile, shown on md+; moved to MobileNav on small screens */}
+            <Button variant="ghost" size="icon" className="hidden md:inline-flex text-gray-600 hover:text-pink-600 active:bg-pink-50 h-10 w-10 sm:h-11 sm:w-11 md:h-9 md:w-9" onClick={() => setIsHelpOpen(true)} aria-label="Help">
               <HelpCircle className="h-6 w-6 sm:h-7 sm:w-7 md:h-5 md:w-5" strokeWidth={2.25} />
             </Button>
             {/* Search - Hidden on mobile */}

@@ -75,7 +75,18 @@ export async function GET(request: NextRequest) {
 		}
 		if (availableOnly) query = query.eq('is_available', true)
 
-		const { data, error } = await query
+		let { data, error } = await query
+		if (error) {
+			console.warn('GET /api/products join failed, retrying without categories:', error?.message || error)
+			const retry = await supabase
+				.from('products')
+				.select('*')
+				.order('created_at', { ascending: false })
+				.limit(limit)
+			data = retry.data as any
+			error = retry.error as any
+		}
+
 		if (error) throw error
 
 		return NextResponse.json(data)
@@ -96,25 +107,57 @@ export async function POST(request: NextRequest) {
 		}
 
     const body = await request.json()
-    const { name, description, base_price, category_id, image_url, video_url, poster_url, is_available = true } = body
+    const { name, description, base_price, category_id, image_url, image_urls, video_url, poster_url, is_available = true } = body
 
 		if (!name || !base_price || !category_id) {
 			return NextResponse.json({ error: 'Missing required fields: name, base_price, and category_id are required' }, { status: 400 })
 		}
 
-    const { data, error } = await supabase
-			.from('products')
-      .insert({ name, description, base_price, category_id, image_url, video_url, poster_url, is_available })
-			.select(`
-				*,
-				categories (
-					id,
-					name,
-					description,
-					display_order
-				)
-			`)
-			.single()
+    // Coerce and validate image_urls
+    let finalImageUrls: string[] | null = null
+    if (Array.isArray(image_urls)) {
+      const seen = new Set<string>()
+      finalImageUrls = image_urls
+        .filter((u: any) => typeof u === 'string' && u.trim())
+        .map((u: string) => normalizePublicUrl(u.trim()))
+        .filter((u: string) => (seen.has(u) ? false : (seen.add(u), true)))
+        .slice(0, 3)
+    }
+
+    const coverImage = finalImageUrls?.[0] || (typeof image_url === 'string' ? normalizePublicUrl(image_url) : null)
+
+    let { data, error } = await supabase
+      .from('products')
+      .insert({ name, description, base_price, category_id, image_url: coverImage, image_urls: finalImageUrls, video_url, poster_url, is_available })
+      .select(`
+        *,
+        categories (
+          id,
+          name,
+          description,
+          display_order
+        )
+      `)
+      .single()
+
+    // Fallback if image_urls column doesn't exist yet
+    if (error && (error.message?.includes('image_urls') || error.message?.includes('column') || error.code === '42703')) {
+      const retry = await supabase
+        .from('products')
+        .insert({ name, description, base_price, category_id, image_url: coverImage, video_url, poster_url, is_available })
+        .select(`
+          *,
+          categories (
+            id,
+            name,
+            description,
+            display_order
+          )
+        `)
+        .single()
+      data = retry.data as any
+      error = retry.error as any
+    }
 
 		if (error) {
 			console.error('Supabase error:', error)
@@ -126,5 +169,15 @@ export async function POST(request: NextRequest) {
 		console.error('POST /api/products error:', error)
 		return NextResponse.json({ error: 'Failed to create product' }, { status: 500 })
 	}
+}
+
+function normalizePublicUrl(url?: string | null): string {
+  if (!url) return ''
+  if (url.includes('/object/public/product-images/')) return url
+  const marker = '/storage/v1/object/product-images/'
+  if (url.includes(marker)) {
+    return url.replace('/storage/v1/object/product-images/', '/storage/v1/object/public/product-images/')
+  }
+  return url
 }
 

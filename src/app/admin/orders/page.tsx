@@ -34,7 +34,7 @@ interface Order {
   delivery_time: string;
   special_instructions: string;
   created_at: string;
-  order_items: OrderItem[];
+  order_items?: OrderItem[]; // not included in list API; fetched on demand
 }
 
 export default function AdminOrdersPage() {
@@ -47,10 +47,14 @@ export default function AdminOrdersPage() {
   const [showFailedOrders, setShowFailedOrders] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'pending' | 'cancelled' | 'out_for_delivery' | 'confirmed' | 'failed' | 'timeout' | 'document_pending'>('all');
   const [sortBy, setSortBy] = useState<'date_desc' | 'date_asc' | 'status'>('date_desc');
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(20);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrders(0, page);
+  }, [page]);
 
   // Filter and sort orders
   useEffect(() => {
@@ -119,9 +123,11 @@ export default function AdminOrdersPage() {
     setFilteredOrders(filtered);
   }, [searchQuery, orders, showFailedOrders, statusFilter, sortBy]);
 
-  const fetchOrders = async (retryCount = 0) => {
+  const fetchOrders = async (retryCount = 0, pageArg?: number) => {
     try {
-      const response = await fetch('/api/orders', {
+      const currentPage = pageArg ?? page;
+      const params = new URLSearchParams({ page: String(currentPage), pageSize: String(pageSize) });
+      const response = await fetch(`/api/orders?${params.toString()}`, {
         cache: 'no-store', // Always fetch fresh data
         headers: {
           'Content-Type': 'application/json',
@@ -137,10 +143,14 @@ export default function AdminOrdersPage() {
       if (Array.isArray(data)) {
         setOrders(data);
         setFilteredOrders(data);
+        setTotal(data.length);
+        setHasMore(false);
         setError(null); // Clear any previous errors
       } else if (data.orders) {
         setOrders(data.orders);
         setFilteredOrders(data.orders);
+        setTotal(typeof data.total === 'number' ? data.total : data.orders.length);
+        setHasMore(!!data.hasMore);
         setError(null); // Clear any previous errors
       } else if (data.error) {
         setError(data.error);
@@ -154,7 +164,7 @@ export default function AdminOrdersPage() {
       if (retryCount < 2) {
         console.log(`Retrying orders fetch (attempt ${retryCount + 1})...`);
         setTimeout(() => {
-          fetchOrders(retryCount + 1);
+          fetchOrders(retryCount + 1, pageArg);
         }, 1000 * (retryCount + 1)); // Exponential backoff
         return; // Don't set loading to false yet
       }
@@ -165,6 +175,20 @@ export default function AdminOrdersPage() {
         setLoading(false);
       }
     }
+  };
+
+  const loadOrderDetails = async (orderId: string) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, { cache: 'no-store' });
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json?.order) {
+        setSelectedOrder(json.order);
+        // also update in the list copy to include items for that one order (optional)
+        setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, order_items: json.order.order_items || [] } : o)) as Order[]);
+        setFilteredOrders(prev => prev.map(o => (o.id === orderId ? { ...o, order_items: json.order.order_items || [] } : o)) as Order[]);
+      }
+    } catch {}
   };
 
   const getStatusIcon = (status: string) => {
@@ -391,7 +415,12 @@ export default function AdminOrdersPage() {
                             ? 'border-pink-500 bg-pink-50'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
-                        onClick={() => setSelectedOrder(order)}
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          if (!order.order_items) {
+                            loadOrderDetails(order.id);
+                          }
+                        }}
                       >
                         <div className="flex items-center justify-between">
                           <div>
@@ -423,6 +452,28 @@ export default function AdminOrdersPage() {
                         </div>
                       </div>
                     ))}
+                    {/* Pagination Controls */}
+                    <div className="flex items-center justify-between pt-4">
+                      <div className="text-sm text-gray-600">
+                        Page {page} · {orders.length} of {total} orders
+                      </div>
+                      <div className="space-x-2">
+                        <Button
+                          variant="outline"
+                          disabled={page <= 1}
+                          onClick={() => setPage(p => Math.max(1, p - 1))}
+                        >
+                          Previous
+                        </Button>
+                        <Button
+                          variant="outline"
+                          disabled={!hasMore}
+                          onClick={() => setPage(p => p + 1)}
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -491,7 +542,7 @@ export default function AdminOrdersPage() {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-2">Items</h3>
                     <div className="space-y-2">
-                      {selectedOrder.order_items.map((item) => (
+                      {(selectedOrder.order_items || []).map((item) => (
                         <div key={item.id} className="flex justify-between text-sm">
                           <div>
                             <p className="font-medium">{item.product_name}</p>
@@ -500,6 +551,9 @@ export default function AdminOrdersPage() {
                           <p className="font-medium">KSH {item.total_price.toFixed(2)}</p>
                         </div>
                       ))}
+                      {(!selectedOrder.order_items || selectedOrder.order_items.length === 0) && (
+                        <p className="text-sm text-gray-500">No items to display.</p>
+                      )}
                     </div>
                   </div>
 

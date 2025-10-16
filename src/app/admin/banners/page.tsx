@@ -131,7 +131,7 @@ export default function BannersAdminPage() {
           <div className="space-y-3">
             {banners.map((b, i) => (
               <div key={b.id} className="flex flex-col sm:flex-row sm:items-center gap-3 border rounded p-3 bg-white">
-                <img src={b.image_url} alt={b.alt || ''} className="h-16 w-full sm:w-28 object-cover rounded" />
+                <img src={b.image_url} alt={b.alt || ''} className="h-16 w-full sm:w-28 object-cover rounded" loading="lazy" width={112} height={64} />
                 <div className="flex-1 min-w-0">
                   <div className="font-medium truncate">{b.headline || '(no headline)'}</div>
                   <div className="text-xs text-gray-600 truncate">{b.image_url}</div>

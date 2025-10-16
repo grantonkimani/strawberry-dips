@@ -13,6 +13,7 @@ interface Product {
 	base_price: number
 	category_id: string | null
 	image_url: string | null
+	image_urls?: string[] | null
 	video_url?: string | null
 	poster_url?: string | null
 	is_available: boolean
@@ -41,6 +42,7 @@ const emptyForm = {
 	base_price: 0,
 	category_id: '',
 	image_url: '',
+	image_urls: [] as string[],
 	video_url: '',
 	poster_url: '',
 	is_available: true,
@@ -112,9 +114,36 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
       const res = await fetch('/api/uploads/product-image', { method: 'POST', body: formData })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Upload failed')
-      setForm(prev => ({ ...prev, image_url: data.url }))
+      setForm(prev => ({ ...prev, image_url: data.url, image_urls: prev.image_urls?.length ? prev.image_urls : [data.url] }))
 		} catch (err) {
 			setError('Failed to upload image. Please try again.')
+		} finally {
+			setIsUploadingCreate(false)
+		}
+	}
+
+	async function handleMultiUploadForCreate(e: React.ChangeEvent<HTMLInputElement>) {
+		const files = Array.from(e.target.files || [])
+		if (!files.length) return
+		setIsUploadingCreate(true)
+		try {
+			const newUrls: string[] = []
+			for (const file of files) {
+				const fd = new FormData()
+				fd.append('file', file)
+				const res = await fetch('/api/uploads/product-image', { method: 'POST', body: fd })
+				const data = await res.json()
+				if (!res.ok) throw new Error(data.error || 'Upload failed')
+				newUrls.push(data.url)
+			}
+			setForm(prev => {
+				const existing = prev.image_urls || []
+				const merged = [...existing, ...newUrls]
+				const dedup = merged.filter((u, i, arr) => u && arr.indexOf(u) === i).slice(0, 3)
+				return { ...prev, image_urls: dedup, image_url: dedup[0] || prev.image_url }
+			})
+		} catch (err) {
+			setError('Failed to upload images. Please try again.')
 		} finally {
 			setIsUploadingCreate(false)
 		}
@@ -130,12 +159,77 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
       const res = await fetch('/api/uploads/product-image', { method: 'POST', body: formData })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Upload failed')
-      setEditForm(prev => ({ ...prev, image_url: data.url }))
+      setEditForm(prev => ({ ...prev, image_url: data.url, image_urls: (prev.image_urls as string[] | undefined)?.length ? prev.image_urls : [data.url] }))
 		} catch (err) {
 			setError('Failed to upload image. Please try again.')
 		} finally {
 			setIsUploadingEdit(false)
 		}
+	}
+
+	async function handleMultiUploadForEdit(e: React.ChangeEvent<HTMLInputElement>) {
+		const files = Array.from(e.target.files || [])
+		if (!files.length) return
+		setIsUploadingEdit(true)
+		try {
+			const newUrls: string[] = []
+			for (const file of files) {
+				const fd = new FormData()
+				fd.append('file', file)
+				const res = await fetch('/api/uploads/product-image', { method: 'POST', body: fd })
+				const data = await res.json()
+				if (!res.ok) throw new Error(data.error || 'Upload failed')
+				newUrls.push(data.url)
+			}
+			setEditForm(prev => {
+				const existing = (prev.image_urls as string[] | undefined) || []
+				const merged = [...existing, ...newUrls]
+				const dedup = merged.filter((u, i, arr) => u && arr.indexOf(u) === i).slice(0, 3)
+				return { ...prev, image_urls: dedup, image_url: dedup[0] || (prev.image_url as string | undefined) || null }
+			})
+		} catch (err) {
+			setError('Failed to upload images. Please try again.')
+		} finally {
+			setIsUploadingEdit(false)
+		}
+	}
+
+	function removeCreateImage(index: number) {
+		setForm(prev => {
+			const list = [...(prev.image_urls || [])]
+			list.splice(index, 1)
+			return { ...prev, image_urls: list, image_url: list[0] || '' }
+		})
+	}
+
+	function moveCreateImage(index: number, dir: -1 | 1) {
+		setForm(prev => {
+			const list = [...(prev.image_urls || [])]
+			const j = index + dir
+			if (j < 0 || j >= list.length) return prev
+			;[list[index], list[j]] = [list[j], list[index]]
+			return { ...prev, image_urls: list, image_url: list[0] || prev.image_url }
+		})
+	}
+
+	function removeEditImage(index: number) {
+		setEditForm(prev => {
+			const current = (prev.image_urls as string[] | undefined) || []
+			const list = [...current]
+			list.splice(index, 1)
+			return { ...prev, image_urls: list, image_url: list[0] || (prev.image_url as string | undefined) || null }
+		})
+	}
+
+	function moveEditImage(index: number, dir: -1 | 1) {
+		setEditForm(prev => {
+			const current = (prev.image_urls as string[] | undefined) || []
+			const list = [...current]
+			const j = index + dir
+			if (j < 0 || j >= list.length) return prev
+			;[list[index], list[j]] = [list[j], list[index]]
+			return { ...prev, image_urls: list, image_url: list[0] || (prev.image_url as string | undefined) || null }
+		})
 	}
 
 	async function createProduct() {
@@ -165,6 +259,7 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 			const normalizedForm = {
 				...form,
 				image_url: normalizePublicUrl(form.image_url),
+				image_urls: (form.image_urls || []).map(u => normalizePublicUrl(u)),
 				poster_url: normalizePublicUrl(form.poster_url),
 				video_url: form.video_url
 			}
@@ -196,6 +291,7 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 			base_price: product.base_price,
 			category_id: product.category_id,
 			image_url: product.image_url,
+			image_urls: product.image_urls || (product.image_url ? [product.image_url] : []),
 			video_url: product.video_url || null,
 			poster_url: product.poster_url || null,
 			is_available: product.is_available
@@ -243,6 +339,7 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 			const normalizedEdit = {
 				...editForm,
 				image_url: normalizePublicUrl(editForm.image_url || ''),
+				image_urls: (editForm.image_urls as string[] | undefined)?.map(u => normalizePublicUrl(u)) || undefined,
 				poster_url: normalizePublicUrl(editForm.poster_url || ''),
 				video_url: editForm.video_url
 			}
@@ -306,7 +403,7 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 					</div>
 				)}
 				
-				{isCreating && (
+                {isCreating && (
 					<Card>
 						<CardHeader>
 							<CardTitle>New Product</CardTitle>
@@ -329,19 +426,30 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 									<input name="base_price" type="number" min={0} step={0.01} value={form.base_price} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" />
 								</div>
 								<div>
-									<label className="block text-sm font-semibold text-gray-800 mb-1">Image</label>
+						<label className="block text-sm font-semibold text-gray-800 mb-1">Images (up to 3)</label>
 									<div className="space-y-2">
-										<input name="image_url" value={form.image_url} onChange={handleChange} placeholder="https://... (optional if you upload)" className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" />
-										<div className="flex items-center space-x-3">
-											<label className="inline-block">
-												<span className="sr-only">Upload image</span>
-												<input type="file" accept="image/*" onChange={handleUploadForCreate} className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100" />
-											</label>
-											{isUploadingCreate && <span className="text-sm text-gray-600">Uploading...</span>}
+							<input name="image_url" value={form.image_url} onChange={handleChange} placeholder="Cover image URL (optional if you upload)" className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" />
+							<div className="flex items-center space-x-3">
+								<label className="inline-block">
+									<span className="sr-only">Upload images</span>
+									<input type="file" accept="image/*" multiple onChange={handleMultiUploadForCreate} className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100" />
+								</label>
+								{isUploadingCreate && <span className="text-sm text-gray-600">Uploading...</span>}
+							</div>
+							{(form.image_urls || []).length > 0 && (
+								<div className="flex flex-wrap gap-2">
+								{(form.image_urls || []).map((url, i) => (
+										<div key={url + i} className="relative">
+											<img src={url} alt={`Image ${i+1}`} className="h-20 w-28 object-cover rounded border" loading="lazy" width={112} height={80} />
+											<div className="absolute -top-2 -right-2 flex space-x-1">
+												<Button size="sm" variant="outline" onClick={() => moveCreateImage(i, -1)} disabled={i===0}>↑</Button>
+												<Button size="sm" variant="outline" onClick={() => moveCreateImage(i, 1)} disabled={i===(form.image_urls!.length-1)}>↓</Button>
+												<Button size="sm" className="bg-red-600 hover:bg-red-700 text-white" onClick={() => removeCreateImage(i)}>X</Button>
+											</div>
 										</div>
-										{form.image_url && (
-											<img src={form.image_url} alt="Preview" className="h-24 rounded border" />
-										)}
+									))}
+								</div>
+							)}
 									</div>
 								</div>
 				<div>
@@ -402,11 +510,11 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 							<div className="text-center py-8 text-gray-600">No products found.</div>
 						) : (
 							<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-								{products.map(p => (
+                  {products.map(p => (
 									<div key={p.id} className="border rounded-lg overflow-hidden bg-white">
 										<div className="h-40 bg-gray-100 flex items-center justify-center">
 											{p.image_url ? (
-												<img src={p.image_url} alt={p.name} className="h-full w-full object-cover" />
+                          <img src={p.image_url} alt={p.name} className="h-full w-full object-cover" loading="lazy" width={640} height={160} />
 											) : (
 												<span className="text-3xl">🍓</span>
 											)}
@@ -427,13 +535,24 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 											placeholder="https://... (optional if you upload)"
 											className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 mb-2" 
 										/>
-										<div className="flex items-center space-x-3 mb-2">
-											<input type="file" accept="image/*" onChange={handleUploadForEdit} className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100" />
+						<div className="flex items-center space-x-3 mb-2">
+							<input type="file" accept="image/*" multiple onChange={handleMultiUploadForEdit} className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100" />
 											{isUploadingEdit && <span className="text-sm text-gray-600">Uploading...</span>}
 										</div>
-										{editForm.image_url && (
-											<img src={editForm.image_url} alt="Preview" className="h-24 rounded border" />
-										)}
+						{((editForm.image_urls as string[] | undefined) || []).length > 0 && (
+							<div className="flex flex-wrap gap-2">
+								{((editForm.image_urls as string[] | undefined) || []).map((url, i, arr) => (
+									<div key={url + i} className="relative">
+										<img src={url} alt={`Image ${i+1}`} className="h-20 w-28 object-cover rounded border" loading="lazy" width={112} height={80} />
+										<div className="absolute -top-2 -right-2 flex space-x-1">
+											<Button size="sm" variant="outline" onClick={() => moveEditImage(i, -1)} disabled={i===0}>↑</Button>
+											<Button size="sm" variant="outline" onClick={() => moveEditImage(i, 1)} disabled={i===(arr.length-1)}>↓</Button>
+											<Button size="sm" className="bg-red-600 hover:bg-red-700 text-white" onClick={() => removeEditImage(i)}>X</Button>
+										</div>
+									</div>
+								))}
+							</div>
+						)}
 								<label className="block text-sm font-semibold text-gray-800 mb-1 mt-2">Product Video (MP4/WebM)</label>
 								<input 
 									value={editForm.video_url || ''} 

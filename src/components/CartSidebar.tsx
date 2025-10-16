@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Menu, ShoppingCart, User } from 'lucide-react';
+import { X, Menu, ShoppingCart, User, HelpCircle } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
@@ -121,6 +121,18 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
             {/* Additional Mobile Actions */}
             <div className="mt-8 pt-6 border-t border-gray-200">
               <div className="space-y-2">
+                <button 
+                  onClick={() => {
+                    // open help drawer by dispatching a custom event handled by Header
+                    const ev = new CustomEvent('open-help');
+                    window.dispatchEvent(ev);
+                    onClose();
+                  }}
+                  className="w-full flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors"
+                >
+                  <HelpCircle className="h-5 w-5" />
+                  <span className="font-medium">Help & Support</span>
+                </button>
                 <Link 
                   href="/cart" 
                   className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors"

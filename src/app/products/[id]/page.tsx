@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { GiftProductGrid } from '@/components/GiftProductGrid';
 import { ProductCard } from '@/components/ProductCard';
 import { Card, CardContent } from '@/components/ui/Card';
-import { ChevronLeft, Home, Menu, Play, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, Menu, Play, X } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -17,6 +17,7 @@ interface Product {
   description: string;
   base_price: number;
   image_url?: string;
+  image_urls?: string[] | null;
   video_url?: string; // optional product video
   poster_url?: string; // optional poster image for video
   categories?: { id: string; name: string };
@@ -35,6 +36,9 @@ export default function ProductDetailPage() {
   const [bestSellers, setBestSellers] = useState<Product[]>([]);
   const [giftsLoaded, setGiftsLoaded] = useState(false);
   const [bestSellersLoaded, setBestSellersLoaded] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchEndX, setTouchEndX] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -87,6 +91,21 @@ export default function ProductDetailPage() {
     };
   }, []);
 
+  // Keyboard navigation for gallery: always register to keep hook order stable
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!product) return;
+      if (e.key === 'ArrowLeft') {
+        setActiveImageIndex(i => Math.max(0, i - 1));
+      } else if (e.key === 'ArrowRight') {
+        const total = ((product.image_urls && product.image_urls.length > 0) ? product.image_urls.length : (product.image_url ? 1 : 1));
+        setActiveImageIndex(i => Math.min(total - 1, i + 1));
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [product]);
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -107,6 +126,18 @@ export default function ProductDetailPage() {
   
   if (!product) return <div className="max-w-7xl mx-auto px-4 py-10">Product not found.</div>;
 
+  const galleryImages: string[] = (() => {
+    const urls = (product.image_urls || []).filter(Boolean);
+    if (urls.length > 0) return urls as string[];
+    return product.image_url ? [product.image_url] : ['/images/placeholder-gift.svg'];
+  })();
+  const mainImage = galleryImages[Math.min(activeImageIndex, galleryImages.length - 1)] || '/images/placeholder-gift.svg';
+
+  const goPrev = () => setActiveImageIndex((i) => Math.max(0, i - 1));
+  const goNext = () => setActiveImageIndex((i) => Math.min(galleryImages.length - 1, i + 1));
+
+  // (Removed per stable hook order; keyboard listener registered above)
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Breadcrumb Navigation */}
@@ -125,11 +156,24 @@ export default function ProductDetailPage() {
       </nav>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-[6/5] md:aspect-square">
+        <div
+          className="relative bg-gray-100 rounded-lg overflow-hidden aspect-[6/5] md:aspect-square select-none"
+          onTouchStart={(e) => setTouchStartX(e.changedTouches[0]?.clientX ?? null)}
+          onTouchMove={(e) => setTouchEndX(e.changedTouches[0]?.clientX ?? null)}
+          onTouchEnd={() => {
+            if (touchStartX != null && touchEndX != null) {
+              const delta = touchEndX - touchStartX;
+              if (Math.abs(delta) > 40) {
+                if (delta < 0) goNext(); else goPrev();
+              }
+            }
+            setTouchStartX(null); setTouchEndX(null);
+          }}
+        >
           {/* Always show image first */}
           <div className="relative w-full h-full">
             <Image
-              src={product.image_url || '/images/placeholder-gift.svg'}
+              src={mainImage}
               alt={product.name}
               fill
               priority
@@ -138,6 +182,41 @@ export default function ProductDetailPage() {
               style={{ visibility: showVideo ? 'hidden' : 'visible' }}
             />
           </div>
+
+          {/* Preload adjacent images for smoother nav */}
+          {galleryImages[activeImageIndex + 1] && (
+            <Image src={galleryImages[activeImageIndex + 1]} alt="" width={1} height={1} className="hidden" />
+          )}
+          {galleryImages[activeImageIndex - 1] && (
+            <Image src={galleryImages[activeImageIndex - 1]} alt="" width={1} height={1} className="hidden" />
+          )}
+
+          {/* Prev/Next controls */}
+          {galleryImages.length > 1 && !showVideo && (
+            <>
+              <button
+                aria-label="Previous image"
+                onClick={goPrev}
+                disabled={activeImageIndex === 0}
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-20 rounded-full bg-black/60 text-white p-3.5 md:p-5 hover:bg-black/75 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-white/90 focus-visible:ring-offset-2 focus-visible:ring-offset-black/30 backdrop-blur-sm shadow-xl border border-white/30"
+              >
+                <ChevronLeft className="h-6 w-6 md:h-7 md:w-7 drop-shadow" aria-hidden="true" />
+              </button>
+              <button
+                aria-label="Next image"
+                onClick={goNext}
+                disabled={activeImageIndex === galleryImages.length - 1}
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-20 rounded-full bg-black/60 text-white p-3.5 md:p-5 hover:bg-black/75 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-white/90 focus-visible:ring-offset-2 focus-visible:ring-offset-black/30 backdrop-blur-sm shadow-xl border border-white/30"
+              >
+                <ChevronRight className="h-6 w-6 md:h-7 md:w-7 drop-shadow" aria-hidden="true" />
+              </button>
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+                {galleryImages.map((_, i) => (
+                  <span key={i} className={`h-2 w-2 md:h-2.5 md:w-2.5 rounded-full ${i === activeImageIndex ? 'bg-white' : 'bg-white/70'}`} />
+                ))}
+              </div>
+            </>
+          )}
 
           {/* If there is a video, show play overlay until user clicks */}
           {product.video_url && !showVideo && (
@@ -184,6 +263,7 @@ export default function ProductDetailPage() {
             </div>
           )}
         </div>
+        {/* Thumbnails removed in favor of slider controls */}
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
           <p className="mt-2 text-gray-700">{product.description || 'Delicious handcrafted strawberry treats.'}</p>
