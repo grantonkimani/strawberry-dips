@@ -1,0 +1,45 @@
+{
+  "timestamp": "2025-10-18T08:24:17.828Z",
+  "pages": {
+    "homepage": {
+      "componentCount": 6,
+      "dynamicImports": 5,
+      "suspenseBlocks": 3,
+      "hasLazyLoading": true,
+      "hasSuspense": true
+    }
+  },
+  "images": {
+    "totalImages": 7,
+    "totalSize": 3228,
+    "averageSize": 461.14285714285717,
+    "largeImages": 0,
+    "webpImages": 0,
+    "optimizationScore": 0
+  },
+  "apis": {
+    "totalAPIs": 42,
+    "cachedAPIs": 0,
+    "uncachedAPIs": 42,
+    "cacheRatio": 0
+  },
+  "recommendations": [
+    {
+      "type": "suggestion",
+      "message": "Convert more images to WebP format for better compression",
+      "impact": "medium"
+    },
+    {
+      "type": "suggestion",
+      "message": "42 API endpoints don't use caching - add appropriate cache headers",
+      "impact": "medium"
+    }
+  ],
+  "nextConfig": {
+    "hasImageOptimization": true,
+    "hasHeaders": true,
+    "hasTurbopack": true,
+    "imageOptimized": false
+  },
+  "overallScore": 90
+}

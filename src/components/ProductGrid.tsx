@@ -55,10 +55,12 @@ export function ProductGrid() {
 				// Fetch products and categories in parallel with caching
 							const [productsRes, categoriesRes] = await Promise.all([
 								fetch('/api/products?available=true&limit=100', {
-									cache: 'no-store'
+									cache: 'force-cache',
+									next: { revalidate: 300 } // 5 minutes
 								}),
 								fetch('/api/categories', {
-									cache: 'no-store'
+									cache: 'force-cache',
+									next: { revalidate: 1800 } // 30 minutes
 								})
 							]);
 

@@ -22,7 +22,13 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
     
-    return NextResponse.json({ banners: data ?? [] });
+    const response = NextResponse.json({ banners: data ?? [] });
+    
+    // Add caching headers for banners (longer cache since they change less frequently)
+    response.headers.set('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=3600')
+    response.headers.set('CDN-Cache-Control', 'public, s-maxage=1800')
+    
+    return response;
   } catch (error) {
     console.error('Banners GET error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

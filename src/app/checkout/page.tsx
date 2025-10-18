@@ -138,6 +138,7 @@ export default function CheckoutPage() {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Form state
@@ -203,6 +204,7 @@ export default function CheckoutPage() {
         // Order already exists, just mark as successful
         setPaymentSuccess(true);
         setOrderId(paymentIntentId);
+        setIsRedirecting(true);
         
         // Clear cart and redirect to success page after a short delay
         // Use the orderId from the IntaSend response, not the invoice ID
@@ -299,7 +301,9 @@ export default function CheckoutPage() {
               PLEASE WAIT - DO NOT CLOSE THIS WINDOW
             </p>
             <p className="text-gray-600 text-sm">
-              {paymentSuccess 
+              {isRedirecting 
+                ? 'Payment successful! Preparing your order confirmation...'
+                : paymentSuccess 
                 ? 'Payment successful! Redirecting to order confirmation...'
                 : 'We\'re confirming your payment and preparing your order confirmation. This may take a few moments...'
               }

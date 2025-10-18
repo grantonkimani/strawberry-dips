@@ -27,6 +27,7 @@ export default function IntaSendPayment({
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card'>('mpesa');
   const [statusMessage, setStatusMessage] = useState('');
+  const [isWaitingForConfirmation, setIsWaitingForConfirmation] = useState(false);
 
   const handlePayment = async () => {
     if (!customerEmail || !customerPhone) {
@@ -37,10 +38,15 @@ export default function IntaSendPayment({
     }
 
     setIsProcessing(true);
+    setIsWaitingForConfirmation(true);
     setStatusMessage('');
 
     try {
       const orderId = `ORDER-${Date.now()}`;
+
+      // Set a timeout for the API call
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
       const response = await fetch('/api/intasend/initiate', {
         method: 'POST',
@@ -58,7 +64,10 @@ export default function IntaSendPayment({
           cartItems,
           deliveryInfo,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const data = await response.json();
 
@@ -68,11 +77,13 @@ export default function IntaSendPayment({
 
       if (data.success) {
         if (paymentMethod === 'mpesa') {
+          setIsWaitingForConfirmation(false);
           setStatusMessage('M-Pesa STK push sent to your phone. Please enter your PIN to complete payment.');
 
           // Start polling for payment status
           pollPaymentStatus(data.invoiceId, data.orderId);
         } else if (data.checkoutUrl) {
+          setIsWaitingForConfirmation(false);
           setStatusMessage('Redirecting to card payment...');
           if (typeof window !== 'undefined') {
             // Navigate to IntaSend checkout for card details entry
@@ -84,10 +95,12 @@ export default function IntaSendPayment({
         } else {
           // For card payments, we must have a checkout URL to collect card details.
           if (paymentMethod === 'card') {
+            setIsWaitingForConfirmation(false);
             setStatusMessage('Card checkout is unavailable right now. Please try again or use M-Pesa.');
             onError?.('Card checkout URL missing');
             return;
           }
+          setIsWaitingForConfirmation(false);
           setStatusMessage('Payment initiated successfully.');
           onSuccess?.(data);
         }
@@ -96,7 +109,17 @@ export default function IntaSendPayment({
       }
     } catch (error) {
       console.error('IntaSend payment error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Payment failed';
+      let errorMessage = 'Payment failed';
+      
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          errorMessage = 'Payment request timed out. Please try again.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setIsWaitingForConfirmation(false);
       setStatusMessage(`Payment failed: ${errorMessage}`);
       onError?.(errorMessage);
     } finally {
@@ -202,6 +225,9 @@ export default function IntaSendPayment({
             <p className="text-sm text-green-800">
               📱 You will receive an M-Pesa STK push on your phone. Enter your M-Pesa PIN to complete the payment.
             </p>
+            <p className="text-xs text-green-700 mt-1">
+              ⏱️ Please wait a moment after clicking "Pay" - we're preparing your payment request.
+            </p>
           </div>
         )}
 
@@ -214,32 +240,41 @@ export default function IntaSendPayment({
         )}
 
         {/* Status Message */}
-        {statusMessage && (
+        {(statusMessage || isWaitingForConfirmation) && (
           <div className={`p-3 rounded-lg mb-4 text-sm ${
-            statusMessage.includes('successful') || statusMessage.includes('🎉')
+            isWaitingForConfirmation
+              ? 'bg-blue-50 border border-blue-200 text-blue-800'
+              : statusMessage.includes('successful') || statusMessage.includes('🎉')
               ? 'bg-green-50 border border-green-200 text-green-800'
               : statusMessage.includes('failed') || statusMessage.includes('error')
               ? 'bg-red-50 border border-red-200 text-red-800'
               : 'bg-yellow-50 border border-yellow-200 text-yellow-800'
           }`}>
-            {statusMessage}
+            {isWaitingForConfirmation ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                <span>Please wait as we confirm your order...</span>
+              </div>
+            ) : (
+              statusMessage
+            )}
           </div>
         )}
 
         {/* Payment Button */}
         <Button
           onClick={handlePayment}
-          disabled={isProcessing}
+          disabled={isProcessing || isWaitingForConfirmation}
           className={`w-full ${
             paymentMethod === 'mpesa'
               ? 'bg-green-600 hover:bg-green-700'
               : 'bg-blue-600 hover:bg-blue-700'
-          } text-white`}
+          } text-white ${(isProcessing || isWaitingForConfirmation) ? 'opacity-75 cursor-not-allowed' : ''}`}
         >
-          {isProcessing ? (
+          {isProcessing || isWaitingForConfirmation ? (
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Processing...
+              {isWaitingForConfirmation ? 'Confirming Order...' : 'Processing...'}
             </div>
           ) : (
             `Pay KES ${amount.toLocaleString()} with ${paymentMethod === 'mpesa' ? 'M-Pesa' : 'Card'}`

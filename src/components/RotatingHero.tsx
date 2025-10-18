@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 
 const builtIns = [
@@ -45,7 +46,8 @@ export function RotatingHero() {
         const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
         
         const res = await fetch('/api/banners', { 
-          cache: 'force-cache', // Enable caching
+          cache: 'force-cache',
+          next: { revalidate: 1800 }, // 30 minutes
           signal: controller.signal 
         });
         clearTimeout(timeoutId);
@@ -85,16 +87,19 @@ export function RotatingHero() {
       >
         {/* Slides */}
         {slides.map((s, i) => (
-          <img
+          <Image
             key={s.image_url + i}
             src={s.image_url}
             alt={s.alt || ''}
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${
+            fill
+            className={`object-cover transition-opacity duration-700 ease-out ${
               i === index ? "opacity-100" : "opacity-0"
             }`}
-            loading={i === 0 ? 'eager' : 'lazy'}
-            decoding="async"
+            priority={i === 0}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
+            quality={90}
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
             onError={(e) => {
               // Fallback to built-in images if external image fails
               if (builtIns.includes(s.image_url)) return;
@@ -106,13 +111,16 @@ export function RotatingHero() {
         
         {/* Fallback for when no slides are loaded yet */}
         {slides.length === 0 && (
-          <img
+          <Image
             src={builtIns[0]}
             alt="Strawberry Dips Hero"
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="eager"
-            decoding="async"
+            fill
+            className="object-cover"
+            priority
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
+            quality={90}
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
           />
         )}
 

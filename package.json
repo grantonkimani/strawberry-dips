@@ -8,7 +8,9 @@
     "setup:https": "node scripts/setup-https.js",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "analyze:performance": "node scripts/performance-analysis.js",
+    "test:performance": "node scripts/test-performance.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

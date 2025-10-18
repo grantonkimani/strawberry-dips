@@ -4,7 +4,15 @@ import { supabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('IntaSend initiate API called');
     const body = await request.json();
+    console.log('Request body:', { 
+      orderId: body.orderId, 
+      amount: body.amount, 
+      paymentMethod: body.paymentMethod,
+      customerEmail: body.customerEmail,
+      customerPhone: body.customerPhone 
+    });
     const {
       orderId,
       amount,

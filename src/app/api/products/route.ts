@@ -89,7 +89,13 @@ export async function GET(request: NextRequest) {
 
 		if (error) throw error
 
-		return NextResponse.json(data)
+		const response = NextResponse.json(data)
+		
+		// Add caching headers for better performance
+		response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
+		response.headers.set('CDN-Cache-Control', 'public, s-maxage=300')
+		
+		return response
 	} catch (error) {
 		console.error('GET /api/products error:', error)
 		return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })

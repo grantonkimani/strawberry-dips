@@ -222,9 +222,24 @@ export default function OrderSuccessPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your order details...</p>
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Payment Successful! 🎉
+          </h2>
+          <p className="text-lg text-green-600 font-semibold mb-4">
+            Preparing Your Order Confirmation
+          </p>
+          <p className="text-gray-600 text-sm mb-6">
+            Please wait while we fetch your order details and prepare your confirmation email...
+          </p>
+          <div className="flex items-center justify-center space-x-2">
+            <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce"></div>
+            <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+            <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+          </div>
         </div>
       </div>
     );

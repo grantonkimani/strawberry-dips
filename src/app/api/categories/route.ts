@@ -18,7 +18,13 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({ categories: data });
+    const response = NextResponse.json({ categories: data });
+    
+    // Add caching headers for categories (longer cache since they change less frequently)
+    response.headers.set('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=3600')
+    response.headers.set('CDN-Cache-Control', 'public, s-maxage=1800')
+    
+    return response;
   } catch (error) {
     console.error('Categories API error:', error);
     return NextResponse.json(

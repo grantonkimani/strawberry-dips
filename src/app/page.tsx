@@ -1,14 +1,9 @@
 'use client';
 
 import { Header } from "@/components/Header";
-import { ProductGrid } from "@/components/ProductGrid";
 import { Footer } from "@/components/Footer";
-import { SupportSection } from "@/components/SupportSection";
-import { WhyChoose } from "@/components/WhyChoose";
 import { RotatingHero } from "@/components/RotatingHero";
-import { FeaturedProducts } from "@/components/FeaturedProducts";
 import { TrustStrip } from "@/components/TrustStrip";
-import { Testimonials } from "@/components/Testimonials";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 
@@ -38,6 +33,29 @@ const LazyFeaturedProducts = dynamic(() => import("@/components/FeaturedProducts
   )
 });
 
+const LazyProductGrid = dynamic(() => import("@/components/ProductGrid").then(mod => ({ default: mod.ProductGrid })), {
+  loading: () => (
+    <section className="py-16 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Fresh Products</h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">Handcrafted with love, delivered fresh</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="aspect-square rounded-xl bg-gradient-to-br from-pink-100 to-purple-100 mb-4" />
+              <div className="h-5 w-3/4 rounded bg-gray-200 mb-2" />
+              <div className="h-4 w-1/2 rounded bg-gray-200 mb-3" />
+              <div className="h-10 w-full rounded-lg bg-gradient-to-r from-pink-200 to-purple-200" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+});
+
 const LazySupportSection = dynamic(() => import("@/components/SupportSection").then(mod => ({ default: mod.SupportSection })), {
   loading: () => (
     <div className="w-full max-w-2xl mx-auto">
@@ -52,6 +70,52 @@ const LazySupportSection = dynamic(() => import("@/components/SupportSection").t
         </div>
       </div>
     </div>
+  )
+});
+
+const LazyWhyChoose = dynamic(() => import("@/components/WhyChoose").then(mod => ({ default: mod.WhyChoose })), {
+  loading: () => (
+    <section className="py-16 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Us</h2>
+        </div>
+        <div className="grid md:grid-cols-3 gap-8">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="text-center animate-pulse">
+              <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4"></div>
+              <div className="h-6 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+});
+
+const LazyTestimonials = dynamic(() => import("@/components/Testimonials").then(mod => ({ default: mod.Testimonials })), {
+  loading: () => (
+    <section className="py-16 px-4 bg-gray-50">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">What Our Customers Say</h2>
+        </div>
+        <div className="grid md:grid-cols-3 gap-8">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-white p-6 rounded-lg shadow-sm animate-pulse">
+              <div className="h-4 bg-gray-200 rounded mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded mb-4"></div>
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                <div className="h-4 w-24 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   )
 });
 
@@ -110,12 +174,12 @@ export default function HomePage() {
           </div>
         </section>
       }>
-        <ProductGrid />
+        <LazyProductGrid />
       </Suspense>
       
-      {/* Static content loads immediately */}
-      <WhyChoose />
-      <Testimonials />
+      {/* Lazy load non-critical sections */}
+      <LazyWhyChoose />
+      <LazyTestimonials />
       
       {/* Trust Section */}
       <section className="py-16 px-4 bg-gradient-to-r from-pink-50 to-purple-50">
