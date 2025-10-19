@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find valid reset token
+    console.log(`[RESET PASSWORD] Looking for token: ${token}`);
     const { data: resetToken, error: tokenError } = await supabase
       .from('password_reset_tokens')
       .select(`
@@ -34,13 +35,24 @@ export async function POST(request: NextRequest) {
         )
       `)
       .eq('token', token)
-      .eq('used_at', null)
-      .gt('expires_at', new Date().toISOString())
+      .is('used_at', null)
       .single();
 
+    console.log(`[RESET PASSWORD] Token query result:`, { resetToken, tokenError });
+
     if (tokenError || !resetToken) {
+      console.log(`[RESET PASSWORD] Token not found or error:`, tokenError);
       return NextResponse.json(
         { error: 'Invalid or expired reset token' },
+        { status: 400 }
+      );
+    }
+
+    // Check if token is expired
+    if (new Date(resetToken.expires_at) < new Date()) {
+      console.log(`[RESET PASSWORD] Token expired: ${resetToken.expires_at}`);
+      return NextResponse.json(
+        { error: 'Reset token has expired' },
         { status: 400 }
       );
     }

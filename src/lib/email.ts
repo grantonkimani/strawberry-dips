@@ -189,7 +189,7 @@ export const emailTemplates = {
             </a>
           </div>
           <p style="font-size: 14px; color: #666;">
-            This link will expire in 15 minutes for security reasons.
+            This link will expire in 1 hour for security reasons.
           </p>
         </div>
         
