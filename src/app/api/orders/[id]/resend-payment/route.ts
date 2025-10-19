@@ -136,8 +136,7 @@ export async function POST(
     return NextResponse.json({
       message: 'Payment prompt sent successfully',
       orderId: order.id,
-      customerEmail: order.customer_email,
-      emailMessageId: emailResult.messageId
+      customerEmail: order.customer_email
     });
 
   } catch (error) {
