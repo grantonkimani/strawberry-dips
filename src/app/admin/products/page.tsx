@@ -69,7 +69,14 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 	async function fetchProducts() {
 		setLoading(true)
 		try {
-			const res = await fetch('/api/products')
+			const res = await fetch('/api/products', { 
+				cache: 'no-store',
+				headers: {
+					'Cache-Control': 'no-cache, no-store, must-revalidate',
+					'Pragma': 'no-cache',
+					'Expires': '0'
+				}
+			})
 			const data = await res.json()
 			if (Array.isArray(data)) setProducts(data)
 			else if (data.products) setProducts(data.products)
@@ -374,9 +381,19 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 	async function deleteProduct(id: string) {
 		if (!confirm('Delete this product?')) return
 		try {
-			await fetch(`/api/products/${id}`, { method: 'DELETE' })
+			const response = await fetch(`/api/products/${id}`, { method: 'DELETE' })
+			if (!response.ok) {
+				const errorData = await response.json()
+				throw new Error(errorData.error || 'Failed to delete product')
+			}
+			// Update the UI immediately
 			setProducts(prev => prev.filter(p => p.id !== id))
-		} catch {}
+			// Also refresh the data to ensure consistency
+			await fetchProducts()
+		} catch (error) {
+			console.error('Delete product error:', error)
+			alert(`Failed to delete product: ${error instanceof Error ? error.message : 'Unknown error'}`)
+		}
 	}
 
 
