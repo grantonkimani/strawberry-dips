@@ -1,0 +1,5 @@
+[33mde17770[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fix password reset functionality and products display
+[33m1ec7b11[m Fix forgot password - remove is_active check and add debugging
+[33m80e2b4c[m Fix build errors - createTransport and Suspense boundary
+[33m72832c0[m Fix TypeScript error - remove non-existent messageId property
+[33mdfaa2f2[m Fix TypeScript error in signup API - add missing lastName parameter
