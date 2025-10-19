@@ -8,9 +8,11 @@ import { Clock, CheckCircle, Truck, Package, MapPin, Calendar, Phone, Mail } fro
 
 interface OrderItem {
   id: string;
-  name: string;
+  product_name: string;
+  product_category: string;
+  unit_price: number;
   quantity: number;
-  price: number;
+  total_price: number;
 }
 
 interface Order {
@@ -28,7 +30,7 @@ interface Order {
   special_instructions?: string;
   created_at: string;
   updated_at: string;
-  items: OrderItem[];
+  order_items: OrderItem[];
 }
 
 const statusConfig = {
@@ -112,7 +114,7 @@ export default function TrackOrderPage() {
       }
 
       const data = await response.json();
-      setOrder(data);
+      setOrder(data.order);
     } catch (err) {
       console.error('Error fetching order:', err);
       setError('Failed to load order details. Please try again later.');
@@ -195,26 +197,26 @@ export default function TrackOrderPage() {
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Tracking</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Order Tracking</h1>
           <p className="text-gray-600">Track your Strawberry Dips order</p>
         </div>
 
         {/* Order Status */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Order #{order.id.slice(0, 8)}</span>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.bgColor} ${statusInfo.color}`}>
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <span className="text-lg">Order #{order.id.slice(0, 8)}</span>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.bgColor} ${statusInfo.color} self-start sm:self-auto`}>
                 {statusInfo.label}
               </span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center space-x-4">
-              <div className={`p-3 rounded-full ${statusInfo.bgColor}`}>
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+              <div className={`p-3 rounded-full ${statusInfo.bgColor} self-start`}>
                 <StatusIcon className={`h-6 w-6 ${statusInfo.color}`} />
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="font-medium text-gray-900">{statusInfo.description}</p>
                 <p className="text-sm text-gray-500">
                   Last updated: {formatDate(order.updated_at)}
@@ -237,13 +239,13 @@ export default function TrackOrderPage() {
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">Items Ordered</h4>
                 <div className="space-y-2">
-                  {order.items.map((item) => (
+                  {order.order_items.map((item) => (
                     <div key={item.id} className="flex justify-between items-center py-2 border-b border-gray-100">
                       <div>
-                        <p className="font-medium text-gray-900">{item.name}</p>
+                        <p className="font-medium text-gray-900">{item.product_name}</p>
                         <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
                       </div>
-                      <p className="font-medium text-gray-900">KSH {item.price.toFixed(2)}</p>
+                      <p className="font-medium text-gray-900">KSH {item.total_price.toFixed(2)}</p>
                     </div>
                   ))}
                 </div>

@@ -189,16 +189,17 @@ export default function IntaSendPayment({
               />
               <span className="text-sm">M-Pesa</span>
             </label>
-            <label className="flex items-center">
+            <label className="flex items-center opacity-50 cursor-not-allowed">
               <input
                 type="radio"
                 name="paymentMethod"
                 value="card"
-                checked={paymentMethod === 'card'}
-                onChange={(e) => setPaymentMethod(e.target.value as 'card')}
+                checked={false}
+                disabled
                 className="mr-2"
               />
-              <span className="text-sm">Credit/Debit Card</span>
+              <span className="text-sm text-gray-500">Credit/Debit Card</span>
+              <span className="text-xs text-red-500 ml-2">(Not Available)</span>
             </label>
           </div>
         </div>
@@ -232,9 +233,12 @@ export default function IntaSendPayment({
         )}
 
         {paymentMethod === 'card' && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-            <p className="text-sm text-blue-800">
-              💳 You will be redirected to a secure payment page to enter your card details.
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+            <p className="text-sm text-red-800">
+              ❌ Card payments are currently unavailable. Please use M-Pesa for your payment.
+            </p>
+            <p className="text-xs text-red-700 mt-1">
+              We apologize for any inconvenience. Our card payment service is temporarily disabled.
             </p>
           </div>
         )}
@@ -264,12 +268,8 @@ export default function IntaSendPayment({
         {/* Payment Button */}
         <Button
           onClick={handlePayment}
-          disabled={isProcessing || isWaitingForConfirmation}
-          className={`w-full ${
-            paymentMethod === 'mpesa'
-              ? 'bg-green-600 hover:bg-green-700'
-              : 'bg-blue-600 hover:bg-blue-700'
-          } text-white ${(isProcessing || isWaitingForConfirmation) ? 'opacity-75 cursor-not-allowed' : ''}`}
+          disabled={isProcessing || isWaitingForConfirmation || paymentMethod === 'card'}
+          className={`w-full bg-green-600 hover:bg-green-700 text-white ${(isProcessing || isWaitingForConfirmation || paymentMethod === 'card') ? 'opacity-75 cursor-not-allowed' : ''}`}
         >
           {isProcessing || isWaitingForConfirmation ? (
             <div className="flex items-center justify-center">
@@ -277,7 +277,7 @@ export default function IntaSendPayment({
               {isWaitingForConfirmation ? 'Confirming Order...' : 'Processing...'}
             </div>
           ) : (
-            `Pay KES ${amount.toLocaleString()} with ${paymentMethod === 'mpesa' ? 'M-Pesa' : 'Card'}`
+            `Pay KES ${amount.toLocaleString()} with M-Pesa`
           )}
         </Button>
 

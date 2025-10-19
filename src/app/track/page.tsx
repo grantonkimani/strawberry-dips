@@ -55,8 +55,8 @@ export default function TrackOrderPage() {
               <Package className="h-8 w-8 text-pink-600" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Track Your Order</h1>
-          <p className="text-lg text-gray-600">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Track Your Order</h1>
+          <p className="text-base sm:text-lg text-gray-600 px-4">
             Enter your tracking code to see the status of your strawberry order
           </p>
         </div>
@@ -81,9 +81,13 @@ export default function TrackOrderPage() {
                   value={trackingCode}
                   onChange={(e) => setTrackingCode(e.target.value.toUpperCase())}
                   placeholder="Enter your tracking code (e.g., A1B2C3D4)"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-center text-lg font-mono tracking-wider"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-center text-lg font-mono tracking-wider min-h-[44px] text-base"
                   maxLength={16}
                   disabled={loading}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="characters"
+                  spellCheck="false"
                 />
               </div>
 

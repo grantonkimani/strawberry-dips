@@ -90,11 +90,11 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
+          <Link href="/" className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 flex-shrink-0 min-w-0">
             <img 
               src="/strawberry-dip-logo-header.svg" 
               alt="Strawberry Dip Logo" 
-              className="h-10 w-10 sm:h-12 sm:w-12 object-contain"
+              className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 object-contain flex-shrink-0"
               loading="eager"
               decoding="async"
               onError={(e) => {
@@ -105,12 +105,12 @@ export function Header() {
                 }
               }}
             />
-            <span className="text-2xl" style={{display: 'none'}}>🍓</span>
-            <div className="flex flex-col">
-              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent leading-tight">
+            <span className="text-xl sm:text-2xl" style={{display: 'none'}}>🍓</span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm sm:text-lg md:text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent leading-tight truncate">
                 Strawberrydips
               </span>
-              <span className="hidden xs:block text-[10px] sm:text-xs text-gray-500 uppercase tracking-wide leading-tight">
+              <span className="hidden xs:block text-[8px] sm:text-[10px] md:text-xs text-gray-500 uppercase tracking-wide leading-tight truncate">
                 Chocolate Covered Strawberries
               </span>
             </div>
@@ -136,7 +136,7 @@ export function Header() {
           </nav>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 pr-2 sm:pr-4">
+          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4 pr-1 sm:pr-2 md:pr-4">
             {/* Social Media Icons */}
             <div className="hidden md:flex items-center space-x-2">
               <a 
@@ -212,9 +212,9 @@ export function Header() {
             </div>
 
             {/* Wishlist */}
-            <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-10 w-10 sm:h-11 sm:w-11 md:h-9 md:w-9">
-              <Heart className="h-6 w-6 sm:h-7 sm:w-7 md:h-5 md:w-5" strokeWidth={2.25} />
-              <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] md:text-xs rounded-full h-5 min-w-[1.25rem] px-1 md:px-0 flex items-center justify-center">
+            <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-8 w-8 sm:h-9 sm:w-9 md:h-9 md:w-9 flex-shrink-0">
+              <Heart className="h-4 w-4 sm:h-5 sm:w-5 md:h-5 md:w-5" strokeWidth={2.25} />
+              <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[8px] sm:text-[10px] md:text-xs rounded-full h-4 min-w-[1rem] px-1 md:px-0 flex items-center justify-center">
                 0
               </span>
             </Button>
@@ -224,10 +224,10 @@ export function Header() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-10 w-10 sm:h-11 sm:w-11 md:h-9 md:w-9"
+                className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-8 w-8 sm:h-9 sm:w-9 md:h-9 md:w-9 flex-shrink-0"
               >
-                <ShoppingCart className="h-6 w-6 sm:h-7 sm:w-7 md:h-5 md:w-5" strokeWidth={2.25} />
-                <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] md:text-xs rounded-full h-5 min-w-[1.25rem] px-1 md:px-0 flex items-center justify-center">
+                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 md:h-5 md:w-5" strokeWidth={2.25} />
+                <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[8px] sm:text-[10px] md:text-xs rounded-full h-4 min-w-[1rem] px-1 md:px-0 flex items-center justify-center">
                   {isHydrated ? state.items.reduce((total, item) => total + (item.quantity || 1), 0) : 0}
                 </span>
               </Button>
@@ -235,8 +235,8 @@ export function Header() {
 
             {/* User Account */}
             <Link href={isAuthenticated ? "/account" : "/account/login"}>
-              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 h-10 w-10 sm:h-11 sm:w-11 md:h-9 md:w-9">
-                <User className="h-6 w-6 sm:h-7 sm:w-7 md:h-5 md:w-5" strokeWidth={2.25} />
+              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 h-8 w-8 sm:h-9 sm:w-9 md:h-9 md:w-9 flex-shrink-0">
+                <User className="h-4 w-4 sm:h-5 sm:w-5 md:h-5 md:w-5" strokeWidth={2.25} />
               </Button>
             </Link>
 
@@ -244,10 +244,10 @@ export function Header() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="md:hidden text-gray-600 hover:text-pink-600 active:bg-pink-50 h-10 w-10 sm:h-11 sm:w-11"
+              className="md:hidden text-gray-600 hover:text-pink-600 active:bg-pink-50 h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0"
               onClick={() => setIsMobileMenuOpen(true)}
             >
-              <Menu className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={2.25} />
+              <Menu className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2.25} />
             </Button>
           </div>
         </div>
