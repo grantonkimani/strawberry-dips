@@ -24,14 +24,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if customer exists
+    console.log(`[FORGOT PASSWORD] Looking for customer with email: ${email.toLowerCase()}`);
     const { data: customer, error: customerError } = await supabase
       .from('customers')
       .select('id, email, first_name, last_name')
       .eq('email', email.toLowerCase())
-      .eq('is_active', true)
       .single();
 
+    console.log(`[FORGOT PASSWORD] Customer query result:`, { customer, customerError });
+
     if (customerError || !customer) {
+      console.log(`[FORGOT PASSWORD] Customer not found or error:`, customerError);
       // Don't reveal if email exists or not for security
       return NextResponse.json({
         success: true,
@@ -69,15 +72,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Send password reset email
+    console.log(`[FORGOT PASSWORD] Attempting to send email to: ${customer.email}`);
     try {
-      await sendPasswordResetEmail({
+      const emailResult = await sendPasswordResetEmail({
         email: customer.email,
         firstName: customer.first_name,
         lastName: customer.last_name,
         resetToken: resetToken
       });
+      console.log(`[FORGOT PASSWORD] Email result:`, emailResult);
     } catch (emailError) {
-      console.error('Error sending password reset email:', emailError);
+      console.error('[FORGOT PASSWORD] Error sending password reset email:', emailError);
       // Don't fail the request if email fails
     }
 
