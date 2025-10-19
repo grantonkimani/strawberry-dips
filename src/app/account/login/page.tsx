@@ -73,8 +73,7 @@ function LoginInner() {
   };
 
   const handleForgotPassword = () => {
-    // TODO: Implement forgot password functionality
-    setError('Forgot password feature coming soon. Please contact support for assistance.');
+    router.push('/account/forgot-password');
   };
 
   return (

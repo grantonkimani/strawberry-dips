@@ -289,6 +289,88 @@ export async function sendOrderEmail(
   }
 }
 
+// Password reset email template
+export const passwordResetEmailTemplate = (data: {
+  firstName: string;
+  lastName: string;
+  resetToken: string;
+}) => ({
+  subject: 'Reset Your Password - Strawberry Dips',
+  html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #e91e63; margin: 0;">🍓 Strawberry Dips</h1>
+        <p style="color: #666; margin: 5px 0;">Premium Chocolate Covered Strawberries</p>
+      </div>
+      
+      <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h2 style="color: #e91e63; margin-top: 0;">Password Reset Request</h2>
+        <p>Hi ${data.firstName},</p>
+        <p>We received a request to reset your password for your Strawberry Dips account.</p>
+      </div>
+      
+      <div style="margin-bottom: 20px;">
+        <p>Click the button below to reset your password:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/account/reset-password?token=${data.resetToken}" 
+             style="background: #e91e63; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+            Reset Password
+          </a>
+        </div>
+        <p style="font-size: 14px; color: #666;">
+          This link will expire in 15 minutes for security reasons.
+        </p>
+      </div>
+      
+      <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+        <h3 style="color: #856404; margin-top: 0;">Security Notice</h3>
+        <ul style="color: #856404; margin: 0; padding-left: 20px;">
+          <li>If you didn't request this password reset, please ignore this email</li>
+          <li>Your password will remain unchanged until you click the link above</li>
+          <li>Never share this link with anyone</li>
+        </ul>
+      </div>
+      
+      <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #666; font-size: 14px;">
+        <p>If the button doesn't work, copy and paste this link into your browser:</p>
+        <p style="word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 4px;">
+          ${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/account/reset-password?token=${data.resetToken}
+        </p>
+        <p>Need help? Contact us at <a href="mailto:support@strawberrydips.com" style="color: #e91e63;">support@strawberrydips.com</a></p>
+      </div>
+    </div>
+  `
+});
+
+// Send password reset email
+export async function sendPasswordResetEmail(data: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  resetToken: string;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const transporter = createTransporter();
+    const template = passwordResetEmailTemplate(data);
+
+    await transporter.sendMail({
+      from: `"Strawberry Dips" <${process.env.GMAIL_USER}>`,
+      to: data.email,
+      subject: template.subject,
+      html: template.html,
+    });
+
+    console.log(`Password reset email sent to: ${data.email}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
+  }
+}
+
 // Send order confirmation email (called after payment success)
 export async function sendOrderConfirmationEmail(orderData: any) {
   return await sendOrderEmail(orderData.customer_email, 'orderConfirmed', orderData);
@@ -346,5 +428,87 @@ export async function sendVerificationEmail(data: {
   } catch (error) {
     console.error('Verification email sending failed:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// Password reset email template
+export const passwordResetEmailTemplate = (data: {
+  firstName: string;
+  lastName: string;
+  resetToken: string;
+}) => ({
+  subject: 'Reset Your Password - Strawberry Dips',
+  html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #e91e63; margin: 0;">🍓 Strawberry Dips</h1>
+        <p style="color: #666; margin: 5px 0;">Premium Chocolate Covered Strawberries</p>
+      </div>
+      
+      <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h2 style="color: #e91e63; margin-top: 0;">Password Reset Request</h2>
+        <p>Hi ${data.firstName},</p>
+        <p>We received a request to reset your password for your Strawberry Dips account.</p>
+      </div>
+      
+      <div style="margin-bottom: 20px;">
+        <p>Click the button below to reset your password:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/account/reset-password?token=${data.resetToken}" 
+             style="background: #e91e63; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+            Reset Password
+          </a>
+        </div>
+        <p style="font-size: 14px; color: #666;">
+          This link will expire in 15 minutes for security reasons.
+        </p>
+      </div>
+      
+      <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+        <h3 style="color: #856404; margin-top: 0;">Security Notice</h3>
+        <ul style="color: #856404; margin: 0; padding-left: 20px;">
+          <li>If you didn't request this password reset, please ignore this email</li>
+          <li>Your password will remain unchanged until you click the link above</li>
+          <li>Never share this link with anyone</li>
+        </ul>
+      </div>
+      
+      <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #666; font-size: 14px;">
+        <p>If the button doesn't work, copy and paste this link into your browser:</p>
+        <p style="word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 4px;">
+          ${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/account/reset-password?token=${data.resetToken}
+        </p>
+        <p>Need help? Contact us at <a href="mailto:support@strawberrydips.com" style="color: #e91e63;">support@strawberrydips.com</a></p>
+      </div>
+    </div>
+  `
+});
+
+// Send password reset email
+export async function sendPasswordResetEmail(data: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  resetToken: string;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const transporter = createTransporter();
+    const template = passwordResetEmailTemplate(data);
+
+    await transporter.sendMail({
+      from: `"Strawberry Dips" <${process.env.GMAIL_USER}>`,
+      to: data.email,
+      subject: template.subject,
+      html: template.html,
+    });
+
+    console.log(`Password reset email sent to: ${data.email}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
   }
 }
