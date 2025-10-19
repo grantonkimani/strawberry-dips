@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 
 // Gmail SMTP Configuration
 const createTransporter = () => {
-  return nodemailer.createTransport({
+  return nodemailer.createTransporter({
     service: 'gmail',
     auth: {
       user: process.env.GMAIL_USER,
@@ -49,160 +49,25 @@ export const emailTemplates = {
           </table>
         </div>
         
-        <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-          <h4 style="margin: 0 0 10px 0; color: #2e7d32;">What's Next?</h4>
-          <p style="margin: 0;">We'll send you updates as we prepare and deliver your order. You can track your order status anytime using the link below.</p>
-        </div>
-        
-        <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-          <h4 style="margin: 0 0 10px 0; color: #1976d2;">Create an Account for Better Experience</h4>
-          <p style="margin: 0 0 10px 0;">Want to track all your orders easily? Create a free account to:</p>
-          <ul style="margin: 0; padding-left: 20px;">
-            <li>View your complete order history</li>
-            <li>Save delivery addresses for faster checkout</li>
-            <li>Get exclusive offers and updates</li>
-            <li>Track multiple orders in one place</li>
-          </ul>
-          <div style="text-align: center; margin-top: 15px;">
-            <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://strawberrydips.com'}/account/signup" 
-               style="background: #1976d2; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block; font-size: 14px;">
-              Create Free Account
-            </a>
-          </div>
-        </div>
-        
-        <div style="text-align: center; margin-top: 30px;">
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://strawberrydips.com'}/track/${orderData.id}" 
-             style="background: #e91e63; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-            Track Your Order
-          </a>
-        </div>
-        
-        <div style="text-align: center; margin-top: 30px; color: #666; font-size: 14px;">
-          <p>Questions? Contact us at support@strawberrydips.com</p>
-          <p>Thank you for choosing Strawberry Dips! 🍓</p>
-        </div>
-      </div>
-    `,
-  }),
-
-  orderPreparing: (orderData: any) => ({
-    subject: `Your Strawberries Are Being Prepared - Order #${orderData.id.slice(0, 8)}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #e91e63; margin: 0;">🍓 Strawberry Dips</h1>
-        </div>
-        
-        <div style="background: #fff3e0; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-          <h2 style="color: #e91e63; margin-top: 0;">Your Strawberries Are Being Prepared Fresh! 👨‍🍳</h2>
-          <p>Our expert chefs are hand-dipping your fresh strawberries in premium chocolate right now.</p>
-        </div>
-        
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-          <h4 style="margin: 0 0 10px 0; color: #333;">Order #${orderData.id.slice(0, 8)}</h4>
-          <p style="margin: 0;">Expected delivery: <strong>${new Date(orderData.delivery_date).toLocaleDateString()} - ${orderData.delivery_time}</strong></p>
-        </div>
-        
-        <div style="text-align: center; margin-top: 30px;">
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://strawberrydips.com'}/track/${orderData.id}" 
-             style="background: #e91e63; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-            Track Your Order
-          </a>
-        </div>
-      </div>
-    `,
-  }),
-
-  orderOutForDelivery: (orderData: any) => ({
-    subject: `Your Order Is Out for Delivery - Order #${orderData.id.slice(0, 8)}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #e91e63; margin: 0;">🍓 Strawberry Dips</h1>
-        </div>
-        
-        <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-          <h2 style="color: #e91e63; margin-top: 0;">Your Order Is On The Way! 🚚</h2>
-          <p>Your fresh strawberries are out for delivery and heading to your location.</p>
-        </div>
-        
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-          <h4 style="margin: 0 0 10px 0; color: #333;">Delivery Details</h4>
-          <p style="margin: 5px 0;"><strong>Order:</strong> #${orderData.id.slice(0, 8)}</p>
-          <p style="margin: 5px 0;"><strong>Expected Time:</strong> ${orderData.delivery_time}</p>
-          <p style="margin: 5px 0;"><strong>Location:</strong> ${orderData.delivery_city}, ${orderData.delivery_state}</p>
-          ${orderData.special_instructions ? `<p style="margin: 5px 0;"><strong>Instructions:</strong> ${orderData.special_instructions}</p>` : ''}
-        </div>
-        
-        <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-          <h4 style="margin: 0 0 10px 0; color: #e65100;">Please Ensure:</h4>
-          <ul style="margin: 0; padding-left: 20px;">
-            <li>Someone is available to receive the order</li>
-            <li>Your phone is accessible for delivery updates</li>
-            <li>Delivery location is clearly marked</li>
+        <div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+          <h3 style="color: #2e7d32; margin-top: 0;">What's Next?</h3>
+          <ul style="color: #2e7d32; margin: 0; padding-left: 20px;">
+            <li>We'll prepare your fresh strawberries</li>
+            <li>You'll receive updates on your order status</li>
+            <li>We'll deliver on your scheduled date and time</li>
           </ul>
         </div>
         
-        <div style="text-align: center; margin-top: 30px;">
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://strawberrydips.com'}/track/${orderData.id}" 
-             style="background: #e91e63; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-            Track Your Order
-          </a>
+        <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #666; font-size: 14px;">
+          <p>Questions? Contact us at <a href="mailto:support@strawberrydips.com" style="color: #e91e63;">support@strawberrydips.com</a></p>
+          <p>Track your order at: <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/track" style="color: #e91e63;">strawberrydips.shop/track</a></p>
         </div>
       </div>
-    `,
+    `
   }),
-
-  orderDelivered: (orderData: any) => ({
-    subject: `Order Delivered - Enjoy Your Strawberries! 🍓 #${orderData.id.slice(0, 8)}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #e91e63; margin: 0;">🍓 Strawberry Dips</h1>
-        </div>
-        
-        <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-          <h2 style="color: #2e7d32; margin-top: 0;">Order Delivered Successfully! 🎉</h2>
-          <p>Your fresh chocolate-covered strawberries have been delivered. We hope you enjoy them!</p>
-        </div>
-        
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-          <h4 style="margin: 0 0 10px 0; color: #333;">Order #${orderData.id.slice(0, 8)}</h4>
-          <p style="margin: 5px 0;">Delivered on: <strong>${new Date().toLocaleDateString()}</strong></p>
-          <p style="margin: 5px 0;">Total: <strong>KSH ${orderData.total.toFixed(2)}</strong></p>
-        </div>
-        
-        <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-          <h4 style="margin: 0 0 10px 0; color: #e65100;">Storage Tips:</h4>
-          <ul style="margin: 0; padding-left: 20px;">
-            <li>Keep refrigerated for best freshness</li>
-            <li>Consume within 2-3 days for optimal taste</li>
-            <li>Let sit at room temperature for 10 minutes before serving</li>
-          </ul>
-        </div>
-        
-        <div style="text-align: center; margin-top: 30px;">
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://strawberrydips.com'}" 
-             style="background: #e91e63; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-right: 10px;">
-            Order Again
-          </a>
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://strawberrydips.com'}/contact" 
-             style="background: #666; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-            Leave Feedback
-          </a>
-        </div>
-        
-        <div style="text-align: center; margin-top: 30px; color: #666; font-size: 14px;">
-          <p>Thank you for choosing Strawberry Dips! 🍓</p>
-          <p>We hope to serve you again soon!</p>
-        </div>
-      </div>
-    `,
-  }),
-
-  emailVerification: (data: { firstName: string; verificationToken: string }) => ({
-    subject: 'Verify Your Email - Strawberry Dips Account',
+  
+  statusUpdate: (orderData: any) => ({
+    subject: `Order Update - Strawberry Dips #${orderData.id.slice(0, 8)}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px;">
@@ -211,136 +76,204 @@ export const emailTemplates = {
         </div>
         
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-          <h2 style="color: #e91e63; margin-top: 0;">Welcome ${data.firstName}! 👋</h2>
-          <p>Thank you for creating an account with Strawberry Dips! To complete your registration and start enjoying our premium chocolate-covered strawberries, please verify your email address.</p>
+          <h2 style="color: #e91e63; margin-top: 0;">Order Status Update</h2>
+          <p>Your order status has been updated:</p>
+          <div style="background: #fff; padding: 15px; border-radius: 6px; border-left: 4px solid #e91e63; margin: 15px 0;">
+            <strong style="color: #e91e63; font-size: 18px;">${getStatusDisplayName(orderData.status)}</strong>
+          </div>
         </div>
         
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://strawberrydips.com'}/verify-email?token=${data.verificationToken}" 
-             style="background: #e91e63; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-size: 16px; font-weight: bold;">
-            Verify My Email Address
-          </a>
+        <div style="margin-bottom: 20px;">
+          <h3 style="color: #333;">Order Details</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Order ID:</strong></td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee;">#${orderData.id.slice(0, 8)}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Total:</strong></td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee;">KSH ${orderData.total.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0;"><strong>Delivery Date:</strong></td>
+              <td style="padding: 8px 0;">${new Date(orderData.delivery_date).toLocaleDateString()}</td>
+            </tr>
+          </table>
         </div>
         
-        <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-          <h4 style="margin: 0 0 10px 0; color: #e65100;">What happens next?</h4>
-          <ul style="margin: 0; padding-left: 20px;">
-            <li>Click the verification button above</li>
-            <li>You'll be redirected to our website</li>
-            <li>Your account will be activated</li>
-            <li>You can start ordering delicious strawberries!</li>
-          </ul>
+        <div style="background: #e3f2fd; border: 1px solid #2196f3; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+          <h3 style="color: #1976d2; margin-top: 0;">${getStatusMessage(orderData.status)}</h3>
         </div>
         
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-          <h4 style="margin: 0 0 10px 0; color: #333;">Benefits of having an account:</h4>
-          <ul style="margin: 0; padding-left: 20px;">
-            <li>Track your orders easily</li>
-            <li>Save delivery addresses</li>
-            <li>Faster checkout process</li>
-            <li>Order history and receipts</li>
-            <li>Exclusive offers and updates</li>
-          </ul>
-        </div>
-        
-        <div style="text-align: center; margin-top: 30px; color: #666; font-size: 14px;">
-          <p><strong>Can't click the button?</strong> Copy and paste this link into your browser:</p>
-          <p style="word-break: break-all; background: #f5f5f5; padding: 10px; border-radius: 4px; font-family: monospace;">
-            ${process.env.NEXT_PUBLIC_SITE_URL || 'https://strawberrydips.com'}/verify-email?token=${data.verificationToken}
-          </p>
-          <p style="margin-top: 20px;">This link will expire in 24 hours for security reasons.</p>
-          <p>Questions? Contact us at support@strawberrydips.com</p>
+        <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #666; font-size: 14px;">
+          <p>Questions? Contact us at <a href="mailto:support@strawberrydips.com" style="color: #e91e63;">support@strawberrydips.com</a></p>
+          <p>Track your order at: <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/track" style="color: #e91e63;">strawberrydips.shop/track</a></p>
         </div>
       </div>
-    `,
+    `
   }),
+
+  verification: (verificationData: any) => ({
+    subject: 'Verify Your Email - Strawberry Dips',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #e91e63; margin: 0;">🍓 Strawberry Dips</h1>
+          <p style="color: #666; margin: 5px 0;">Premium Chocolate Covered Strawberries</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <h2 style="color: #e91e63; margin-top: 0;">Welcome to Strawberry Dips!</h2>
+          <p>Hi ${verificationData.firstName},</p>
+          <p>Thank you for signing up! Please verify your email address to complete your account setup.</p>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <p>Click the button below to verify your email:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/verify-email?token=${verificationData.verificationToken}" 
+               style="background: #e91e63; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+              Verify Email Address
+            </a>
+          </div>
+          <p style="font-size: 14px; color: #666;">
+            This link will expire in 24 hours for security reasons.
+          </p>
+        </div>
+        
+        <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+          <h3 style="color: #856404; margin-top: 0;">What's Next?</h3>
+          <ul style="color: #856404; margin: 0; padding-left: 20px;">
+            <li>Verify your email to activate your account</li>
+            <li>Start ordering delicious chocolate-covered strawberries</li>
+            <li>Track your orders and manage your profile</li>
+          </ul>
+        </div>
+        
+        <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #666; font-size: 14px;">
+          <p>If the button doesn't work, copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 4px;">
+            ${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/verify-email?token=${verificationData.verificationToken}
+          </p>
+          <p>Need help? Contact us at <a href="mailto:support@strawberrydips.com" style="color: #e91e63;">support@strawberrydips.com</a></p>
+        </div>
+      </div>
+    `
+  }),
+
+  passwordReset: (data: {
+    firstName: string;
+    lastName: string;
+    resetToken: string;
+  }) => ({
+    subject: 'Reset Your Password - Strawberry Dips',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #e91e63; margin: 0;">🍓 Strawberry Dips</h1>
+          <p style="color: #666; margin: 5px 0;">Premium Chocolate Covered Strawberries</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <h2 style="color: #e91e63; margin-top: 0;">Password Reset Request</h2>
+          <p>Hi ${data.firstName},</p>
+          <p>We received a request to reset your password for your Strawberry Dips account.</p>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <p>Click the button below to reset your password:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/account/reset-password?token=${data.resetToken}" 
+               style="background: #e91e63; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+              Reset Password
+            </a>
+          </div>
+          <p style="font-size: 14px; color: #666;">
+            This link will expire in 15 minutes for security reasons.
+          </p>
+        </div>
+        
+        <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+          <h3 style="color: #856404; margin-top: 0;">Security Notice</h3>
+          <ul style="color: #856404; margin: 0; padding-left: 20px;">
+            <li>If you didn't request this password reset, please ignore this email</li>
+            <li>Your password will remain unchanged until you click the link above</li>
+            <li>Never share this link with anyone</li>
+          </ul>
+        </div>
+        
+        <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #666; font-size: 14px;">
+          <p>If the button doesn't work, copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 4px;">
+            ${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/account/reset-password?token=${data.resetToken}
+          </p>
+          <p>Need help? Contact us at <a href="mailto:support@strawberrydips.com" style="color: #e91e63;">support@strawberrydips.com</a></p>
+        </div>
+      </div>
+    `
+  })
 };
 
-// Send email function
-export async function sendOrderEmail(
-  to: string,
-  template: 'orderConfirmed' | 'orderPreparing' | 'orderOutForDelivery' | 'orderDelivered',
-  orderData: any
-) {
+// Helper functions
+function getStatusDisplayName(status: string): string {
+  const statusMap: { [key: string]: string } = {
+    'pending': 'Payment Pending',
+    'paid': 'Payment Confirmed',
+    'confirmed': 'Order Confirmed',
+    'preparing': 'Preparing Your Order',
+    'out_for_delivery': 'Out for Delivery',
+    'delivered': 'Delivered',
+    'cancelled': 'Cancelled'
+  };
+  return statusMap[status] || status;
+}
+
+function getStatusMessage(status: string): string {
+  const messageMap: { [key: string]: string } = {
+    'pending': 'We\'re waiting for your payment confirmation.',
+    'paid': 'Payment received! We\'re preparing your order.',
+    'confirmed': 'Your order is confirmed and being prepared.',
+    'preparing': 'Our chefs are preparing your fresh strawberries.',
+    'out_for_delivery': 'Your order is on the way to you!',
+    'delivered': 'Your order has been delivered successfully.',
+    'cancelled': 'Your order has been cancelled.'
+  };
+  return messageMap[status] || 'Your order status has been updated.';
+}
+
+// Generic email sending function
+export async function sendOrderEmail(to: string, templateType: keyof typeof emailTemplates, data: any): Promise<{ success: boolean; error?: string }> {
   try {
-    // Check if email is configured
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
-      console.log('Email not configured, skipping email send');
-      return { success: false, error: 'Email not configured' };
-    }
-
     const transporter = createTransporter();
-    const emailTemplate = emailTemplates[template](orderData);
+    const template = emailTemplates[templateType](data);
 
-    const mailOptions = {
+    await transporter.sendMail({
       from: `"Strawberry Dips" <${process.env.GMAIL_USER}>`,
       to: to,
-      subject: emailTemplate.subject,
-      html: emailTemplate.html,
-    };
+      subject: template.subject,
+      html: template.html,
+    });
 
-    const result = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', result.messageId);
-    
-    return { success: true, messageId: result.messageId };
+    console.log(`Email sent to: ${to}`);
+    return { success: true };
   } catch (error) {
-    console.error('Email sending failed:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    console.error('Error sending email:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
   }
 }
 
-// Password reset email template
-export const passwordResetEmailTemplate = (data: {
+// Send verification email
+export async function sendVerificationEmail(data: {
+  email: string;
   firstName: string;
   lastName: string;
-  resetToken: string;
-}) => ({
-  subject: 'Reset Your Password - Strawberry Dips',
-  html: `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #e91e63; margin: 0;">🍓 Strawberry Dips</h1>
-        <p style="color: #666; margin: 5px 0;">Premium Chocolate Covered Strawberries</p>
-      </div>
-      
-      <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-        <h2 style="color: #e91e63; margin-top: 0;">Password Reset Request</h2>
-        <p>Hi ${data.firstName},</p>
-        <p>We received a request to reset your password for your Strawberry Dips account.</p>
-      </div>
-      
-      <div style="margin-bottom: 20px;">
-        <p>Click the button below to reset your password:</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/account/reset-password?token=${data.resetToken}" 
-             style="background: #e91e63; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
-            Reset Password
-          </a>
-        </div>
-        <p style="font-size: 14px; color: #666;">
-          This link will expire in 15 minutes for security reasons.
-        </p>
-      </div>
-      
-      <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-        <h3 style="color: #856404; margin-top: 0;">Security Notice</h3>
-        <ul style="color: #856404; margin: 0; padding-left: 20px;">
-          <li>If you didn't request this password reset, please ignore this email</li>
-          <li>Your password will remain unchanged until you click the link above</li>
-          <li>Never share this link with anyone</li>
-        </ul>
-      </div>
-      
-      <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #666; font-size: 14px;">
-        <p>If the button doesn't work, copy and paste this link into your browser:</p>
-        <p style="word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 4px;">
-          ${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/account/reset-password?token=${data.resetToken}
-        </p>
-        <p>Need help? Contact us at <a href="mailto:support@strawberrydips.com" style="color: #e91e63;">support@strawberrydips.com</a></p>
-      </div>
-    </div>
-  `
-});
+  verificationToken: string;
+}): Promise<{ success: boolean; error?: string }> {
+  return await sendOrderEmail(data.email, 'verification', data);
+}
 
 // Send password reset email
 export async function sendPasswordResetEmail(data: {
@@ -349,26 +282,7 @@ export async function sendPasswordResetEmail(data: {
   lastName: string;
   resetToken: string;
 }): Promise<{ success: boolean; error?: string }> {
-  try {
-    const transporter = createTransporter();
-    const template = passwordResetEmailTemplate(data);
-
-    await transporter.sendMail({
-      from: `"Strawberry Dips" <${process.env.GMAIL_USER}>`,
-      to: data.email,
-      subject: template.subject,
-      html: template.html,
-    });
-
-    console.log(`Password reset email sent to: ${data.email}`);
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending password reset email:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    };
-  }
+  return await sendOrderEmail(data.email, 'passwordReset', data);
 }
 
 // Send order confirmation email (called after payment success)
@@ -377,138 +291,6 @@ export async function sendOrderConfirmationEmail(orderData: any) {
 }
 
 // Send status update email (called when admin changes status)
-export async function sendStatusUpdateEmail(orderData: any, newStatus: string) {
-  let template: 'orderPreparing' | 'orderOutForDelivery' | 'orderDelivered';
-  
-  switch (newStatus) {
-    case 'preparing':
-      template = 'orderPreparing';
-      break;
-    case 'out_for_delivery':
-      template = 'orderOutForDelivery';
-      break;
-    case 'delivered':
-      template = 'orderDelivered';
-      break;
-    default:
-      console.log('No email template for status:', newStatus);
-      return { success: false, error: 'No email template for this status' };
-  }
-  
-  return await sendOrderEmail(orderData.customer_email, template, orderData);
-}
-
-// Send email verification email
-export async function sendVerificationEmail(data: { 
-  email: string; 
-  firstName: string; 
-  verificationToken: string 
-}) {
-  try {
-    // Check if email is configured
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
-      console.log('Email not configured, skipping verification email send');
-      return { success: false, error: 'Email not configured' };
-    }
-
-    const transporter = createTransporter();
-    const emailTemplate = emailTemplates.emailVerification(data);
-
-    const mailOptions = {
-      from: `"Strawberry Dips" <${process.env.GMAIL_USER}>`,
-      to: data.email,
-      subject: emailTemplate.subject,
-      html: emailTemplate.html,
-    };
-
-    const result = await transporter.sendMail(mailOptions);
-    console.log('Verification email sent successfully:', result.messageId);
-    
-    return { success: true, messageId: result.messageId };
-  } catch (error) {
-    console.error('Verification email sending failed:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-  }
-}
-
-// Password reset email template
-export const passwordResetEmailTemplate = (data: {
-  firstName: string;
-  lastName: string;
-  resetToken: string;
-}) => ({
-  subject: 'Reset Your Password - Strawberry Dips',
-  html: `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #e91e63; margin: 0;">🍓 Strawberry Dips</h1>
-        <p style="color: #666; margin: 5px 0;">Premium Chocolate Covered Strawberries</p>
-      </div>
-      
-      <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-        <h2 style="color: #e91e63; margin-top: 0;">Password Reset Request</h2>
-        <p>Hi ${data.firstName},</p>
-        <p>We received a request to reset your password for your Strawberry Dips account.</p>
-      </div>
-      
-      <div style="margin-bottom: 20px;">
-        <p>Click the button below to reset your password:</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/account/reset-password?token=${data.resetToken}" 
-             style="background: #e91e63; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
-            Reset Password
-          </a>
-        </div>
-        <p style="font-size: 14px; color: #666;">
-          This link will expire in 15 minutes for security reasons.
-        </p>
-      </div>
-      
-      <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-        <h3 style="color: #856404; margin-top: 0;">Security Notice</h3>
-        <ul style="color: #856404; margin: 0; padding-left: 20px;">
-          <li>If you didn't request this password reset, please ignore this email</li>
-          <li>Your password will remain unchanged until you click the link above</li>
-          <li>Never share this link with anyone</li>
-        </ul>
-      </div>
-      
-      <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #666; font-size: 14px;">
-        <p>If the button doesn't work, copy and paste this link into your browser:</p>
-        <p style="word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 4px;">
-          ${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/account/reset-password?token=${data.resetToken}
-        </p>
-        <p>Need help? Contact us at <a href="mailto:support@strawberrydips.com" style="color: #e91e63;">support@strawberrydips.com</a></p>
-      </div>
-    </div>
-  `
-});
-
-// Send password reset email
-export async function sendPasswordResetEmail(data: {
-  email: string;
-  firstName: string;
-  lastName: string;
-  resetToken: string;
-}): Promise<{ success: boolean; error?: string }> {
-  try {
-    const transporter = createTransporter();
-    const template = passwordResetEmailTemplate(data);
-
-    await transporter.sendMail({
-      from: `"Strawberry Dips" <${process.env.GMAIL_USER}>`,
-      to: data.email,
-      subject: template.subject,
-      html: template.html,
-    });
-
-    console.log(`Password reset email sent to: ${data.email}`);
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending password reset email:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    };
-  }
+export async function sendStatusUpdateEmail(orderData: any) {
+  return await sendOrderEmail(orderData.customer_email, 'statusUpdate', orderData);
 }
