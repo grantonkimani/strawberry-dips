@@ -188,6 +188,7 @@ export async function POST(request: NextRequest) {
       await sendVerificationEmail({
         email: email.toLowerCase(),
         firstName: firstName,
+        lastName: lastName,
         verificationToken: verificationToken
       });
     } catch (emailError) {
