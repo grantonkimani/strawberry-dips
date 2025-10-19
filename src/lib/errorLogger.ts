@@ -14,14 +14,21 @@ class ErrorLogger {
   private logs: ErrorLog[] = [];
   private maxLogs = 100;
 
-  log(error: ErrorLog) {
-    // Add to local logs
-    this.logs.unshift({
-      ...error,
+  log(error: Partial<ErrorLog>) {
+    // Create complete error log with required fields
+    const completeError: ErrorLog = {
       timestamp: new Date().toISOString(),
-      url: typeof window !== 'undefined' ? window.location.href : undefined,
-      userAgent: typeof window !== 'undefined' ? navigator.userAgent : undefined,
-    });
+      level: error.level || 'error',
+      message: error.message || 'Unknown error',
+      stack: error.stack,
+      context: error.context,
+      userId: error.userId,
+      url: error.url || (typeof window !== 'undefined' ? window.location.href : undefined),
+      userAgent: error.userAgent || (typeof window !== 'undefined' ? navigator.userAgent : undefined),
+    };
+
+    // Add to local logs
+    this.logs.unshift(completeError);
 
     // Keep only recent logs
     if (this.logs.length > this.maxLogs) {
@@ -30,12 +37,12 @@ class ErrorLogger {
 
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.error(`[${error.level.toUpperCase()}] ${error.message}`, error);
+      console.error(`[${completeError.level.toUpperCase()}] ${completeError.message}`, completeError);
     }
 
     // Send to monitoring service in production
     if (process.env.NODE_ENV === 'production') {
-      this.sendToMonitoring(error);
+      this.sendToMonitoring(completeError);
     }
   }
 
