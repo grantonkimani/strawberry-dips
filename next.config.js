@@ -1,14 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  turbopack: {
-    root: __dirname,
-    rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
-      },
-    },
-  },
   images: {
     unoptimized: false,
     domains: ['localhost', 'supabase.co'],
