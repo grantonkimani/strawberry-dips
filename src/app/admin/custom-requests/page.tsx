@@ -30,7 +30,7 @@ async function deleteRequest(id: string) {
   'use server'
   const base =
     process.env.NEXT_PUBLIC_BASE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://strawberrydips.shop');
   const url = `${base}/api/custom/${id}`;
   await fetch(url, { method: 'DELETE', cache: 'no-store' });
   revalidatePath('/admin/custom-requests');

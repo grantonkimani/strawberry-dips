@@ -68,7 +68,7 @@ export default function SettingsPage() {
     // Payment Settings
     intasendPublishableKey: '',
     intasendSecretKey: '',
-    intasendTestMode: true,
+    intasendTestMode: false,
     
     // Email Settings
     siteUrl: 'https://strawberrydips.shop',
