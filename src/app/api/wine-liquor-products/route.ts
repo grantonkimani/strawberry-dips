@@ -267,6 +267,20 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // First check if the table exists
+    const { data: tableCheck, error: tableError } = await supabaseAdmin
+      .from('wine_liquor_products')
+      .select('id')
+      .limit(1);
+
+    if (tableError) {
+      console.error('Table check error:', tableError);
+      return NextResponse.json(
+        { error: 'Wine/liquor products table does not exist. Please run the database migration first.' },
+        { status: 500 }
+      );
+    }
+
     const { error } = await supabaseAdmin
       .from('wine_liquor_products')
       .delete()
