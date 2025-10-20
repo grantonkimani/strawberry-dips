@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Search, ChevronRight, Phone } from 'lucide-react';
+import { X, Search, ChevronRight, Phone, Home, Menu, Gift, Wine, Package, User, HelpCircle } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
@@ -12,17 +12,50 @@ interface MobileNavProps {
   onClose: () => void;
 }
 
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  display_order: number;
+  product_count?: number;
+}
+
 export function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const { state } = useCart();
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Ensure component is mounted before rendering portal
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
   }, []);
+
+  // Fetch categories when component mounts
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories', {
+          cache: 'no-store'
+        });
+        const data = await response.json();
+        if (data.categories) {
+          setCategories(data.categories);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchCategories();
+    }
+  }, [isOpen]);
 
   // Don't render anything on server or before mount
   if (!mounted) return null;
@@ -106,91 +139,124 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
           {/* Navigation Links */}
           <div className="flex-1 overflow-y-auto">
             <nav className="p-4 space-y-1">
-              {/* Best Sellers */}
+              {/* Main Navigation - Match Desktop */}
               <Link 
-                href="/?featured=true" 
-                className="flex items-center justify-between px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
+                href="/" 
+                className="flex items-center space-x-3 px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
                 onClick={onClose}
               >
-                <span className="font-medium">Best Sellers</span>
+                <Home className="h-5 w-5" />
+                <span className="font-medium">Home</span>
               </Link>
 
-              {/* Chocolate Covered */}
               <Link 
                 href="/menu" 
-                className="flex items-center justify-between px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
+                className="flex items-center space-x-3 px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
                 onClick={onClose}
               >
-                <span className="font-medium">Chocolate Covered</span>
+                <Menu className="h-5 w-5" />
+                <span className="font-medium">Menu</span>
               </Link>
 
-              {/* Birthday */}
               <Link 
-                href="/gifts?occasion=birthday" 
-                className="flex items-center justify-between px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
+                href="/gifts" 
+                className="flex items-center space-x-3 px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
                 onClick={onClose}
               >
-                <span className="font-medium">Birthday</span>
+                <Gift className="h-5 w-5" />
+                <span className="font-medium">Gifts</span>
               </Link>
 
-              {/* By Type - Dropdown */}
-              <div>
-                <button
-                  onClick={() => toggleExpanded('by-type')}
-                  className="flex items-center justify-between w-full px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
-                >
-                  <span className="font-medium">By Type</span>
-                  <ChevronRight 
-                    className={`h-5 w-5 transition-transform ${
-                      expandedItems.includes('by-type') ? 'rotate-90' : ''
-                    }`} 
-                  />
-                </button>
-                {expandedItems.includes('by-type') && (
-                  <div className="ml-4 mt-1 space-y-1">
-                    <Link 
-                      href="/menu?category=classic" 
-                      className="block px-4 py-2 text-red-200 hover:bg-red-800 rounded-lg transition-colors"
-                      onClick={onClose}
-                    >
-                      Classic Milk
-                    </Link>
-                    <Link 
-                      href="/menu?category=dark" 
-                      className="block px-4 py-2 text-red-200 hover:bg-red-800 rounded-lg transition-colors"
-                      onClick={onClose}
-                    >
-                      Dark Chocolate
-                    </Link>
-                    <Link 
-                      href="/menu?category=white" 
-                      className="block px-4 py-2 text-red-200 hover:bg-red-800 rounded-lg transition-colors"
-                      onClick={onClose}
-                    >
-                      White Chocolate
-                    </Link>
-                  </div>
-                )}
-              </div>
+              <Link 
+                href="/wines-liquor" 
+                className="flex items-center space-x-3 px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
+                onClick={onClose}
+              >
+                <Wine className="h-5 w-5" />
+                <span className="font-medium">Wines & Liquor</span>
+              </Link>
 
-              {/* Occasion - Dropdown */}
+              <Link 
+                href="/track" 
+                className="flex items-center space-x-3 px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
+                onClick={onClose}
+              >
+                <Package className="h-5 w-5" />
+                <span className="font-medium">Track Order</span>
+              </Link>
+
+              <Link 
+                href="/custom" 
+                className="flex items-center space-x-3 px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
+                onClick={onClose}
+              >
+                <span className="text-lg">✨</span>
+                <span className="font-medium">Custom Order</span>
+              </Link>
+
+              {/* Divider */}
+              <div className="border-t border-red-800 my-4"></div>
+
+              {/* Dynamic Categories - From Database */}
+              {loading ? (
+                <div className="px-4 py-2 text-red-200 text-sm">Loading categories...</div>
+              ) : categories.length > 0 ? (
+                <div>
+                  <button
+                    onClick={() => toggleExpanded('categories')}
+                    className="flex items-center justify-between w-full px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
+                  >
+                    <span className="font-medium">Categories</span>
+                    <ChevronRight 
+                      className={`h-5 w-5 transition-transform ${
+                        expandedItems.includes('categories') ? 'rotate-90' : ''
+                      }`} 
+                    />
+                  </button>
+                  {expandedItems.includes('categories') && (
+                    <div className="ml-4 mt-1 space-y-1">
+                      {categories
+                        .sort((a, b) => a.display_order - b.display_order)
+                        .map((category) => (
+                        <Link 
+                          key={category.id}
+                          href={`/menu?category=${category.id}`} 
+                          className="block px-4 py-2 text-red-200 hover:bg-red-800 rounded-lg transition-colors"
+                          onClick={onClose}
+                        >
+                          {category.name}
+                          {category.product_count && (
+                            <span className="ml-2 text-xs opacity-75">({category.product_count})</span>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : null}
+
+              {/* Occasions - Dropdown */}
               <div>
                 <button
-                  onClick={() => toggleExpanded('occasion')}
+                  onClick={() => toggleExpanded('occasions')}
                   className="flex items-center justify-between w-full px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
                 >
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm">♿</span>
-                    <span className="font-medium">Occasion</span>
-                  </div>
+                  <span className="font-medium">Occasions</span>
                   <ChevronRight 
                     className={`h-5 w-5 transition-transform ${
-                      expandedItems.includes('occasion') ? 'rotate-90' : ''
+                      expandedItems.includes('occasions') ? 'rotate-90' : ''
                     }`} 
                   />
                 </button>
-                {expandedItems.includes('occasion') && (
+                {expandedItems.includes('occasions') && (
                   <div className="ml-4 mt-1 space-y-1">
+                    <Link 
+                      href="/gifts?occasion=birthday" 
+                      className="block px-4 py-2 text-red-200 hover:bg-red-800 rounded-lg transition-colors"
+                      onClick={onClose}
+                    >
+                      Birthday
+                    </Link>
                     <Link 
                       href="/gifts?occasion=valentine" 
                       className="block px-4 py-2 text-red-200 hover:bg-red-800 rounded-lg transition-colors"
@@ -212,68 +278,53 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
                     >
                       Graduation
                     </Link>
-                  </div>
-                )}
-              </div>
-
-              {/* Wine - Dropdown */}
-              <div>
-                <button
-                  onClick={() => toggleExpanded('wine')}
-                  className="flex items-center justify-between w-full px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
-                >
-                  <span className="font-medium">Wine</span>
-                  <ChevronRight 
-                    className={`h-5 w-5 transition-transform ${
-                      expandedItems.includes('wine') ? 'rotate-90' : ''
-                    }`} 
-                  />
-                </button>
-                {expandedItems.includes('wine') && (
-                  <div className="ml-4 mt-1 space-y-1">
                     <Link 
-                      href="/wines-liquor?category=wine" 
+                      href="/gifts?occasion=sympathy" 
                       className="block px-4 py-2 text-red-200 hover:bg-red-800 rounded-lg transition-colors"
                       onClick={onClose}
                     >
-                      Wine Collection
+                      Sympathy
                     </Link>
                     <Link 
-                      href="/wines-liquor?category=liquor" 
+                      href="/gifts?occasion=corporate" 
                       className="block px-4 py-2 text-red-200 hover:bg-red-800 rounded-lg transition-colors"
                       onClick={onClose}
                     >
-                      Liquor Collection
+                      Corporate
                     </Link>
                   </div>
                 )}
               </div>
 
-              {/* Sympathy */}
+              {/* Divider */}
+              <div className="border-t border-red-800 my-4"></div>
+
+              {/* Support & Account */}
               <Link 
-                href="/gifts?occasion=sympathy" 
-                className="flex items-center justify-between px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
+                href="/support" 
+                className="flex items-center space-x-3 px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
                 onClick={onClose}
               >
-                <span className="font-medium">Sympathy</span>
+                <HelpCircle className="h-5 w-5" />
+                <span className="font-medium">Support</span>
               </Link>
 
-              {/* Corporate */}
               <Link 
-                href="/gifts?type=corporate" 
-                className="flex items-center justify-between px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
+                href="/account" 
+                className="flex items-center space-x-3 px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors"
                 onClick={onClose}
               >
-                <span className="font-medium">Corporate</span>
+                <User className="h-5 w-5" />
+                <span className="font-medium">Account</span>
               </Link>
 
-              {/* Next Day - Special CTA */}
+              {/* Special CTA */}
               <Link 
                 href="/checkout?delivery=next-day" 
                 className="flex items-center justify-between px-4 py-3 text-white hover:bg-red-800 rounded-lg transition-colors border-t border-red-800 mt-4 pt-4"
                 onClick={onClose}
               >
-                <span className="font-medium underline">Next Day</span>
+                <span className="font-medium underline">Next Day Delivery</span>
               </Link>
             </nav>
           </div>
