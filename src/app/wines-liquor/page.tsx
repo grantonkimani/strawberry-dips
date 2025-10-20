@@ -293,7 +293,7 @@ export default function WinesLiquorPage() {
                           id: product.id,
                           name: product.name,
                           price: product.price,
-                          image: product.image_url,
+                          image: product.image_url || '',
                           category: 'wine-liquor',
                           quantity: 1
                         });
@@ -356,7 +356,7 @@ export default function WinesLiquorPage() {
                               id: product.id,
                               name: product.name,
                               price: product.price,
-                              image: product.image_url,
+                              image: product.image_url || '',
                               category: 'wine-liquor',
                               quantity: 1
                             });

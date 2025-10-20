@@ -120,14 +120,14 @@ export function WineLiquorSection() {
                   <span className="text-xl font-bold text-red-600">
                     KES {product.price.toLocaleString()}
                   </span>
-                  <Button 
+                <Button 
                     className="bg-red-600 hover:bg-red-700 text-white"
                     onClick={() => {
                       addItem({
                         id: product.id,
                         name: product.name,
                         price: product.price,
-                        image: product.image_url,
+                      image: product.image_url || '',
                         category: 'wine-liquor',
                         quantity: 1
                       });
