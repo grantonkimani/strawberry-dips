@@ -4,6 +4,7 @@ import { ShoppingCart, Heart, User, Menu, HelpCircle, Instagram } from "lucide-r
 import { Button } from "./ui/Button";
 import { useCart } from "@/contexts/CartContext";
 import { MobileNav } from "./CartSidebar";
+import { MobileNav as MobileNavNew } from "./MobileNavNew";
 import { HelpDrawer } from "./HelpDrawer";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -257,7 +258,7 @@ export function Header() {
       </div>
       
       {/* Mobile Navigation */}
-      <MobileNav 
+      <MobileNavNew 
         isOpen={isMobileMenuOpen} 
         onClose={() => setIsMobileMenuOpen(false)} 
       />
