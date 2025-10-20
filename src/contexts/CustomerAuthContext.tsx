@@ -39,7 +39,7 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
     try {
       // Add timeout to prevent hanging
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // Reduced to 5 seconds
       
       const response = await fetch('/api/customers/verify-session', {
         credentials: 'include',

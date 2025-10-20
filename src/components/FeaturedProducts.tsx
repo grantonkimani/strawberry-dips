@@ -23,8 +23,8 @@ export function FeaturedProducts() {
       try {
         // Add caching and reduce limit for better performance
         const res = await fetch('/api/products?available=true&limit=6', {
-          cache: 'force-cache',
-          next: { revalidate: 300 } // 5 minutes
+          cache: 'no-store', // Always fetch fresh data
+          next: { revalidate: 0 } // No revalidation
         });
         const data = await res.json();
         const list: ApiProduct[] = Array.isArray(data) ? data : (data.products || []);

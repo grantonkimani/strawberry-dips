@@ -5,6 +5,7 @@ export async function GET(request: NextRequest) {
 	try {
 		console.log('GET /api/products - Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
 		console.log('GET /api/products - Supabase Key configured:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+		console.log('GET /api/products - Request URL:', request.url);
 		
 		// Check if Supabase is configured
 		if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co') {
@@ -76,6 +77,8 @@ export async function GET(request: NextRequest) {
 		if (availableOnly) query = query.eq('is_available', true)
 
 		let { data, error } = await query
+		console.log('GET /api/products - Query result:', { dataCount: data?.length, error: error?.message });
+		
 		if (error) {
 			console.warn('GET /api/products join failed, retrying without categories:', error?.message || error)
 			const retry = await supabase
@@ -85,15 +88,22 @@ export async function GET(request: NextRequest) {
 				.limit(limit)
 			data = retry.data as any
 			error = retry.error as any
+			console.log('GET /api/products - Retry result:', { dataCount: data?.length, error: error?.message });
 		}
 
-		if (error) throw error
+		if (error) {
+			console.error('GET /api/products - Final error:', error);
+			throw error;
+		}
+		
+		console.log('GET /api/products - Returning products:', data?.length || 0);
 
 		const response = NextResponse.json(data)
 		
-		// Add caching headers for better performance
-		response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
-		response.headers.set('CDN-Cache-Control', 'public, s-maxage=300')
+		// Remove caching headers to ensure fresh data
+		response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
+		response.headers.set('Pragma', 'no-cache')
+		response.headers.set('Expires', '0')
 		
 		return response
 	} catch (error) {

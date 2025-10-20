@@ -42,6 +42,7 @@ export function ProductGrid() {
 	const [search, setSearch] = useState<string>('');
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [lastFetch, setLastFetch] = useState<Date | null>(null);
 
 	// Read query from URL (?q=) and react to changes
 	const searchParams = useSearchParams();
@@ -53,16 +54,16 @@ export function ProductGrid() {
 		const fetchData = async () => {
 			try {
 				// Fetch products and categories in parallel with caching
-							const [productsRes, categoriesRes] = await Promise.all([
-								fetch('/api/products?available=true&limit=100', {
-									cache: 'force-cache',
-									next: { revalidate: 300 } // 5 minutes
-								}),
-								fetch('/api/categories', {
-									cache: 'force-cache',
-									next: { revalidate: 1800 } // 30 minutes
-								})
-							]);
+				const [productsRes, categoriesRes] = await Promise.all([
+					fetch('/api/products?available=true&limit=100', {
+						cache: 'no-store', // Always fetch fresh data
+						next: { revalidate: 0 } // No revalidation
+					}),
+					fetch('/api/categories', {
+						cache: 'no-store', // Always fetch fresh data
+						next: { revalidate: 0 } // No revalidation
+					})
+				]);
 
 				const productsData = await productsRes.json();
 				const categoriesData = await categoriesRes.json();
@@ -99,11 +100,19 @@ export function ProductGrid() {
 				console.error('Error fetching data:', e);
 			} finally {
 				setLoading(false);
+				setLastFetch(new Date());
 			}
 		};
 
 		fetchData();
 	}, []);
+
+	// Add manual refresh function
+	const refreshProducts = () => {
+		setLoading(true);
+		setError(null);
+		fetchData();
+	};
 
 	// Transform products to ensure description is never null
 	const transformedProducts = products.map(product => ({
@@ -150,10 +159,25 @@ export function ProductGrid() {
 					<h2 className="text-4xl font-bold text-gray-900 mb-4">
 						Our Premium Collection
 					</h2>
-					<p className="text-xl text-gray-600 max-w-2xl mx-auto">
+					<p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
 						Hand-crafted chocolate covered strawberries made with the finest ingredients 
 						and delivered fresh to your door.
 					</p>
+					{/* Debug Info and Refresh Button */}
+					<div className="flex items-center justify-center gap-4 text-sm text-gray-500">
+						{lastFetch && (
+							<span>Last updated: {lastFetch.toLocaleTimeString()}</span>
+						)}
+						<Button 
+							onClick={refreshProducts}
+							variant="outline"
+							size="sm"
+							disabled={loading}
+						>
+							{loading ? 'Loading...' : 'Refresh Products'}
+						</Button>
+						<span>Products: {products.length}</span>
+					</div>
 				</div>
 
 				{loading ? (

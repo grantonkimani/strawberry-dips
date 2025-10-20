@@ -5,6 +5,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CustomerAuthProvider } from "@/contexts/CustomerAuthContext";
 import { PerformanceMonitor } from "@/components/PerformanceMonitor";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,14 +41,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <CustomerAuthProvider>
-            <CartProvider>
-              {children}
-              <PerformanceMonitor />
-            </CartProvider>
-          </CustomerAuthProvider>
-        </AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <CustomerAuthProvider>
+              <CartProvider>
+                {children}
+                <PerformanceMonitor />
+              </CartProvider>
+            </CustomerAuthProvider>
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
