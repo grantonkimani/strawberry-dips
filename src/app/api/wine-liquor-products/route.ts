@@ -4,6 +4,13 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 // GET /api/wine-liquor-products
 export async function GET(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const includeInactive = searchParams.get('includeInactive') === 'true';
     const category = searchParams.get('category');
@@ -58,6 +65,13 @@ export async function GET(request: NextRequest) {
 // POST /api/wine-liquor-products
 export async function POST(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const {
       name,
@@ -142,6 +156,13 @@ export async function POST(request: NextRequest) {
 // PUT /api/wine-liquor-products
 export async function PUT(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const {
       id,
@@ -229,6 +250,13 @@ export async function PUT(request: NextRequest) {
 // DELETE /api/wine-liquor-products
 export async function DELETE(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 

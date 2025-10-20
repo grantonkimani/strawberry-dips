@@ -4,6 +4,13 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 // GET /api/wine-liquor-categories
 export async function GET(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const includeInactive = searchParams.get('includeInactive') === 'true';
 
@@ -39,6 +46,13 @@ export async function GET(request: NextRequest) {
 // POST /api/wine-liquor-categories
 export async function POST(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { name, description, icon, display_order, is_active } = body;
 
@@ -82,6 +96,13 @@ export async function POST(request: NextRequest) {
 // PUT /api/wine-liquor-categories
 export async function PUT(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { id, name, description, icon, display_order, is_active } = body;
 
@@ -127,6 +148,13 @@ export async function PUT(request: NextRequest) {
 // DELETE /api/wine-liquor-categories
 export async function DELETE(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
