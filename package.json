@@ -7,9 +7,10 @@
     "dev:https": "next dev --turbopack --experimental-https --experimental-https-key ./certs/key.pem --experimental-https-cert ./certs/cert.pem",
     "setup:https": "node scripts/setup-https.js",
     "build": "next build --turbopack",
+    "build:vercel": "next build",
     "start": "next start",
     "lint": "eslint",
-    "analyze:performance": "node scripts/performance-analysis.js",
+    "analyze:performance": "node scripts/test-performance.js",
     "test:performance": "node scripts/test-performance.js"
   },
   "dependencies": {
