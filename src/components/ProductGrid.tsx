@@ -50,60 +50,61 @@ export function ProductGrid() {
 		setSearch(searchParams.get('q') || '');
 	}, [searchParams]);
 
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				// Fetch products and categories in parallel with caching
-				const [productsRes, categoriesRes] = await Promise.all([
-					fetch('/api/products?available=true&limit=100', {
-						cache: 'no-store', // Always fetch fresh data
-						next: { revalidate: 0 } // No revalidation
-					}),
-					fetch('/api/categories', {
-						cache: 'no-store', // Always fetch fresh data
-						next: { revalidate: 0 } // No revalidation
-					})
-				]);
+	// Define fetchData function outside useEffect so it can be reused
+	const fetchData = async () => {
+		try {
+			// Fetch products and categories in parallel with caching
+			const [productsRes, categoriesRes] = await Promise.all([
+				fetch('/api/products?available=true&limit=100', {
+					cache: 'no-store', // Always fetch fresh data
+					next: { revalidate: 0 } // No revalidation
+				}),
+				fetch('/api/categories', {
+					cache: 'no-store', // Always fetch fresh data
+					next: { revalidate: 0 } // No revalidation
+				})
+			]);
 
-				const productsData = await productsRes.json();
-				const categoriesData = await categoriesRes.json();
+			const productsData = await productsRes.json();
+			const categoriesData = await categoriesRes.json();
 
-				// Set products
-				if (Array.isArray(productsData)) {
-					setProducts(productsData);
-				} else if (productsData.products) {
-					setProducts(productsData.products);
-				} else {
-					setError(productsData.error || 'Failed to load products');
-					return;
-				}
-
-				// Set categories with product counts
-				if (Array.isArray(categoriesData)) {
-					const categoriesWithCounts = categoriesData.map(category => ({
-						...category,
-						product_count: productsData.filter((p: ApiProduct) => p.category_id === category.id).length
-					}));
-					setCategories(categoriesWithCounts);
-				} else if (categoriesData.categories) {
-					const categoriesWithCounts = categoriesData.categories.map((category: Category) => ({
-						...category,
-						product_count: productsData.filter((p: ApiProduct) => p.category_id === category.id).length
-					}));
-					setCategories(categoriesWithCounts);
-				} else {
-					console.warn('Failed to load categories:', categoriesData.error);
-					setCategories([]);
-				}
-			} catch (e) {
-				setError('Failed to load data');
-				console.error('Error fetching data:', e);
-			} finally {
-				setLoading(false);
-				setLastFetch(new Date());
+			// Set products
+			if (Array.isArray(productsData)) {
+				setProducts(productsData);
+			} else if (productsData.products) {
+				setProducts(productsData.products);
+			} else {
+				setError(productsData.error || 'Failed to load products');
+				return;
 			}
-		};
 
+			// Set categories with product counts
+			if (Array.isArray(categoriesData)) {
+				const categoriesWithCounts = categoriesData.map(category => ({
+					...category,
+					product_count: productsData.filter((p: ApiProduct) => p.category_id === category.id).length
+				}));
+				setCategories(categoriesWithCounts);
+			} else if (categoriesData.categories) {
+				const categoriesWithCounts = categoriesData.categories.map((category: Category) => ({
+					...category,
+					product_count: productsData.filter((p: ApiProduct) => p.category_id === category.id).length
+				}));
+				setCategories(categoriesWithCounts);
+			} else {
+				console.warn('Failed to load categories:', categoriesData.error);
+				setCategories([]);
+			}
+		} catch (e) {
+			setError('Failed to load data');
+			console.error('Error fetching data:', e);
+		} finally {
+			setLoading(false);
+			setLastFetch(new Date());
+		}
+	};
+
+	useEffect(() => {
 		fetchData();
 	}, []);
 
