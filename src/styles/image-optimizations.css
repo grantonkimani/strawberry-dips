@@ -1,0 +1,141 @@
+/* Image Loading Optimizations */
+
+/* Smooth transitions for image loading */
+.image-loading-transition {
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* Blur placeholder effect */
+.image-blur-placeholder {
+  filter: blur(10px);
+  transform: scale(1.1);
+  opacity: 0.7;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Loading skeleton animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.image-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Progressive image loading */
+.progressive-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.progressive-image img {
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.progressive-image img.loading {
+  opacity: 0;
+  transform: scale(1.05);
+}
+
+.progressive-image img.loaded {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Aspect ratio containers */
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
+.aspect-portrait {
+  aspect-ratio: 3 / 4;
+}
+
+/* Image error state */
+.image-error {
+  background: linear-gradient(135deg, #fee2e2 0%, #fef3c7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #dc2626;
+}
+
+/* Responsive image sizing */
+.responsive-image {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+/* Lazy loading intersection observer optimization */
+.lazy-load-target {
+  content-visibility: auto;
+  contain-intrinsic-size: 300px 300px;
+}
+
+/* Image hover effects */
+.image-hover-effect {
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.image-hover-effect:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading spinner for images */
+.image-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #dc2626;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Fallback icon styling */
+.fallback-icon {
+  font-size: 4rem;
+  opacity: 0.6;
+  filter: grayscale(0.3);
+}
+
+/* Image container with proper sizing */
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #f9fafb;
+}
+
+/* Optimized image loading states */
+.image-loading-state {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

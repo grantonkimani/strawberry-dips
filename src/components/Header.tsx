@@ -127,6 +127,9 @@ export function Header() {
             <Link href="/gifts" className="text-gray-600 hover:text-pink-600 font-medium transition-colors">
               Gifts
             </Link>
+            <Link href="/wines-liquor" className="text-gray-600 hover:text-pink-600 font-medium transition-colors">
+              Wines & Liquor
+            </Link>
             <Link href="/track" className="text-gray-600 hover:text-pink-600 font-medium transition-colors">
               Track Order
             </Link>

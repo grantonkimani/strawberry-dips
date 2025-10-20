@@ -94,6 +94,32 @@ const LazyWhyChoose = dynamic(() => import("@/components/WhyChoose").then(mod =>
   )
 });
 
+const LazyWineLiquorSection = dynamic(() => import("@/components/WineLiquorSection").then(mod => ({ default: mod.WineLiquorSection })), {
+  loading: () => (
+    <section className="py-16 px-4 bg-gradient-to-r from-red-50 to-amber-50">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center mb-4">
+            <div className="animate-pulse w-8 h-8 bg-red-200 rounded mr-3"></div>
+            <div className="animate-pulse h-8 w-64 bg-red-200 rounded"></div>
+          </div>
+          <div className="animate-pulse h-6 w-96 bg-red-200 rounded mx-auto"></div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="aspect-square rounded-lg bg-red-200 mb-4" />
+              <div className="h-5 w-3/4 rounded bg-red-200 mb-2" />
+              <div className="h-4 w-1/2 rounded bg-red-200 mb-3" />
+              <div className="h-9 w-full rounded-md bg-red-200" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+});
+
 const LazyTestimonials = dynamic(() => import("@/components/Testimonials").then(mod => ({ default: mod.Testimonials })), {
   loading: () => (
     <section className="py-16 px-4 bg-gray-50">
@@ -178,6 +204,7 @@ export default function HomePage() {
       </Suspense>
       
       {/* Lazy load non-critical sections */}
+      <LazyWineLiquorSection />
       <LazyWhyChoose />
       <LazyTestimonials />
       

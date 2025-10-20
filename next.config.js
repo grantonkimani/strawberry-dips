@@ -49,6 +49,14 @@ const nextConfig = {
         source: '/uploads/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=86400' },
+          { key: 'Content-Security-Policy', value: "default-src 'self'" },
+        ],
+      },
+      {
+        source: '/uploads/wine-liquor/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=604800' }, // 7 days for wine/liquor images
+          { key: 'Content-Security-Policy', value: "default-src 'self'" },
         ],
       },
       {
