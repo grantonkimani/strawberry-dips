@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
 
     if (state === 'COMPLETE') {
       nextPaymentStatus = 'completed';
-      nextOrderStatus = 'confirmed';
+      nextOrderStatus = 'paid'; // Set to 'paid' instead of 'confirmed' for delivery workflow
       if (mpesa_reference) updateData.payment_reference = mpesa_reference;
     } else if (state === 'PENDING') {
       nextPaymentStatus = 'pending';

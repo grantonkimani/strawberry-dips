@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { sendStatusUpdateEmail } from '@/lib/email';
 
 // GET /api/orders/[id] - Get order details for tracking
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } } | any
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const orderId = (context as any)?.params?.id as string;
+    const params = await context.params;
+    const orderId = params.id;
 
     if (!orderId) {
       return NextResponse.json(
@@ -64,6 +66,72 @@ export async function GET(
     return NextResponse.json({ order: transformedOrder });
   } catch (error) {
     console.error('Error in order tracking API:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT /api/orders/[id] - Update order status
+export async function PUT(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const params = await context.params;
+    const orderId = params.id;
+    const body = await request.json();
+    const { status: newStatus } = body;
+
+    if (!orderId) {
+      return NextResponse.json(
+        { error: 'Order ID is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!newStatus) {
+      return NextResponse.json(
+        { error: 'Status is required' },
+        { status: 400 }
+      );
+    }
+
+    // Update the order status
+    const { data: updatedOrder, error: updateError } = await supabase
+      .from('orders')
+      .update({ status: newStatus })
+      .eq('id', orderId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Error updating order:', updateError);
+      return NextResponse.json(
+        { error: 'Failed to update order status' },
+        { status: 500 }
+      );
+    }
+
+    // Send email notification for status changes
+    let emailSent = false;
+    try {
+      await sendStatusUpdateEmail({ ...updatedOrder, status: newStatus });
+      emailSent = true;
+    } catch (emailError) {
+      console.error('Failed to send status email:', emailError);
+      // Don't fail the request if email fails
+    }
+
+    return NextResponse.json({
+      success: true,
+      order: updatedOrder,
+      message: `Order status updated to ${newStatus}${emailSent ? ' and email sent' : ''}`
+    });
+
+  } catch (error) {
+    console.error('Error updating order status:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

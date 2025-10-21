@@ -117,7 +117,7 @@ export default function AdminDashboard() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ orderId, status: newStatus }),
+        body: JSON.stringify({ status: newStatus }),
       });
 
       const data = await response.json();
@@ -140,6 +140,34 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error updating order status:', error);
       alert('Failed to update order status');
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
+  const autoCheckPendingOrders = async () => {
+    setUpdatingStatus('auto-check');
+    
+    try {
+      const response = await fetch('/api/admin/auto-check-pending', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+
+      if (data.success) {
+        await fetchOrders();
+        await fetchAnalyticsTotals(period);
+        alert(`🤖 Auto-check complete! Updated ${data.updated} out of ${data.total} pending orders.`);
+      } else {
+        alert(`❌ Auto-check failed: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error auto-checking pending orders:', error);
+      alert('❌ Auto-check failed');
     } finally {
       setUpdatingStatus(null);
     }
@@ -211,8 +239,29 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="bg-white border-b border-pink-100 shadow-sm mb-8">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Admin Dashboard</h1>
-          <p className="text-gray-600">Manage orders and track business performance</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Admin Dashboard</h1>
+              <p className="text-gray-600">Manage orders and track business performance</p>
+            </div>
+            <Button
+              onClick={autoCheckPendingOrders}
+              disabled={updatingStatus === 'auto-check'}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {updatingStatus === 'auto-check' ? (
+                <>
+                  <Clock className="h-4 w-4 mr-2 animate-spin" />
+                  Auto-Checking...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Auto-Check Pending Orders
+                </>
+              )}
+            </Button>
+          </div>
           <div className="mt-3 flex items-center gap-2">
             <label className="text-sm text-gray-600">Range:</label>
             <select
@@ -395,9 +444,6 @@ export default function AdminDashboard() {
                             >
                               <option value="pending">Pending</option>
                               <option value="paid">Paid</option>
-                              <option value="preparing">Preparing</option>
-                              <option value="out_for_delivery">Out for Delivery</option>
-                              <option value="delivered">Delivered</option>
                               <option value="cancelled">Cancelled</option>
                             </select>
                             {updatingStatus === order.id && (

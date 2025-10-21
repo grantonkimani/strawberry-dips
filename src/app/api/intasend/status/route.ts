@@ -44,6 +44,11 @@ export async function GET(request: NextRequest) {
 
     // Check payment status with IntaSend
     const statusResponse = await checkPaymentStatus(invoice_id);
+    
+    console.log(`Checking status for order ${orderId || invoice_id}:`, {
+      invoiceState: statusResponse.invoice?.state,
+      failedReason: statusResponse.invoice?.failed_reason
+    });
 
     // Update order status in database based on IntaSend response
     if (orderId || invoiceId) {
@@ -54,27 +59,41 @@ export async function GET(request: NextRequest) {
       // Map IntaSend status to our order status
       if (statusResponse.invoice?.state === 'COMPLETE') {
         updateData.payment_status = 'completed';
-        updateData.status = 'confirmed';
+        updateData.status = 'paid';
+        console.log(`🟢 Payment COMPLETE - updating to paid`);
       } else if (statusResponse.invoice?.state === 'PENDING') {
         updateData.payment_status = 'pending';
+        console.log(`🟡 Payment PENDING - keeping as pending`);
       } else if (statusResponse.invoice?.state === 'FAILED') {
         updateData.payment_status = 'failed';
         updateData.status = 'cancelled';
+        if (statusResponse.invoice.failed_reason) {
+          updateData.payment_error = statusResponse.invoice.failed_reason;
+        }
+        console.log(`🔴 Payment FAILED - updating PENDING order to cancelled`);
       }
 
-      // Update by orderId if available, otherwise by invoice reference
-      const { error: updateError } = orderId
-        ? await supabase
-            .from('orders')
-            .update(updateData)
-            .eq('id', orderId)
-        : await supabase
-            .from('orders')
-            .update(updateData)
-            .eq('intasend_invoice_id', invoice_id);
+      // Always update if we have status information
+      if (statusResponse.invoice?.state) {
+        console.log(`📝 Attempting to update order ${orderId || invoice_id} with data:`, updateData);
+        
+        const { error: updateError } = orderId
+          ? await supabase
+              .from('orders')
+              .update(updateData)
+              .eq('id', orderId)
+          : await supabase
+              .from('orders')
+              .update(updateData)
+              .eq('intasend_invoice_id', invoice_id);
 
-      if (updateError) {
-        console.error('Error updating order status:', updateError);
+        if (updateError) {
+          console.error('❌ Error updating order status:', updateError);
+        } else {
+          console.log(`✅ Order ${orderId || invoice_id} successfully updated:`, updateData);
+        }
+      } else {
+        console.log(`⚠️ No invoice state found for order ${orderId || invoice_id}`);
       }
     }
 

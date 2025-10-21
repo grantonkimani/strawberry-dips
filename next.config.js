@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Ensure Turbopack uses this project directory as the root
+  turbopack: {
+    root: __dirname,
+  },
   images: {
     unoptimized: false,
     domains: ['localhost', 'supabase.co'],
