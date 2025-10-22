@@ -100,7 +100,12 @@ export default function BannersAdminPage() {
     [next[idx], next[j]] = [next[j], next[idx]];
     setBanners(next);
     // Persist orders
-    await Promise.all(next.map((b, i) => fetch(`/api/banners/${b.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ display_order: i }) })));
+    await Promise.all(next.map((b, i) => fetch(`/api/banners/${b.id}`, { 
+      method: 'PATCH', 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify({ display_order: i }),
+      credentials: 'include'
+    })));
     load();
   };
 

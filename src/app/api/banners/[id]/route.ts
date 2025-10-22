@@ -5,7 +5,25 @@ import { withAdminAuth } from '@/lib/auth-middleware';
 async function updateBanner(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const body = await req.json();
   const { id } = await context.params;
-  if (!supabaseAdmin) return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
+  
+  if (!supabaseAdmin) {
+    console.warn('Supabase admin client not configured, using regular client');
+    // Fallback to regular supabase client if admin is not available
+    const { supabase } = await import('@/lib/supabase');
+    if (!supabase) {
+      return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
+    }
+    
+    const { data, error } = await supabase
+      .from('banners')
+      .update(body)
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ banner: data });
+  }
+  
   const { data, error } = await supabaseAdmin
     .from('banners')
     .update(body)

@@ -41,10 +41,36 @@ async function createBanner(req: NextRequest) {
     const body = await req.json();
     
     if (!supabaseAdmin) {
-      console.warn('Supabase admin client not configured');
-      return NextResponse.json({ 
-        error: 'Supabase not configured. Please set up your environment variables in .env.local' 
-      }, { status: 500 });
+      console.warn('Supabase admin client not configured, using regular client');
+      // Fallback to regular supabase client if admin is not available
+      const { supabase } = await import('@/lib/supabase');
+      if (!supabase) {
+        return NextResponse.json({ 
+          error: 'Supabase not configured. Please set up your environment variables in .env.local' 
+        }, { status: 500 });
+      }
+      
+      // Use regular supabase client for creation
+      const { data, error } = await supabase.from('banners').insert({
+        image_url: body.image_url,
+        alt: body.alt ?? '',
+        headline: body.headline ?? '',
+        subtext: body.subtext ?? '',
+        cta_label: body.cta_label ?? '',
+        cta_href: body.cta_href ?? '',
+        overlay: body.overlay ?? 0.45,
+        display_order: body.display_order ?? 0,
+        active: body.active ?? true,
+        start_at: body.start_at ?? null,
+        end_at: body.end_at ?? null,
+      }).select('*').single();
+      
+      if (error) {
+        console.error('Supabase insert error:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+      
+      return NextResponse.json({ banner: data });
     }
     
     // Validate required fields
