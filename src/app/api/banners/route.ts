@@ -25,9 +25,9 @@ async function getBanners() {
     
     const response = NextResponse.json({ banners: data ?? [] });
     
-    // Add caching headers for banners (longer cache since they change less frequently)
-    response.headers.set('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=3600')
-    response.headers.set('CDN-Cache-Control', 'public, s-maxage=1800')
+    // Reduced caching for banners since they're frequently updated by admins
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
+    response.headers.set('CDN-Cache-Control', 'public, s-maxage=60')
     
     return response;
   } catch (error) {
