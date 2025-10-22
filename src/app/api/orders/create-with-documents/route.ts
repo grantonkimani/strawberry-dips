@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { sendOrderConfirmationEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -126,6 +127,31 @@ export async function POST(request: NextRequest) {
       if (updateError) {
         console.error('Error updating order with document info:', updateError);
       }
+    }
+
+    // Send order confirmation email
+    try {
+      const emailResult = await sendOrderConfirmationEmail({
+        id: order.id,
+        customer_email: customerEmail,
+        total: amount,
+        delivery_date: deliveryInfo.deliveryDate || new Date().toISOString().split('T')[0],
+        delivery_time: deliveryInfo.deliveryTime || 'morning',
+        delivery_city: deliveryInfo.city || 'Not provided',
+        delivery_state: deliveryInfo.state || 'Not provided',
+        special_instructions: deliveryInfo.specialInstructions || null,
+        tracking_code: order.id.slice(0, 8).toUpperCase(), // Use order ID as tracking code
+      });
+      
+      if (!emailResult.success) {
+        console.warn('Order confirmation email failed:', emailResult.error);
+        // Don't fail the request if email fails
+      } else {
+        console.log('Order confirmation email sent successfully');
+      }
+    } catch (emailError) {
+      console.error('Email sending error:', emailError);
+      // Don't fail the request if email fails
     }
 
     return NextResponse.json({
