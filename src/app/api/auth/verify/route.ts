@@ -1,36 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { verifyAdminSession } from '@/lib/auth-middleware';
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('admin-session')?.value;
+    const { isValid, user, error } = await verifyAdminSession(request);
 
-    if (!token) {
+    if (!isValid) {
       return NextResponse.json({
         success: false,
         authenticated: false,
-        message: 'No session token found'
+        message: error || 'Authentication failed'
       });
     }
-
-    // In a real app, you'd verify the token signature and check expiration
-    // For simplicity, we'll just check if it exists and get user info
-    // You could decode the token to get user ID and fetch from database
-    
-    // For now, return a mock user since we know the token exists
-    // In production, you'd decode the token and fetch the actual user
-    const mockUser = {
-      id: 'admin-user-id',
-      username: 'admin',
-      email: 'admin@strawberrydips.com',
-      full_name: 'Administrator'
-    };
 
     return NextResponse.json({
       success: true,
       authenticated: true,
-      user: mockUser,
-      token: token
+      user: user,
+      token: request.cookies.get('admin-session')?.value
     });
   } catch (error) {
     console.error('Session verification error:', error);

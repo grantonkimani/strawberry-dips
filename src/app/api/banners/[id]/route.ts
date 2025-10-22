@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { withAdminAuth } from '@/lib/auth-middleware';
 
-export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+async function updateBanner(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const body = await req.json();
   const { id } = await context.params;
   if (!supabaseAdmin) return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
@@ -15,7 +16,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
   return NextResponse.json({ banner: data });
 }
 
-export async function DELETE(_: NextRequest, context: { params: Promise<{ id: string }> }) {
+async function deleteBanner(_: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
     
@@ -90,5 +91,9 @@ export async function DELETE(_: NextRequest, context: { params: Promise<{ id: st
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+// Protected admin endpoints
+export const PATCH = withAdminAuth(updateBanner);
+export const DELETE = withAdminAuth(deleteBanner);
 
 

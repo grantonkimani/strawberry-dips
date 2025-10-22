@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { withAdminAuth } from '@/lib/auth-middleware';
 
-export async function GET() {
+async function getBanners() {
   try {
     if (!supabaseAdmin) {
       console.warn('Supabase admin client not configured - returning empty banners');
@@ -35,7 +36,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest) {
+async function createBanner(req: NextRequest) {
   try {
     const body = await req.json();
     
@@ -91,5 +92,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+// Public GET endpoint for banners (no auth required for public display)
+export async function GET() {
+  return getBanners();
+}
+
+// Protected POST endpoint for creating banners (admin auth required)
+export const POST = withAdminAuth(createBanner);
 
 

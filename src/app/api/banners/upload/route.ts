@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { withAdminAuth } from '@/lib/auth-middleware';
 
-export async function POST(request: NextRequest) {
+async function uploadBanner(request: NextRequest) {
   try {
     if (!supabaseAdmin) return NextResponse.json({ error: 'Storage not configured' }, { status: 500 });
     const contentType = request.headers.get('content-type') || '';
@@ -36,5 +37,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to upload' }, { status: 500 });
   }
 }
+
+// Protected upload endpoint (admin auth required)
+export const POST = withAdminAuth(uploadBanner);
 
 

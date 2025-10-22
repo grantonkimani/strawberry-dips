@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create session
-    const session = createAuthSession(user);
+    const session = await createAuthSession(user);
 
     // Create response with session data
     const response = NextResponse.json({

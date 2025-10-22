@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { SignJWT } from 'jose';
 import { supabase } from './supabase';
 
 export interface AdminUser {
@@ -21,9 +22,31 @@ export interface AuthSession {
   expiresAt: number;
 }
 
-// Generate a simple session token
-export function generateSessionToken(): string {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+// Helper function to get JWT secret key
+function getJwtSecretKey(): Uint8Array {
+  const secret = process.env.JWT_SECRET_KEY || 'your-secret-key-change-in-production';
+  return new TextEncoder().encode(secret);
+}
+
+// Generate a proper JWT session token
+export async function generateSessionToken(user: AdminUser): Promise<string> {
+  const secretKey = getJwtSecretKey();
+  const expiresAt = Math.floor(Date.now() / 1000) + (24 * 60 * 60); // 24 hours
+
+  const token = await new SignJWT({
+    type: 'admin',
+    userId: user.id,
+    username: user.username,
+    email: user.email,
+    full_name: user.full_name,
+    exp: expiresAt
+  })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('24h')
+    .sign(secretKey);
+
+  return token;
 }
 
 // Verify admin credentials
@@ -85,7 +108,6 @@ export async function verifyAdminCredentials(credentials: LoginCredentials): Pro
         last_login: data.last_login
       };
     } catch (dbError) {
-      console.log('Database not set up yet, using hardcoded credentials');
       return null;
     }
   } catch (error) {
@@ -95,8 +117,8 @@ export async function verifyAdminCredentials(credentials: LoginCredentials): Pro
 }
 
 // Create auth session
-export function createAuthSession(user: AdminUser): AuthSession {
-  const token = generateSessionToken();
+export async function createAuthSession(user: AdminUser): Promise<AuthSession> {
+  const token = await generateSessionToken(user);
   const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
 
   return {

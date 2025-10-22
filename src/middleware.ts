@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { jwtVerify } from 'jose';
 
-export function middleware(request: NextRequest) {
+function getJwtSecretKey(): Uint8Array {
+  const secret = process.env.JWT_SECRET_KEY || 'your-secret-key-change-in-production';
+  return new TextEncoder().encode(secret);
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if the request is for an admin route (but not login)
@@ -13,8 +19,26 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
 
-    // You could add additional token validation here
-    // For now, we'll just check if the token exists
+    // Validate the JWT token
+    try {
+      const { payload } = await jwtVerify(sessionToken, getJwtSecretKey());
+      
+      // Check if token is for admin user
+      if (payload.type !== 'admin') {
+        return NextResponse.redirect(new URL('/admin/login', request.url));
+      }
+
+      // Check token expiration
+      if (payload.exp && payload.exp < Date.now() / 1000) {
+        return NextResponse.redirect(new URL('/admin/login', request.url));
+      }
+
+      // Token is valid, allow request to continue
+    } catch (error) {
+      // Token is invalid, redirect to login
+      console.error('JWT verification failed in middleware:', error);
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
   }
 
   // Allow the request to continue
@@ -25,7 +49,7 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
+     * - api (API routes) - API routes are now protected individually
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)

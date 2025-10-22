@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { withAdminAuth } from '@/lib/auth-middleware';
 
 // Settings schema for database
 interface StoreSettings {
@@ -78,7 +79,7 @@ const DEFAULT_SETTINGS: StoreSettings = {
 };
 
 // GET /api/admin/settings
-export async function GET(request: NextRequest) {
+async function getSettings(request: NextRequest) {
   try {
     // Check if settings table exists, if not return default settings
     const { data: settings, error } = await supabase
@@ -103,7 +104,7 @@ export async function GET(request: NextRequest) {
 }
 
 // PUT /api/admin/settings
-export async function PUT(request: NextRequest) {
+async function updateSettings(request: NextRequest) {
   try {
     const settings: StoreSettings = await request.json();
 
@@ -152,4 +153,8 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
+
+// Protected admin endpoints
+export const GET = withAdminAuth(getSettings);
+export const PUT = withAdminAuth(updateSettings);
 
