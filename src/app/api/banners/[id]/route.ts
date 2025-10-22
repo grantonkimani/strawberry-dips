@@ -21,8 +21,26 @@ async function deleteBanner(_: NextRequest, context: { params: Promise<{ id: str
     const { id } = await context.params;
     
     if (!supabaseAdmin) {
-      console.error('[DELETE /api/banners/[id]] Supabase not configured');
-      return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
+      console.error('[DELETE /api/banners/[id]] Supabase admin not configured, using regular client');
+      // Fallback to regular supabase client if admin is not available
+      const { supabase } = await import('@/lib/supabase');
+      if (!supabase) {
+        return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
+      }
+      
+      // Use regular supabase client for deletion
+      const { error } = await supabase
+        .from('banners')
+        .delete()
+        .eq('id', id);
+        
+      if (error) {
+        console.error('[DELETE /api/banners/[id]] Supabase delete error:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+      
+      console.log(`[DELETE /api/banners/[id]] Successfully deleted banner with id: ${id}`);
+      return NextResponse.json({ success: true });
     }
 
     console.log(`[DELETE /api/banners/[id]] Attempting to delete banner with id: ${id}`);
