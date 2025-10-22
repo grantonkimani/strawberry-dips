@@ -239,7 +239,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="bg-white border-b border-pink-100 shadow-sm mb-8">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Admin Dashboard</h1>
               <p className="text-gray-600">Manage orders and track business performance</p>
@@ -247,7 +247,7 @@ export default function AdminDashboard() {
             <Button
               onClick={autoCheckPendingOrders}
               disabled={updatingStatus === 'auto-check'}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
             >
               {updatingStatus === 'auto-check' ? (
                 <>

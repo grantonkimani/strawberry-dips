@@ -45,19 +45,20 @@ export function GiftProductGrid({ category, limit, showCategory = true }: GiftPr
     const fetchData = async () => {
       try {
         const url = category 
-          ? `/api/gift-products?category=${encodeURIComponent(category)}`
-          : '/api/gift-products';
+          ? `/api/gift-products?category=${encodeURIComponent(category)}&includeInactive=false`
+          : '/api/gift-products?includeInactive=false';
         
         const response = await fetch(url, {
-          cache: 'force-cache',
-          next: { revalidate: 300 } // Cache for 5 minutes
+          cache: 'no-store'
         });
         const data = await response.json();
         
         if (response.ok) {
-          let products = data.giftProducts || [];
+          let products = (data.giftProducts || []).filter((p: GiftProduct) => p.is_active);
           
-          // Apply limit if specified
+        // If a product has no image_url, keep it but show a placeholder; if you prefer to hide, uncomment next line
+        //  products = products.filter((p: GiftProduct) => !!p.image_url);
+          
           if (limit) {
             products = products.slice(0, limit);
           }
@@ -67,10 +68,8 @@ export function GiftProductGrid({ category, limit, showCategory = true }: GiftPr
           setError(data.error || 'Failed to load gift products');
         }
 
-        // Also fetch categories for icons
-        const categoriesResponse = await fetch('/api/gift-categories?includeInactive=true', {
-          cache: 'force-cache',
-          next: { revalidate: 600 } // Categories change less frequently
+        const categoriesResponse = await fetch('/api/gift-categories?includeInactive=false', {
+          cache: 'no-store'
         });
         const categoriesData = await categoriesResponse.json();
         if (categoriesResponse.ok) {

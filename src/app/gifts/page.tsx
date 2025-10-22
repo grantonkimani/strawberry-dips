@@ -37,10 +37,10 @@ export default function GiftsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch both gift categories and products
+        // Fetch both gift categories and products (fresh, no cache)
         const [categoriesResponse, productsResponse] = await Promise.all([
-          fetch('/api/gift-categories?includeInactive=true'),
-          fetch('/api/gift-products?includeInactive=true')
+          fetch('/api/gift-categories?includeInactive=false', { cache: 'no-store' }),
+          fetch('/api/gift-products?includeInactive=false', { cache: 'no-store' })
         ]);
 
         const categoriesData = await categoriesResponse.json();
