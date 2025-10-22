@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 // GET /api/categories/[id] - Get single category
 export async function GET(
@@ -38,6 +39,13 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      );
+    }
+
     const { id } = await params;
     const { name, description, display_order, is_active } = await request.json();
 
@@ -48,7 +56,7 @@ export async function PUT(
       );
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('categories')
       .update({
         name,
@@ -85,9 +93,16 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      );
+    }
+
     const { id } = await params;
     // Check if category has products
-    const { data: products, error: productsError } = await supabase
+    const { data: products, error: productsError } = await supabaseAdmin
       .from('products')
       .select('id')
       .eq('category_id', id)
@@ -109,7 +124,7 @@ export async function DELETE(
     }
 
     // Soft delete by setting is_active to false
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('categories')
       .update({
         is_active: false,

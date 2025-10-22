@@ -190,6 +190,17 @@ export default function CheckoutPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check for same-day delivery cutoff
+    const today = new Date().toISOString().split('T')[0];
+    const isSameDay = formData.deliveryDate === today;
+    const currentHour = new Date().getHours();
+    
+    if (isSameDay && currentHour >= 14) {
+      alert('Same-day delivery is not available after 2 PM. Please select tomorrow or later for delivery.');
+      return;
+    }
+    
     // Form submission is handled by the payment components
     // This prevents the default form submission behavior
   };
@@ -480,6 +491,16 @@ export default function CheckoutPage() {
                         <button
                           type="button"
                           onClick={() => {
+                            const today = new Date();
+                            updateFormField('deliveryDate', today.toISOString().split('T')[0]);
+                          }}
+                          className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors font-medium"
+                        >
+                          Today (Same Day)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
                             const tomorrow = new Date();
                             tomorrow.setDate(tomorrow.getDate() + 1);
                             updateFormField('deliveryDate', tomorrow.toISOString().split('T')[0]);
@@ -522,7 +543,7 @@ export default function CheckoutPage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Click the calendar icon or use quick buttons above
+                        Click the calendar icon or use quick buttons above. Same-day delivery available for orders placed before 2 PM.
                       </p>
                     </div>
                     <div>
@@ -537,10 +558,63 @@ export default function CheckoutPage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
                       >
                         <option value="">Select time</option>
-                        <option value="morning">Morning (9 AM - 12 PM)</option>
-                        <option value="afternoon">Afternoon (12 PM - 5 PM)</option>
-                        <option value="evening">Evening (5 PM - 8 PM)</option>
+                        {(() => {
+                          const today = new Date().toISOString().split('T')[0];
+                          const isSameDay = formData.deliveryDate === today;
+                          const currentHour = new Date().getHours();
+                          
+                          if (isSameDay) {
+                            // Same-day delivery - show only available time slots
+                            const options = [];
+                            
+                            if (currentHour < 14) { // Before 2 PM
+                              if (currentHour < 12) {
+                                options.push(<option key="afternoon" value="afternoon">Afternoon (12 PM - 5 PM)</option>);
+                              }
+                              if (currentHour < 17) {
+                                options.push(<option key="evening" value="evening">Evening (5 PM - 8 PM)</option>);
+                              }
+                            }
+                            
+                            if (options.length === 0) {
+                              return <option value="" disabled>Same-day delivery not available after 2 PM</option>;
+                            }
+                            
+                            return options;
+                          } else {
+                            // Future delivery - show all time slots
+                            return (
+                              <>
+                                <option value="morning">Morning (9 AM - 12 PM)</option>
+                                <option value="afternoon">Afternoon (12 PM - 5 PM)</option>
+                                <option value="evening">Evening (5 PM - 8 PM)</option>
+                              </>
+                            );
+                          }
+                        })()}
                       </select>
+                      {(() => {
+                        const today = new Date().toISOString().split('T')[0];
+                        const isSameDay = formData.deliveryDate === today;
+                        const currentHour = new Date().getHours();
+                        
+                        if (isSameDay) {
+                          if (currentHour >= 14) {
+                            return (
+                              <p className="text-xs text-red-500 mt-1">
+                                Same-day delivery cutoff: 2 PM. Please select tomorrow or later.
+                              </p>
+                            );
+                          } else {
+                            return (
+                              <p className="text-xs text-green-600 mt-1">
+                                ✓ Same-day delivery available! Order before 2 PM for today's delivery.
+                              </p>
+                            );
+                          }
+                        }
+                        return null;
+                      })()}
                     </div>
                   </div>
                   <div>

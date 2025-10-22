@@ -3,7 +3,7 @@ import { jwtVerify } from 'jose';
 import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET_KEY || 'your-secret-key-change-in-production';
 function getJwtSecretKey(): Uint8Array {
   return new TextEncoder().encode(JWT_SECRET);
 }
