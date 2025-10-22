@@ -36,7 +36,12 @@ export default function BannersAdminPage() {
   useEffect(() => { load(); }, []);
 
   const create = async () => {
-    const res = await fetch('/api/banners', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, display_order: banners.length }) });
+    const res = await fetch('/api/banners', { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify({ ...form, display_order: banners.length }),
+      credentials: 'include'
+    });
     const json = await res.json();
     if (!json.error) {
       setForm({ image_url: '', headline: '', subtext: '', alt: '', cta_label: '', cta_href: '', overlay: 0.55, active: true });
@@ -56,7 +61,12 @@ export default function BannersAdminPage() {
   };
 
   const toggleActive = async (id: string, active: boolean) => {
-    await fetch(`/api/banners/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active }) });
+    await fetch(`/api/banners/${id}`, { 
+      method: 'PATCH', 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify({ active }),
+      credentials: 'include'
+    });
     load();
   };
 
@@ -66,7 +76,10 @@ export default function BannersAdminPage() {
     }
     
     try {
-      const res = await fetch(`/api/banners/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/banners/${id}`, { 
+        method: 'DELETE',
+        credentials: 'include'
+      });
       const json = await res.json();
       if (!json.error) {
         load(); // Reload the list
