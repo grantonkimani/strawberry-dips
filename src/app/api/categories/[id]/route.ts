@@ -101,29 +101,8 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    // Check if category has products
-    const { data: products, error: productsError } = await supabaseAdmin
-      .from('products')
-      .select('id')
-      .eq('category_id', id)
-      .limit(1);
-
-    if (productsError) {
-      console.error('Error checking products:', productsError);
-      return NextResponse.json(
-        { error: 'Failed to check category usage' },
-        { status: 500 }
-      );
-    }
-
-    if (products && products.length > 0) {
-      return NextResponse.json(
-        { error: 'Cannot delete category that has products. Please move or delete products first.' },
-        { status: 400 }
-      );
-    }
-
-    // Soft delete by setting is_active to false
+    
+    // Soft delete by setting is_active to false (no need to check products since it's soft delete)
     const { data, error } = await supabaseAdmin
       .from('categories')
       .update({

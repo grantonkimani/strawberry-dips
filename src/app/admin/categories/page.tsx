@@ -51,6 +51,7 @@ export default function CategoriesPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [envStatus, setEnvStatus] = useState<any>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCategories();
@@ -159,9 +160,16 @@ export default function CategoriesPage() {
 
   const handleDeleteCategory = async (id: string) => {
     if (!confirm('Are you sure you want to delete this category?')) return;
+    
+    // Prevent double-clicks
+    if (deletingId) return;
 
     setError(null);
     setSuccess(null);
+    setDeletingId(id);
+
+    // Optimistically update the UI immediately
+    setCategories(prev => prev.filter(cat => cat.id !== id));
 
     try {
       const response = await fetch(`/api/categories/${id}`, {
@@ -172,14 +180,20 @@ export default function CategoriesPage() {
 
       if (response.ok) {
         setSuccess('Category deleted successfully!');
-        await fetchCategories();
+        // No need to refetch - we already updated the UI optimistically
       } else {
+        // Revert the optimistic update on error
+        await fetchCategories();
         setError(data.error || 'Failed to delete category');
         console.error('API Error:', data);
       }
     } catch (error) {
+      // Revert the optimistic update on error
+      await fetchCategories();
       console.error('Error deleting category:', error);
       setError('Network error. Please try again.');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -528,9 +542,11 @@ export default function CategoriesPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleDeleteCategory(category.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        disabled={deletingId === category.id}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
                       >
                         <Trash2 className="h-4 w-4" />
+                        {deletingId === category.id ? 'Deleting...' : ''}
                       </Button>
                     </div>
                   </div>
