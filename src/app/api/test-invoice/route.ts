@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'PDF generation failed' }, { status: 500 });
       }
 
-      return new NextResponse(pdfBuffer, {
+      return new NextResponse(pdfBuffer.buffer, {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': 'attachment; filename="test-invoice.pdf"',
