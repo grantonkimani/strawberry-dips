@@ -4,7 +4,7 @@ import type { Readable } from 'stream';
 // We guard the import so local/dev can generate PDFs while production can opt-out
 async function getPDFKit() {
   try {
-    // @ts-expect-error dynamic import - PDFKit types may not be available
+    // Dynamic import - PDFKit types may not be available
     const mod = await import('pdfkit');
     // Some bundlers default export, others named
     return (mod as any).default || (mod as any);
