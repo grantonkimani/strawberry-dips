@@ -71,7 +71,7 @@ export default function CategoriesPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/categories?includeInactive=true');
+      const response = await fetch('/api/categories');
       if (response.ok) {
         const data = await response.json();
         setCategories(data.categories);
