@@ -8,7 +8,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const includeInactive = searchParams.get('includeInactive') === 'true';
     
-    let query = supabase
+    // Use admin client if available, fallback to regular client
+    const client = supabaseAdmin || supabase;
+    
+    let query = client
       .from('categories')
       .select('*')
       .order('display_order', { ascending: true });
@@ -47,8 +50,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     if (!supabaseAdmin) {
+      console.error('supabaseAdmin is null - missing SUPABASE_SERVICE_ROLE_KEY');
       return NextResponse.json(
-        { error: 'Database connection not available' },
+        { error: 'Server configuration error. Please check environment variables.' },
         { status: 500 }
       );
     }
@@ -61,6 +65,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    console.log('Creating category:', { name, description, display_order });
 
     const { data, error } = await supabaseAdmin
       .from('categories')
@@ -76,11 +82,12 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Error creating category:', error);
       return NextResponse.json(
-        { error: 'Failed to create category' },
+        { error: `Failed to create category: ${error.message}` },
         { status: 500 }
       );
     }
 
+    console.log('Category created successfully:', data);
     return NextResponse.json({ category: data }, { status: 201 });
   } catch (error) {
     console.error('Create category API error:', error);

@@ -50,11 +50,23 @@ export default function CategoriesPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [envStatus, setEnvStatus] = useState<any>(null);
 
   useEffect(() => {
     fetchCategories();
     fetchGiftCategories();
+    checkEnvironment();
   }, []);
+
+  const checkEnvironment = async () => {
+    try {
+      const response = await fetch('/api/debug/env-check');
+      const data = await response.json();
+      setEnvStatus(data);
+    } catch (error) {
+      console.error('Failed to check environment:', error);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -102,8 +114,14 @@ export default function CategoriesPage() {
         setNewCategory({ name: '', description: '', display_order: 0 });
         setShowAddForm(false);
       } else {
-        setError(data.error || 'Failed to create category');
+        const errorMessage = data.error || 'Failed to create category';
+        setError(errorMessage);
         console.error('API Error:', data);
+        
+        // Show specific error for configuration issues
+        if (errorMessage.includes('Server configuration error')) {
+          setError('Server configuration error. Please contact the administrator to check environment variables.');
+        }
       }
     } catch (error) {
       console.error('Error adding category:', error);
@@ -331,6 +349,20 @@ export default function CategoriesPage() {
         {success && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-green-800">{success}</p>
+          </div>
+        )}
+        
+        {/* Environment Debug Info */}
+        {envStatus && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h3 className="font-semibold mb-2 text-blue-800">Environment Status:</h3>
+            <div className="text-sm space-y-1 text-blue-700">
+              <div>Supabase URL: {envStatus.supabaseUrl ? '✅' : '❌'} {envStatus.supabaseUrlValue}</div>
+              <div>Service Role Key: {envStatus.serviceRoleKey ? '✅' : '❌'}</div>
+              <div>Admin Client: {envStatus.supabaseAdminClient ? '✅' : '❌'}</div>
+              <div>Database Connection: {envStatus.databaseConnection ? '✅' : '❌'}</div>
+              {envStatus.databaseError && <div className="text-red-600">DB Error: {envStatus.databaseError}</div>}
+            </div>
           </div>
         )}
 
