@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
         delivery_fee: 5.99,
         discount: 0,
         total: total,
-        order_items: items.map(item => ({
+        order_items: items.map((item: any) => ({
           product_name: item.name,
           quantity: item.quantity,
           unit_price: item.price,
