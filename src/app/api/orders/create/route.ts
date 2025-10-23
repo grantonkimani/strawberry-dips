@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
     try {
       const emailResult = await sendOrderConfirmationEmail({
         id: order.id,
-        created_at: order.created_at,
+        created_at: new Date().toISOString(),
         customer_name: customer.name,
         customer_email: customer.email,
         phone: customer.phone,
