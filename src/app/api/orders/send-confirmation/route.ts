@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { sendOrderConfirmationEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,35 +30,50 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // For now, we'll just log the email content
-    // In a real implementation, you would integrate with an email service like:
-    // - SendGrid, Mailgun, AWS SES, Resend, etc.
-    
-    const emailContent = generateEmailContent(order);
-    
-    // Log the email content (in production, send actual email)
-    console.log('=== ORDER CONFIRMATION EMAIL ===');
-    console.log(`To: ${order.customer_email}`);
-    console.log(`Subject: Order Confirmation - Strawberry Dips #${order.id.slice(0, 8).toUpperCase()}`);
-    console.log('Content:');
-    console.log(emailContent);
-    console.log('=== END EMAIL ===');
-
-    // TODO: Integrate with actual email service
-    // Example with a hypothetical email service:
-    /*
-    await emailService.send({
-      to: order.customer_email,
-      subject: `Order Confirmation - Strawberry Dips #${order.id.slice(0, 8).toUpperCase()}`,
-      html: emailContent,
-    });
-    */
+    // Send order confirmation email with invoice
+    try {
+      const emailResult = await sendOrderConfirmationEmail({
+        id: order.id,
+        created_at: order.created_at,
+        customer_name: order.customer_first_name ? `${order.customer_first_name} ${order.customer_last_name || ''}`.trim() : 'Customer',
+        customer_email: order.customer_email,
+        phone: order.customer_phone,
+        delivery_address: order.delivery_address,
+        delivery_date: order.delivery_date,
+        delivery_time: order.delivery_time,
+        notes: order.special_instructions,
+        subtotal: order.subtotal || (order.total - (order.delivery_fee || 0)),
+        delivery_fee: order.delivery_fee || 0,
+        discount: 0,
+        total: order.total,
+        order_items: order.order_items?.map((item: any) => ({
+          product_name: item.product_name,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          line_total: item.total_price || (item.unit_price * item.quantity)
+        })) || [],
+      });
+      
+      if (!emailResult.success) {
+        console.warn('Order confirmation email failed:', emailResult.error);
+        return NextResponse.json(
+          { error: `Email sending failed: ${emailResult.error}` },
+          { status: 500 }
+        );
+      } else {
+        console.log('Order confirmation email sent successfully with invoice');
+      }
+    } catch (emailError) {
+      console.error('Email sending error:', emailError);
+      return NextResponse.json(
+        { error: 'Failed to send confirmation email' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Confirmation email sent successfully',
-      // In development, we'll return the email content for testing
-      emailContent: process.env.NODE_ENV === 'development' ? emailContent : undefined
+      message: 'Confirmation email sent successfully with invoice'
     });
 
   } catch (error) {
@@ -69,7 +85,8 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function generateEmailContent(order: any): string {
+// Old function removed - now using invoice system from @/lib/email
+function generateEmailContent_OLD(order: any): string {
   const orderItems = order.order_items.map((item: any) => `
     <tr>
       <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">

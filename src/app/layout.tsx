@@ -46,7 +46,7 @@ export default function RootLayout({
             <CustomerAuthProvider>
               <CartProvider>
                 {children}
-                <PerformanceMonitor />
+                {/* <PerformanceMonitor /> */}
               </CartProvider>
             </CustomerAuthProvider>
           </AuthProvider>

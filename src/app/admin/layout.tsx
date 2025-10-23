@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AdminNav } from '@/components/AdminNav';
 import { SessionTimeoutWarning } from '@/components/SessionTimeoutWarning';
 import { useSessionTimeout } from '@/hooks/useSessionTimeout';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function AdminLayout({
@@ -14,6 +14,10 @@ export default function AdminLayout({
 }) {
   const { isLoading, logout, isAuthenticated } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  
+  // Skip authentication check for login page
+  const isLoginPage = pathname === '/admin/login';
   
   // Session timeout configuration
   const {
@@ -31,10 +35,15 @@ export default function AdminLayout({
 
   // Redirect to login if not authenticated (after loading is complete)
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoginPage && !isLoading && !isAuthenticated) {
       router.push('/admin/login');
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, router, isLoginPage]);
+
+  // For login page, just render children without any auth checks
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   // Show loading while checking authentication
   if (isLoading) {

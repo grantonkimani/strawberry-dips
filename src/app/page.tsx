@@ -38,8 +38,11 @@ const LazyProductGrid = dynamic(() => import("@/components/ProductGrid").then(mo
     <section className="py-16 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Fresh Products</h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">Handcrafted with love, delivered fresh</p>
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Premium Collection</h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
+            Hand-crafted chocolate covered strawberries made with the finest ingredients 
+            and delivered fresh to your door.
+          </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {Array.from({ length: 10 }).map((_, i) => (
@@ -184,8 +187,11 @@ export default function HomePage() {
         <section className="py-16 px-4">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Fresh Products</h2>
-              <p className="text-gray-600">Handcrafted with love, delivered fresh</p>
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Premium Collection</h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
+                Hand-crafted chocolate covered strawberries made with the finest ingredients 
+                and delivered fresh to your door.
+              </p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {Array.from({ length: 10 }).map((_, i) => (

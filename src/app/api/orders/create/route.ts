@@ -135,17 +135,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send order confirmation email
+    // Send order confirmation email with invoice
     try {
       const emailResult = await sendOrderConfirmationEmail({
         id: order.id,
+        created_at: order.created_at,
+        customer_name: customer.name,
         customer_email: customer.email,
-        total: total,
+        phone: customer.phone,
+        delivery_address: `${customer.address}, ${customer.city}, ${customer.area || customer.state || 'N/A'}`,
         delivery_date: customer.deliveryDate || new Date().toISOString().split('T')[0],
         delivery_time: customer.deliveryTime || null,
-        delivery_city: customer.city,
-        delivery_state: customer.area || customer.state || 'N/A',
-        special_instructions: customer.specialInstructions || null,
+        notes: customer.specialInstructions || null,
+        subtotal: total - (deliveryFee || 0),
+        delivery_fee: deliveryFee || 0,
+        discount: 0,
+        total: total,
+        order_items: items.map(item => ({
+          product_name: item.name,
+          quantity: item.quantity,
+          unit_price: item.price,
+          line_total: item.price * item.quantity
+        })),
         tracking_code: order.tracking_code,
       });
       

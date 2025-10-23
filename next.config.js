@@ -4,6 +4,8 @@ const nextConfig = {
   turbopack: {
     root: __dirname,
   },
+  // Enable PDFKit for server-side PDF generation
+  serverExternalPackages: ['pdfkit'],
   images: {
     unoptimized: false,
     domains: ['localhost', 'supabase.co'],

@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { buildInvoiceHtml, generateInvoicePdfBuffer, type InvoiceOrder } from './invoice';
 
 // Gmail SMTP Configuration
 const createTransporter = () => {
@@ -13,58 +14,69 @@ const createTransporter = () => {
 
 // Email templates
 export const emailTemplates = {
-  orderConfirmed: (orderData: any) => ({
-    subject: `Order Confirmed - Strawberry Dips #${orderData.id.slice(0, 8)}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #e91e63; margin: 0;">🍓 Strawberry Dips</h1>
-          <p style="color: #666; margin: 5px 0;">Premium Chocolate Covered Strawberries</p>
+  orderConfirmed: (orderData: any) => {
+    const invoiceHtml = buildInvoiceHtml(orderData as InvoiceOrder);
+    return {
+      subject: `Order Confirmed - Strawberry Dips #${orderData.id.slice(0, 8)}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #e91e63; margin: 0;">🍓 Strawberry Dips</h1>
+            <p style="color: #666; margin: 5px 0;">Premium Chocolate Covered Strawberries</p>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h2 style="color: #e91e63; margin-top: 0;">Order Confirmed! 🎉</h2>
+            <p>Thank you for your order! We've received your payment and are preparing your fresh strawberries.</p>
+            <p><strong>Your invoice is attached as a PDF for your records.</strong></p>
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <h3 style="color: #333;">Order Summary</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Order ID:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;">#${orderData.id.slice(0, 8)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Total:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;">KSH ${orderData.total.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Delivery Date:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${new Date(orderData.delivery_date).toLocaleDateString()}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0;"><strong>Delivery Time:</strong></td>
+                <td style="padding: 8px 0;">${orderData.delivery_time}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+            <h3 style="color: #2e7d32; margin-top: 0;">What's Next?</h3>
+            <ul style="color: #2e7d32; margin: 0; padding-left: 20px;">
+              <li>We'll prepare your fresh strawberries</li>
+              <li>You'll receive updates on your order status</li>
+              <li>We'll deliver on your scheduled date and time</li>
+            </ul>
+          </div>
+          
+          <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #666; font-size: 14px;">
+            <p>Questions? Contact us at <a href="mailto:support@strawberrydips.com" style="color: #e91e63;">support@strawberrydips.com</a></p>
+            <p>Track your order at: <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/track/${orderData.id}" style="color: #e91e63;">${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/track/${orderData.id}</a></p>
+          </div>
         </div>
         
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-          <h2 style="color: #e91e63; margin-top: 0;">Order Confirmed! 🎉</h2>
-          <p>Thank you for your order! We've received your payment and are preparing your fresh strawberries.</p>
-        </div>
+        <hr style="margin: 30px 0; border: none; border-top: 2px solid #eee;">
         
-        <div style="margin-bottom: 20px;">
-          <h3 style="color: #333;">Order Details</h3>
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Order ID:</strong></td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #eee;">#${orderData.id.slice(0, 8)}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Total:</strong></td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #eee;">KSH ${orderData.total.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Delivery Date:</strong></td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${new Date(orderData.delivery_date).toLocaleDateString()}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0;"><strong>Delivery Time:</strong></td>
-              <td style="padding: 8px 0;">${orderData.delivery_time}</td>
-            </tr>
-          </table>
+        <div style="margin-top: 30px;">
+          <h3 style="color: #333; text-align: center; margin-bottom: 20px;">Invoice</h3>
+          ${invoiceHtml}
         </div>
-        
-        <div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-          <h3 style="color: #2e7d32; margin-top: 0;">What's Next?</h3>
-          <ul style="color: #2e7d32; margin: 0; padding-left: 20px;">
-            <li>We'll prepare your fresh strawberries</li>
-            <li>You'll receive updates on your order status</li>
-            <li>We'll deliver on your scheduled date and time</li>
-          </ul>
-        </div>
-        
-        <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #666; font-size: 14px;">
-          <p>Questions? Contact us at <a href="mailto:support@strawberrydips.com" style="color: #e91e63;">support@strawberrydips.com</a></p>
-          <p>Track your order at: <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://strawberrydips.shop'}/track" style="color: #e91e63;">strawberrydips.shop/track</a></p>
-        </div>
-      </div>
-    `
-  }),
+      `
+    };
+  },
   
   statusUpdate: (orderData: any) => ({
     subject: `Order Update - Strawberry Dips #${orderData.id.slice(0, 8)}`,
@@ -247,14 +259,33 @@ export async function sendOrderEmail(to: string, templateType: keyof typeof emai
     const transporter = createTransporter();
     const template = emailTemplates[templateType](data);
 
+    // Generate PDF attachment for order confirmation emails
+    let attachments: any[] = [];
+    if (templateType === 'orderConfirmed') {
+      try {
+        const pdfBuffer = await generateInvoicePdfBuffer(data as InvoiceOrder);
+        if (pdfBuffer) {
+          attachments = [{
+            filename: `invoice-${data.id.slice(0, 8)}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf'
+          }];
+        }
+      } catch (pdfError) {
+        console.warn('PDF generation failed, sending email without attachment:', pdfError);
+        // Continue without PDF attachment
+      }
+    }
+
     await transporter.sendMail({
       from: `"Strawberry Dips" <${process.env.GMAIL_USER}>`,
       to: to,
       subject: template.subject,
       html: template.html,
+      attachments: attachments,
     });
 
-    console.log(`Email sent to: ${to}`);
+    console.log(`Email sent to: ${to}${attachments.length > 0 ? ' with PDF attachment' : ''}`);
     return { success: true };
   } catch (error) {
     console.error('Error sending email:', error);

@@ -238,7 +238,7 @@ export function Header() {
             </Link>
 
             {/* User Account */}
-            <Link href={isAuthenticated ? "/account" : "/account/login"}>
+            <Link href={isHydrated && isAuthenticated ? "/account" : "/account/login"}>
               <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 h-12 w-12 sm:h-11 sm:w-11 md:h-9 md:w-9 flex-shrink-0">
                 <User className="h-7 w-7 sm:h-6 sm:w-6 md:h-5 md:w-5" strokeWidth={2.25} />
               </Button>

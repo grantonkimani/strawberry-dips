@@ -21,43 +21,33 @@ export function PerformanceMonitor() {
       return;
     }
 
+    // Prevent multiple executions
+    if (metrics) return;
+
     const measurePerformance = () => {
       if (typeof window === 'undefined' || !window.performance) return;
 
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-      const paintEntries = performance.getEntriesByType('paint');
-      
-      const fcp = paintEntries.find(entry => entry.name === 'first-contentful-paint');
-      const lcp = performance.getEntriesByType('largest-contentful-paint')[0];
-      
-      // Get Core Web Vitals if available
-      if ('PerformanceObserver' in window) {
-        try {
-          const observer = new PerformanceObserver((list) => {
-            for (const entry of list.getEntries()) {
-              if (entry.entryType === 'measure') {
-                console.log('Performance measure:', entry.name, entry.duration);
-              }
-            }
-          });
-          
-          observer.observe({ entryTypes: ['measure'] });
-        } catch (error) {
-          console.warn('Performance Observer not supported:', error);
-        }
+      try {
+        const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+        const paintEntries = performance.getEntriesByType('paint');
+        
+        const fcp = paintEntries.find(entry => entry.name === 'first-contentful-paint');
+        const lcp = performance.getEntriesByType('largest-contentful-paint')[0];
+        
+        const performanceMetrics: PerformanceMetrics = {
+          loadTime: navigation ? navigation.loadEventEnd - navigation.loadEventStart : 0,
+          domContentLoaded: navigation ? navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart : 0,
+          firstContentfulPaint: fcp ? fcp.startTime : 0,
+          largestContentfulPaint: lcp ? lcp.startTime : 0,
+          firstInputDelay: 0, // Would need FID observer
+          cumulativeLayoutShift: 0, // Would need CLS observer
+        };
+
+        setMetrics(performanceMetrics);
+        setIsVisible(true);
+      } catch (error) {
+        console.warn('Performance measurement failed:', error);
       }
-
-      const performanceMetrics: PerformanceMetrics = {
-        loadTime: navigation.loadEventEnd - navigation.loadEventStart,
-        domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
-        firstContentfulPaint: fcp ? fcp.startTime : 0,
-        largestContentfulPaint: lcp ? lcp.startTime : 0,
-        firstInputDelay: 0, // Would need FID observer
-        cumulativeLayoutShift: 0, // Would need CLS observer
-      };
-
-      setMetrics(performanceMetrics);
-      setIsVisible(true);
     };
 
     // Measure after page load
@@ -70,7 +60,7 @@ export function PerformanceMonitor() {
     return () => {
       window.removeEventListener('load', measurePerformance);
     };
-  }, []);
+  }, []); // Remove metrics from dependency array to prevent infinite loop
 
   if (!isVisible || !metrics) return null;
 
