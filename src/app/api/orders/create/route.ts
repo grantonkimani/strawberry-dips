@@ -147,8 +147,8 @@ export async function POST(request: NextRequest) {
         delivery_date: customer.deliveryDate || new Date().toISOString().split('T')[0],
         delivery_time: customer.deliveryTime || null,
         notes: customer.specialInstructions || null,
-        subtotal: total - (deliveryFee || 0),
-        delivery_fee: deliveryFee || 0,
+        subtotal: total - 5.99,
+        delivery_fee: 5.99,
         discount: 0,
         total: total,
         order_items: items.map(item => ({
