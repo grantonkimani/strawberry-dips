@@ -3,13 +3,21 @@ import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 // GET /api/categories - Get all categories
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const { data, error } = await supabase
+    const { searchParams } = new URL(request.url);
+    const includeInactive = searchParams.get('includeInactive') === 'true';
+    
+    let query = supabase
       .from('categories')
       .select('*')
-      .eq('is_active', true)
       .order('display_order', { ascending: true });
+    
+    if (!includeInactive) {
+      query = query.eq('is_active', true);
+    }
+    
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching categories:', error);

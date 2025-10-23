@@ -58,7 +58,7 @@ export default function CategoriesPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/categories');
+      const response = await fetch('/api/categories?includeInactive=true');
       if (response.ok) {
         const data = await response.json();
         setCategories(data.categories);
@@ -112,6 +112,9 @@ export default function CategoriesPage() {
   };
 
   const handleEditCategory = async (id: string) => {
+    setError(null);
+    setSuccess(null);
+    
     try {
       const response = await fetch(`/api/categories/${id}`, {
         method: 'PUT',
@@ -119,13 +122,20 @@ export default function CategoriesPage() {
         body: JSON.stringify(editingCategory)
       });
 
+      const data = await response.json();
+
       if (response.ok) {
+        setSuccess('Category updated successfully!');
         await fetchCategories();
         setEditingId(null);
         setEditingCategory({});
+      } else {
+        setError(data.error || 'Failed to update category');
+        console.error('API Error:', data);
       }
     } catch (error) {
       console.error('Error updating category:', error);
+      setError('Network error. Please try again.');
     }
   };
 
@@ -196,6 +206,9 @@ export default function CategoriesPage() {
   };
 
   const handleEditGiftCategory = async (id: string) => {
+    setError(null);
+    setSuccess(null);
+    
     try {
       // If this is a fallback category (derived from products), create a real one instead
       const isFallback = id.startsWith('fallback-');
@@ -208,13 +221,20 @@ export default function CategoriesPage() {
         body: JSON.stringify(editingGiftCategory)
       });
 
+      const data = await response.json();
+
       if (response.ok) {
+        setSuccess('Gift category updated successfully!');
         await fetchGiftCategories();
         setEditingGiftCategoryId(null);
         setEditingGiftCategory({});
+      } else {
+        setError(data.error || 'Failed to update gift category');
+        console.error('API Error:', data);
       }
     } catch (error) {
       console.error('Error updating gift category:', error);
+      setError('Network error. Please try again.');
     }
   };
 
@@ -449,6 +469,11 @@ export default function CategoriesPage() {
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">
                         {category.name}
+                        {!category.is_active && (
+                          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                            Inactive
+                          </span>
+                        )}
                       </h3>
                       {category.description && (
                         <p className="text-gray-600 mb-2">{category.description}</p>
