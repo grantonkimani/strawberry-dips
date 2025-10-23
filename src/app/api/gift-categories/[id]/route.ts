@@ -184,7 +184,10 @@ export async function DELETE(
       );
     }
 
-    const { error } = await supabase
+    // Use admin client for consistent behavior with other operations
+    const db = supabaseAdmin ?? supabase;
+    
+    const { error } = await db
       .from('gift_categories')
       .delete()
       .eq('id', id);

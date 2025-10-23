@@ -132,19 +132,26 @@ export default function CategoriesPage() {
   const handleDeleteCategory = async (id: string) => {
     if (!confirm('Are you sure you want to delete this category?')) return;
 
+    setError(null);
+    setSuccess(null);
+
     try {
       const response = await fetch(`/api/categories/${id}`, {
         method: 'DELETE'
       });
 
+      const data = await response.json();
+
       if (response.ok) {
+        setSuccess('Category deleted successfully!');
         await fetchCategories();
       } else {
-        const error = await response.json();
-        alert(error.error);
+        setError(data.error || 'Failed to delete category');
+        console.error('API Error:', data);
       }
     } catch (error) {
       console.error('Error deleting category:', error);
+      setError('Network error. Please try again.');
     }
   };
 
@@ -214,19 +221,26 @@ export default function CategoriesPage() {
   const handleDeleteGiftCategory = async (id: string) => {
     if (!confirm('Are you sure you want to delete this gift category?')) return;
 
+    setError(null);
+    setSuccess(null);
+
     try {
       const response = await fetch(`/api/gift-categories/${id}`, {
         method: 'DELETE'
       });
 
+      const data = await response.json();
+
       if (response.ok) {
+        setSuccess('Gift category deleted successfully!');
         await fetchGiftCategories();
       } else {
-        const error = await response.json();
-        alert(error.error);
+        setError(data.error || 'Failed to delete gift category');
+        console.error('API Error:', data);
       }
     } catch (error) {
       console.error('Error deleting gift category:', error);
+      setError('Network error. Please try again.');
     }
   };
 
