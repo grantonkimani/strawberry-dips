@@ -39,7 +39,12 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
     const fetchCategories = async () => {
       try {
         const response = await fetch('/api/categories', {
-          cache: 'no-store'
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
         });
         const data = await response.json();
         if (data.categories) {

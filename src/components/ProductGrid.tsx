@@ -61,7 +61,12 @@ export function ProductGrid() {
 				}),
 				fetch('/api/categories', {
 					cache: 'no-store', // Always fetch fresh data
-					next: { revalidate: 0 } // No revalidation
+					next: { revalidate: 0 }, // No revalidation
+					headers: {
+						'Cache-Control': 'no-cache, no-store, must-revalidate',
+						'Pragma': 'no-cache',
+						'Expires': '0'
+					}
 				})
 			]);
 

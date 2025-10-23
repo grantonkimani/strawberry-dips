@@ -29,9 +29,9 @@ export async function GET(request: NextRequest) {
 
     const response = NextResponse.json({ categories: data });
     
-    // Add caching headers for categories (longer cache since they change less frequently)
-    response.headers.set('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=3600')
-    response.headers.set('CDN-Cache-Control', 'public, s-maxage=1800')
+    // Only cache for a short time to allow immediate updates when categories are added
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
+    response.headers.set('CDN-Cache-Control', 'public, s-maxage=60')
     
     return response;
   } catch (error) {

@@ -90,7 +90,14 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 
 	async function fetchCategories() {
 		try {
-			const res = await fetch('/api/categories')
+			const res = await fetch('/api/categories', {
+				cache: 'no-store',
+				headers: {
+					'Cache-Control': 'no-cache, no-store, must-revalidate',
+					'Pragma': 'no-cache',
+					'Expires': '0'
+				}
+			})
 			const data = await res.json()
 			if (data.categories) {
 				setCategories(data.categories)
