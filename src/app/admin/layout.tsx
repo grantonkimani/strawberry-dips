@@ -4,6 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AdminNav } from '@/components/AdminNav';
 import { SessionTimeoutWarning } from '@/components/SessionTimeoutWarning';
 import { useSessionTimeout } from '@/hooks/useSessionTimeout';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function AdminLayout({
   children,
@@ -11,6 +13,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const { isLoading, logout, isAuthenticated } = useAuth();
+  const router = useRouter();
   
   // Session timeout configuration
   const {
@@ -26,6 +29,13 @@ export default function AdminLayout({
     }
   });
 
+  // Redirect to login if not authenticated (after loading is complete)
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/admin/login');
+    }
+  }, [isLoading, isAuthenticated, router]);
+
   // Show loading while checking authentication
   if (isLoading) {
     return (
@@ -38,26 +48,29 @@ export default function AdminLayout({
     );
   }
 
+  // Don't render anything if not authenticated (will redirect)
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-gray-50">
       {/* Navigation - Only show when authenticated */}
-      {isAuthenticated && <AdminNav />}
+      <AdminNav />
       
       {/* Main Content */}
-      <div className={`max-w-7xl mx-auto px-3 sm:px-4 ${isAuthenticated ? 'py-4 sm:py-8' : ''}`}>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {children}
       </div>
       
       {/* Session Timeout Warning - Only show when authenticated */}
-      {isAuthenticated && (
-        <SessionTimeoutWarning
-          isVisible={isWarning}
-          timeLeft={timeLeft}
-          formatTime={formatTime}
-          onExtend={extendSession}
-          onLogout={logout}
-        />
-      )}
+      <SessionTimeoutWarning
+        isVisible={isWarning}
+        timeLeft={timeLeft}
+        formatTime={formatTime}
+        onExtend={extendSession}
+        onLogout={logout}
+      />
     </div>
   );
 }

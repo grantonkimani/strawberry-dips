@@ -31,7 +31,14 @@ async function updateBanner(req: NextRequest, context: { params: Promise<{ id: s
     .select('*')
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ banner: data });
+  
+  const response = NextResponse.json({ banner: data });
+  
+  // Invalidate cache for immediate frontend updates
+  response.headers.set('Cache-Control', 'no-store, must-revalidate');
+  response.headers.set('CDN-Cache-Control', 'no-store');
+  
+  return response;
 }
 
 async function deleteBanner(_: NextRequest, context: { params: Promise<{ id: string }> }) {
@@ -105,7 +112,14 @@ async function deleteBanner(_: NextRequest, context: { params: Promise<{ id: str
         }
 
         console.log(`[DELETE /api/banners/[id]] Successfully deleted banner with id: ${id}`);
-        return NextResponse.json({ success: true });
+        
+        const response = NextResponse.json({ success: true });
+        
+        // Invalidate cache for immediate frontend updates
+        response.headers.set('Cache-Control', 'no-store, must-revalidate');
+        response.headers.set('CDN-Cache-Control', 'no-store');
+        
+        return response;
         
       } catch (retryError) {
         console.error(`[DELETE /api/banners/[id]] Retry error (attempt ${retryCount + 1}):`, retryError);

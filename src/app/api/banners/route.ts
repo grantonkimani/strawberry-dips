@@ -25,9 +25,9 @@ async function getBanners() {
     
     const response = NextResponse.json({ banners: data ?? [] });
     
-    // Reduced caching for banners since they're frequently updated by admins
-    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
-    response.headers.set('CDN-Cache-Control', 'public, s-maxage=60')
+    // Optimized caching for banners - short cache with stale-while-revalidate
+    response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
+    response.headers.set('CDN-Cache-Control', 'public, s-maxage=30')
     
     return response;
   } catch (error) {
@@ -70,7 +70,13 @@ async function createBanner(req: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
       
-      return NextResponse.json({ banner: data });
+      const response = NextResponse.json({ banner: data });
+      
+      // Invalidate cache for immediate frontend updates
+      response.headers.set('Cache-Control', 'no-store, must-revalidate');
+      response.headers.set('CDN-Cache-Control', 'no-store');
+      
+      return response;
     }
     
     // Validate required fields
@@ -112,7 +118,13 @@ async function createBanner(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
     
-    return NextResponse.json({ banner: data });
+    const response = NextResponse.json({ banner: data });
+    
+    // Invalidate cache for immediate frontend updates
+    response.headers.set('Cache-Control', 'no-store, must-revalidate');
+    response.headers.set('CDN-Cache-Control', 'no-store');
+    
+    return response;
   } catch (error) {
     console.error('Banners POST error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

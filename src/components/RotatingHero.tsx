@@ -46,8 +46,7 @@ export function RotatingHero() {
         const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
         
         const res = await fetch('/api/banners', { 
-          cache: 'force-cache',
-          next: { revalidate: 1800 }, // 30 minutes
+          cache: 'no-store', // Always fetch fresh data
           signal: controller.signal 
         });
         clearTimeout(timeoutId);

@@ -216,8 +216,8 @@ export function Header() {
             </div>
 
             {/* Wishlist */}
-            <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-10 w-10 sm:h-11 sm:w-11 md:h-9 md:w-9 flex-shrink-0">
-              <Heart className="h-6 w-6 sm:h-6 sm:w-6 md:h-5 md:w-5" strokeWidth={2.25} />
+            <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-12 w-12 sm:h-11 sm:w-11 md:h-9 md:w-9 flex-shrink-0">
+              <Heart className="h-7 w-7 sm:h-6 sm:w-6 md:h-5 md:w-5" strokeWidth={2.25} />
               <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] sm:text-[12px] md:text-xs rounded-full h-5 min-w-[1.25rem] px-1 md:px-0 flex items-center justify-center">
                 0
               </span>
@@ -228,9 +228,9 @@ export function Header() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-10 w-10 sm:h-11 sm:w-11 md:h-9 md:w-9 flex-shrink-0"
+                className="text-gray-600 hover:text-pink-600 active:bg-pink-50 relative h-12 w-12 sm:h-11 sm:w-11 md:h-9 md:w-9 flex-shrink-0"
               >
-                <ShoppingCart className="h-6 w-6 sm:h-6 sm:w-6 md:h-5 md:w-5" strokeWidth={2.25} />
+                <ShoppingCart className="h-7 w-7 sm:h-6 sm:w-6 md:h-5 md:w-5" strokeWidth={2.25} />
                 <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] sm:text-[12px] md:text-xs rounded-full h-5 min-w-[1.25rem] px-1 md:px-0 flex items-center justify-center">
                   {isHydrated ? state.items.reduce((total, item) => total + (item.quantity || 1), 0) : 0}
                 </span>
@@ -239,8 +239,8 @@ export function Header() {
 
             {/* User Account */}
             <Link href={isAuthenticated ? "/account" : "/account/login"}>
-              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 h-10 w-10 sm:h-11 sm:w-11 md:h-9 md:w-9 flex-shrink-0">
-                <User className="h-6 w-6 sm:h-6 sm:w-6 md:h-5 md:w-5" strokeWidth={2.25} />
+              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600 active:bg-pink-50 h-12 w-12 sm:h-11 sm:w-11 md:h-9 md:w-9 flex-shrink-0">
+                <User className="h-7 w-7 sm:h-6 sm:w-6 md:h-5 md:w-5" strokeWidth={2.25} />
               </Button>
             </Link>
 
@@ -248,10 +248,10 @@ export function Header() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="md:hidden text-gray-600 hover:text-pink-600 active:bg-pink-50 h-10 w-10 sm:h-11 sm:w-11 flex-shrink-0"
+              className="md:hidden text-gray-600 hover:text-pink-600 active:bg-pink-50 h-12 w-12 sm:h-11 sm:w-11 flex-shrink-0"
               onClick={() => setIsMobileMenuOpen(true)}
             >
-              <Menu className="h-6 w-6 sm:h-6 sm:w-6" strokeWidth={2.25} />
+              <Menu className="h-7 w-7 sm:h-6 sm:w-6" strokeWidth={2.25} />
             </Button>
           </div>
         </div>

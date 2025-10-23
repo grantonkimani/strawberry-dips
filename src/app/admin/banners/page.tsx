@@ -25,7 +25,14 @@ export default function BannersAdminPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/banners');
+      const res = await fetch('/api/banners', { 
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
       const json = await res.json();
       setBanners(json.banners || []);
     } finally {
