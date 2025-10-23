@@ -39,6 +39,13 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      );
+    }
+
     const { id } = await params;
     const body = await request.json();
     const { name, description, icon, display_order, is_active } = body;
@@ -51,8 +58,8 @@ export async function PUT(
       );
     }
 
-    // Prefer admin client (bypasses RLS) if available; otherwise use public client
-    const db = supabaseAdmin ?? supabase;
+    // Use admin client for consistent behavior
+    const db = supabaseAdmin;
 
     // If this is a fallback ID (generated from product categories), create or map to a real row
     if (id.startsWith('fallback-')) {
@@ -163,7 +170,7 @@ export async function DELETE(
     const { id } = await params;
     
     // Check if there are any gift products using this category
-    const { data: products, error: productsError } = await supabase
+    const { data: products, error: productsError } = await supabaseAdmin
       .from('gift_products')
       .select('id')
       .eq('gift_category_id', id)
@@ -185,7 +192,7 @@ export async function DELETE(
     }
 
     // Use admin client for consistent behavior with other operations
-    const db = supabaseAdmin ?? supabase;
+    const db = supabaseAdmin;
     
     const { error } = await db
       .from('gift_categories')
