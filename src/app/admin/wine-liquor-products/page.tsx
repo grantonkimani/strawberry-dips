@@ -406,14 +406,14 @@ export default function WineLiquorProductsPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                 <select
-                  value={formData.category || ''}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  value={formData.wine_liquor_category_id || ''}
+                  onChange={(e) => setFormData({ ...formData, wine_liquor_category_id: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 >
                   <option value="">Select Category</option>
                   {wineLiquorCategories.map((category) => (
-                    <option key={category.id} value={category.name}>
-                      {category.name}
+                    <option key={category.id} value={category.id}>
+                      {category.icon} {category.name}
                     </option>
                   ))}
                 </select>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, X, Gift, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Gift, Package, Wine } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 
@@ -26,17 +26,32 @@ interface GiftCategory {
   updated_at: string;
 }
 
+interface WineLiquorCategory {
+  id: string;
+  name: string;
+  description: string | null;
+  icon: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [giftCategories, setGiftCategories] = useState<GiftCategory[]>([]);
+  const [wineLiquorCategories, setWineLiquorCategories] = useState<WineLiquorCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingCategory, setEditingCategory] = useState<Partial<Category>>({});
   const [editingGiftCategoryId, setEditingGiftCategoryId] = useState<string | null>(null);
   const [editingGiftCategory, setEditingGiftCategory] = useState<Partial<GiftCategory>>({});
+  const [editingWineLiquorCategoryId, setEditingWineLiquorCategoryId] = useState<string | null>(null);
+  const [editingWineLiquorCategory, setEditingWineLiquorCategory] = useState<Partial<WineLiquorCategory>>({});
   const [showAddForm, setShowAddForm] = useState(false);
   const [showAddGiftForm, setShowAddGiftForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<'products' | 'gifts'>('products');
+  const [showAddWineLiquorForm, setShowAddWineLiquorForm] = useState(false);
+  const [activeTab, setActiveTab] = useState<'products' | 'gifts' | 'wine-liquor'>('products');
   const [newCategory, setNewCategory] = useState({
     name: '',
     description: '',
@@ -48,6 +63,12 @@ export default function CategoriesPage() {
     icon: '🎁',
     display_order: 0
   });
+  const [newWineLiquorCategory, setNewWineLiquorCategory] = useState({
+    name: '',
+    description: '',
+    icon: '🍷',
+    display_order: 0
+  });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [envStatus, setEnvStatus] = useState<any>(null);
@@ -56,6 +77,7 @@ export default function CategoriesPage() {
   useEffect(() => {
     fetchCategories();
     fetchGiftCategories();
+    fetchWineLiquorCategories();
     checkEnvironment();
   }, []);
 
@@ -92,6 +114,18 @@ export default function CategoriesPage() {
       }
     } catch (error) {
       console.error('Error fetching gift categories:', error);
+    }
+  };
+
+  const fetchWineLiquorCategories = async () => {
+    try {
+      const response = await fetch('/api/wine-liquor-categories?includeInactive=true');
+      if (response.ok) {
+        const data = await response.json();
+        setWineLiquorCategories(data.wineLiquorCategories || []);
+      }
+    } catch (error) {
+      console.error('Error fetching wine/liquor categories:', error);
     }
   };
 
@@ -296,9 +330,108 @@ export default function CategoriesPage() {
     }
   };
 
+  // Wine & Liquor Category Functions
+  const handleAddWineLiquorCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+    
+    try {
+      const response = await fetch('/api/wine-liquor-categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newWineLiquorCategory),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess('Wine & Liquor category created successfully!');
+        await fetchWineLiquorCategories();
+        setNewWineLiquorCategory({ name: '', description: '', icon: '🍷', display_order: 0 });
+        setShowAddWineLiquorForm(false);
+      } else {
+        setError(data.error || 'Failed to create wine & liquor category');
+        console.error('API Error:', data);
+      }
+    } catch (error) {
+      console.error('Error creating wine & liquor category:', error);
+      setError('Network error. Please try again.');
+    }
+  };
+
+  const handleUpdateWineLiquorCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch(`/api/wine-liquor-categories/${editingWineLiquorCategoryId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editingWineLiquorCategory),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess('Wine & Liquor category updated successfully!');
+        await fetchWineLiquorCategories();
+        setEditingWineLiquorCategoryId(null);
+        setEditingWineLiquorCategory({});
+      } else {
+        setError(data.error || 'Failed to update wine & liquor category');
+        console.error('API Error:', data);
+      }
+    } catch (error) {
+      console.error('Error updating wine & liquor category:', error);
+      setError('Network error. Please try again.');
+    }
+  };
+
+  const handleDeleteWineLiquorCategory = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this wine & liquor category?')) return;
+
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch(`/api/wine-liquor-categories/${id}`, {
+        method: 'DELETE'
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess('Wine & Liquor category deleted successfully!');
+        await fetchWineLiquorCategories();
+      } else {
+        setError(data.error || 'Failed to delete wine & liquor category');
+        console.error('API Error:', data);
+      }
+    } catch (error) {
+      console.error('Error deleting wine & liquor category:', error);
+      setError('Network error. Please try again.');
+    }
+  };
+
+  const startEditWineLiquorCategory = (category: WineLiquorCategory) => {
+    setEditingWineLiquorCategoryId(category.id);
+    setEditingWineLiquorCategory(category);
+  };
+
   const startEditGiftCategory = (category: GiftCategory) => {
     setEditingGiftCategoryId(category.id);
     setEditingGiftCategory(category);
+  };
+
+  const cancelEditWineLiquorCategory = () => {
+    setEditingWineLiquorCategoryId(null);
+    setEditingWineLiquorCategory({});
   };
 
   const cancelEditGiftCategory = () => {
@@ -349,6 +482,17 @@ export default function CategoriesPage() {
             >
               <Gift className="h-4 w-4 inline mr-2" />
               Gift Categories
+            </button>
+            <button
+              onClick={() => setActiveTab('wine-liquor')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'wine-liquor'
+                  ? 'border-pink-500 text-pink-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Wine className="h-4 w-4 inline mr-2" />
+              Wine & Liquor Categories
             </button>
           </nav>
         </div>
@@ -779,6 +923,232 @@ export default function CategoriesPage() {
           )}
         </>
         )}
+
+      {/* Wine & Liquor Categories Tab */}
+      {activeTab === 'wine-liquor' && (
+        <>
+          {/* Action Button */}
+          <div className="flex justify-end mb-8">
+            <Button
+              onClick={() => setShowAddWineLiquorForm(true)}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Wine & Liquor Category
+            </Button>
+          </div>
+
+          {/* Add Form */}
+          {showAddWineLiquorForm && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Add New Wine & Liquor Category</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleAddWineLiquorCategory} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 mb-1">
+                        Category Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={newWineLiquorCategory.name}
+                        onChange={(e) => setNewWineLiquorCategory({ ...newWineLiquorCategory, name: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 mb-1">
+                        Icon
+                      </label>
+                      <input
+                        type="text"
+                        value={newWineLiquorCategory.icon}
+                        onChange={(e) => setNewWineLiquorCategory({ ...newWineLiquorCategory, icon: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+                        placeholder="🍷"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 mb-1">
+                        Display Order
+                      </label>
+                      <input
+                        type="number"
+                        value={newWineLiquorCategory.display_order === 0 ? '' : newWineLiquorCategory.display_order}
+                        onChange={(e) => setNewWineLiquorCategory({ ...newWineLiquorCategory, display_order: parseInt(e.target.value) || 0 })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <Button
+                        type="submit"
+                        className="bg-red-600 hover:bg-red-700 text-white mr-2"
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Save
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowAddWineLiquorForm(false);
+                          setNewWineLiquorCategory({ name: '', description: '', icon: '🍷', display_order: 0 });
+                        }}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-800 mb-1">
+                      Description
+                    </label>
+                    <textarea
+                      value={newWineLiquorCategory.description}
+                      onChange={(e) => setNewWineLiquorCategory({ ...newWineLiquorCategory, description: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      rows={3}
+                    />
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Categories List */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {wineLiquorCategories.map((category) => (
+              <Card key={category.id} className="relative">
+                <CardContent className="p-6">
+                  {editingWineLiquorCategoryId === category.id ? (
+                    <form onSubmit={handleUpdateWineLiquorCategory} className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-800 mb-1">
+                          Category Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={editingWineLiquorCategory.name || ''}
+                          onChange={(e) => setEditingWineLiquorCategory({ ...editingWineLiquorCategory, name: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-800 mb-1">
+                          Icon
+                        </label>
+                        <input
+                          type="text"
+                          value={editingWineLiquorCategory.icon || ''}
+                          onChange={(e) => setEditingWineLiquorCategory({ ...editingWineLiquorCategory, icon: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-800 mb-1">
+                          Display Order
+                        </label>
+                        <input
+                          type="number"
+                          value={editingWineLiquorCategory.display_order === 0 ? '' : editingWineLiquorCategory.display_order || ''}
+                          onChange={(e) => setEditingWineLiquorCategory({ ...editingWineLiquorCategory, display_order: parseInt(e.target.value) || 0 })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-800 mb-1">
+                          Description
+                        </label>
+                        <textarea
+                          value={editingWineLiquorCategory.description || ''}
+                          onChange={(e) => setEditingWineLiquorCategory({ ...editingWineLiquorCategory, description: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+                          rows={3}
+                        />
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button
+                          type="submit"
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                          <Save className="h-4 w-4 mr-2" />
+                          Save
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={cancelEditWineLiquorCategory}
+                        >
+                          <X className="h-4 w-4 mr-2" />
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center">
+                          <span className="text-2xl mr-3">{category.icon}</span>
+                          <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => startEditWineLiquorCategory(category)}
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteWineLiquorCategory(category.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      {category.description && (
+                        <p className="text-gray-600 mb-2">{category.description}</p>
+                      )}
+                      <div className="text-sm text-gray-500">
+                        Order: {category.display_order} | 
+                        Status: <span className={category.is_active ? 'text-green-600' : 'text-red-600'}>
+                          {category.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {wineLiquorCategories.length === 0 && (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Wine className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Wine & Liquor Categories Yet</h3>
+                <p className="text-gray-600 mb-4">Start by adding your first wine & liquor category</p>
+                <Button
+                  onClick={() => setShowAddWineLiquorForm(true)}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add First Category
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </>
+      )}
     </>
   );
 }
