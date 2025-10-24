@@ -144,7 +144,6 @@ export default function CategoriesPage() {
       const data = await response.json();
 
       if (response.ok) {
-        console.log('Category creation response:', data); // Debug log
         setSuccess('Category created successfully!');
         
         // Optimistic update - add the new category immediately to the UI
@@ -157,7 +156,6 @@ export default function CategoriesPage() {
           created_at: data.category?.created_at || new Date().toISOString(),
           updated_at: data.category?.updated_at || new Date().toISOString()
         };
-        console.log('Adding optimistic category:', newCategoryData); // Debug log
         setCategories(prev => [...prev, newCategoryData]);
         
         setNewCategory({ name: '', description: '', display_order: 0 });
