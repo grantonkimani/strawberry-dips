@@ -190,7 +190,7 @@ export default function WineLiquorProductsPage() {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     // Optimistic update - remove from UI immediately
-    setProducts(prev => prev.filter(p => p.id !== id));
+    setWineLiquorProducts(prev => prev.filter(p => p.id !== id));
 
     try {
       const response = await fetch(`/api/wine-liquor-products?id=${id}`, {
@@ -215,7 +215,7 @@ export default function WineLiquorProductsPage() {
 
   const toggleProductStatus = async (product: WineLiquorProduct) => {
     // Optimistic update - toggle status immediately
-    setProducts(prev => prev.map(p => 
+    setWineLiquorProducts(prev => prev.map(p => 
       p.id === product.id 
         ? { ...p, is_active: !p.is_active }
         : p
