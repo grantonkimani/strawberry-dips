@@ -162,7 +162,8 @@ export default function WineLiquorProductsPage() {
       } else {
         const errorData = await response.json();
         console.error('Failed to save product:', errorData);
-        alert(`Failed to save product: ${errorData.error || 'Unknown error'}`);
+        const errorMessage = errorData.details ? `${errorData.error}: ${errorData.details}` : errorData.error || 'Unknown error';
+        alert(`Failed to save product: ${errorMessage}`);
       }
     } catch (error) {
       console.error('Error saving product:', error);
