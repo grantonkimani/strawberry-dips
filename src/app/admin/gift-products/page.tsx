@@ -115,17 +115,26 @@ export default function GiftProductsPage() {
       return;
     }
 
+    // Optimistic update - remove from UI immediately
+    setGiftProducts(prev => prev.filter(p => p.id !== id));
+
     try {
       const response = await fetch(`/api/gift-products/${id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        await fetchGiftProducts();
+        // Success - optimistic update already handled it
+        // Refresh in background to ensure data consistency
+        fetchGiftProducts();
       } else {
+        // Revert optimistic update on error
+        await fetchGiftProducts();
         alert('Failed to delete gift product');
       }
     } catch (error) {
+      // Revert optimistic update on error
+      await fetchGiftProducts();
       console.error('Error deleting gift product:', error);
       alert('Failed to delete gift product');
     }
@@ -133,6 +142,13 @@ export default function GiftProductsPage() {
 
   // Handle toggle active status
   const handleToggleActive = async (product: GiftProduct) => {
+    // Optimistic update - toggle status immediately
+    setGiftProducts(prev => prev.map(p => 
+      p.id === product.id 
+        ? { ...p, is_active: !p.is_active }
+        : p
+    ));
+
     try {
       const response = await fetch(`/api/gift-products/${product.id}`, {
         method: 'PUT',
@@ -146,11 +162,17 @@ export default function GiftProductsPage() {
       });
 
       if (response.ok) {
-        await fetchGiftProducts();
+        // Success - optimistic update already handled it
+        // Refresh in background to ensure data consistency
+        fetchGiftProducts();
       } else {
+        // Revert optimistic update on error
+        await fetchGiftProducts();
         alert('Failed to update gift product status');
       }
     } catch (error) {
+      // Revert optimistic update on error
+      await fetchGiftProducts();
       console.error('Error updating gift product:', error);
       alert('Failed to update gift product status');
     }

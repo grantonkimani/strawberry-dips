@@ -168,10 +168,12 @@ export default function WineLiquorProductsPage() {
       });
 
       if (response.ok) {
-        await fetchData();
+        // Optimistic update - no need to refetch
         setIsCreating(false);
         setEditingProduct(null);
         setFormData({});
+        // Refresh in background to ensure data consistency
+        fetchData();
       } else {
         const errorData = await response.json();
         console.error('Failed to save product:', errorData);
@@ -187,22 +189,38 @@ export default function WineLiquorProductsPage() {
   const handleDeleteProduct = async (id: string) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
+    // Optimistic update - remove from UI immediately
+    setProducts(prev => prev.filter(p => p.id !== id));
+
     try {
       const response = await fetch(`/api/wine-liquor-products?id=${id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        await fetchData();
+        // Success - optimistic update already handled it
+        // Refresh in background to ensure data consistency
+        fetchData();
       } else {
+        // Revert optimistic update on error
+        await fetchData();
         console.error('Failed to delete product');
       }
     } catch (error) {
+      // Revert optimistic update on error
+      await fetchData();
       console.error('Error deleting product:', error);
     }
   };
 
   const toggleProductStatus = async (product: WineLiquorProduct) => {
+    // Optimistic update - toggle status immediately
+    setProducts(prev => prev.map(p => 
+      p.id === product.id 
+        ? { ...p, is_active: !p.is_active }
+        : p
+    ));
+
     try {
       const response = await fetch('/api/wine-liquor-products', {
         method: 'PUT',
@@ -216,11 +234,17 @@ export default function WineLiquorProductsPage() {
       });
 
       if (response.ok) {
-        await fetchData();
+        // Success - optimistic update already handled it
+        // Refresh in background to ensure data consistency
+        fetchData();
       } else {
+        // Revert optimistic update on error
+        await fetchData();
         console.error('Failed to update product status');
       }
     } catch (error) {
+      // Revert optimistic update on error
+      await fetchData();
       console.error('Error updating product status:', error);
     }
   };

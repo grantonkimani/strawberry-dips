@@ -406,10 +406,9 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 				const errorData = await response.json()
 				throw new Error(errorData.error || 'Failed to delete product')
 			}
-			// Update the UI immediately
-			setProducts(prev => prev.filter(p => p.id !== id))
-			// Also refresh the data to ensure consistency
-			await fetchProducts()
+		// Update the UI immediately - optimistic update
+		setProducts(prev => prev.filter(p => p.id !== id))
+		// No need to refetch - optimistic update handles it
 		} catch (error) {
 			console.error('Delete product error:', error)
 			alert(`Failed to delete product: ${error instanceof Error ? error.message : 'Unknown error'}`)
