@@ -66,6 +66,19 @@ export default function WineLiquorProductsPage() {
 
   useEffect(() => {
     fetchData();
+    
+    // Listen for category updates from other pages
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'wineLiquorCategoriesUpdated') {
+        fetchData();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const fetchData = async () => {

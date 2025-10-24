@@ -64,6 +64,19 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 	useEffect(() => {
 		fetchProducts()
 		fetchCategories()
+		
+		// Listen for category updates from other pages
+		const handleStorageChange = (e: StorageEvent) => {
+			if (e.key === 'categoriesUpdated') {
+				fetchCategories()
+			}
+		}
+		
+		window.addEventListener('storage', handleStorageChange)
+		
+		return () => {
+			window.removeEventListener('storage', handleStorageChange)
+		}
 	}, [])
 
 	async function fetchProducts() {

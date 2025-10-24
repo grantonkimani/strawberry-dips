@@ -145,9 +145,27 @@ export default function CategoriesPage() {
 
       if (response.ok) {
         setSuccess('Category created successfully!');
-        await fetchCategories();
+        
+        // Optimistic update - add the new category immediately to the UI
+        const newCategoryData = {
+          id: data.category?.id || Date.now().toString(), // Use API response ID or fallback
+          name: newCategory.name,
+          description: newCategory.description,
+          display_order: newCategory.display_order,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setCategories(prev => [...prev, newCategoryData]);
+        
         setNewCategory({ name: '', description: '', display_order: 0 });
         setShowAddForm(false);
+        
+        // Notify other pages that categories have been updated
+        localStorage.setItem('categoriesUpdated', Date.now().toString());
+        
+        // Refresh in background to ensure data consistency
+        fetchCategories();
       } else {
         const errorMessage = data.error || 'Failed to create category';
         setError(errorMessage);
@@ -349,9 +367,28 @@ export default function CategoriesPage() {
 
       if (response.ok) {
         setSuccess('Wine & Liquor category created successfully!');
-        await fetchWineLiquorCategories();
+        
+        // Optimistic update - add the new category immediately to the UI
+        const newCategoryData = {
+          id: data.wineLiquorCategory?.id || Date.now().toString(), // Use API response ID or fallback
+          name: newWineLiquorCategory.name,
+          description: newWineLiquorCategory.description,
+          icon: newWineLiquorCategory.icon,
+          display_order: newWineLiquorCategory.display_order,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setWineLiquorCategories(prev => [...prev, newCategoryData]);
+        
         setNewWineLiquorCategory({ name: '', description: '', icon: '🍷', display_order: 0 });
         setShowAddWineLiquorForm(false);
+        
+        // Notify other pages that categories have been updated
+        localStorage.setItem('wineLiquorCategoriesUpdated', Date.now().toString());
+        
+        // Refresh in background to ensure data consistency
+        fetchWineLiquorCategories();
       } else {
         setError(data.error || 'Failed to create wine & liquor category');
         console.error('API Error:', data);
