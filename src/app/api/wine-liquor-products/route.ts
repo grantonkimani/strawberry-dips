@@ -101,28 +101,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Prepare insert data, handling empty strings for UUID fields
+    const insertData: any = {
+      name,
+      description,
+      price: parseFloat(price),
+      category,
+      image_url,
+      alcohol_content,
+      volume,
+      vintage,
+      region,
+      producer,
+      grape_variety,
+      spirit_type,
+      serving_temperature,
+      food_pairing,
+      tasting_notes,
+      is_active: is_active !== undefined ? is_active : true,
+      requires_age_verification: requires_age_verification !== undefined ? requires_age_verification : true
+    };
+
+    // Only include wine_liquor_category_id if it's not empty
+    if (wine_liquor_category_id && wine_liquor_category_id.trim() !== '') {
+      insertData.wine_liquor_category_id = wine_liquor_category_id;
+    }
+
     const { data: wineLiquorProduct, error } = await supabaseAdmin
       .from('wine_liquor_products')
-      .insert({
-        name,
-        description,
-        price: parseFloat(price),
-        category,
-        wine_liquor_category_id,
-        image_url,
-        alcohol_content,
-        volume,
-        vintage,
-        region,
-        producer,
-        grape_variety,
-        spirit_type,
-        serving_temperature,
-        food_pairing,
-        tasting_notes,
-        is_active: is_active !== undefined ? is_active : true,
-        requires_age_verification: requires_age_verification !== undefined ? requires_age_verification : true
-      })
+      .insert(insertData)
       .select(`
         *,
         wine_liquor_categories (
