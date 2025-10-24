@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Error creating wine/liquor product:', error);
       return NextResponse.json(
-        { error: 'Failed to create wine/liquor product' },
+        { error: 'Failed to create wine/liquor product', details: error.message },
         { status: 500 }
       );
     }
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error in wine/liquor products POST API:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
