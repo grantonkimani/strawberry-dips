@@ -133,6 +133,16 @@ export default function WineLiquorProductsPage() {
 
   const handleSaveProduct = async () => {
     try {
+      // Validate required fields
+      if (!formData.name || !formData.name.trim()) {
+        alert('Product name is required');
+        return;
+      }
+      if (!formData.price || formData.price <= 0) {
+        alert('Product price must be greater than 0');
+        return;
+      }
+
       const url = editingProduct ? '/api/wine-liquor-products' : '/api/wine-liquor-products';
       const method = editingProduct ? 'PUT' : 'POST';
       
@@ -150,10 +160,13 @@ export default function WineLiquorProductsPage() {
         setEditingProduct(null);
         setFormData({});
       } else {
-        console.error('Failed to save product');
+        const errorData = await response.json();
+        console.error('Failed to save product:', errorData);
+        alert(`Failed to save product: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error saving product:', error);
+      alert('Error saving product. Please try again.');
     }
   };
 
@@ -410,8 +423,8 @@ export default function WineLiquorProductsPage() {
                 <input
                   type="number"
                   step="0.01"
-                  value={formData.price || ''}
-                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                  value={formData.price === 0 ? '' : formData.price || ''}
+                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
                   placeholder="e.g., 4500.00"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 />
