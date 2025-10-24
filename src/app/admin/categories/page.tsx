@@ -421,7 +421,7 @@ export default function CategoriesPage() {
                     </label>
                     <input
                       type="number"
-                      value={newCategory.display_order}
+                      value={newCategory.display_order === 0 ? '' : newCategory.display_order}
                       onChange={(e) => setNewCategory({ ...newCategory, display_order: parseInt(e.target.value) || 0 })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
                     />
@@ -479,7 +479,7 @@ export default function CategoriesPage() {
                         </label>
                         <input
                           type="number"
-                          value={editingCategory.display_order || 0}
+                          value={editingCategory.display_order || ''}
                           onChange={(e) => setEditingCategory({ ...editingCategory, display_order: parseInt(e.target.value) || 0 })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
                         />
@@ -619,7 +619,7 @@ export default function CategoriesPage() {
                       </label>
                       <input
                         type="number"
-                        value={newGiftCategory.display_order}
+                        value={newGiftCategory.display_order === 0 ? '' : newGiftCategory.display_order}
                         onChange={(e) => setNewGiftCategory({ ...newGiftCategory, display_order: parseInt(e.target.value) || 0 })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
                       />
@@ -688,7 +688,7 @@ export default function CategoriesPage() {
                           </label>
                           <input
                             type="number"
-                            value={editingGiftCategory.display_order || 0}
+                            value={editingGiftCategory.display_order || ''}
                             onChange={(e) => setEditingGiftCategory({ ...editingGiftCategory, display_order: parseInt(e.target.value) || 0 })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
                           />

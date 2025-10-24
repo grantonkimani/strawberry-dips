@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export async function POST(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Storage not configured' }, { status: 500 });
+    }
+
     const data = await request.formData();
     const file: File | null = data.get('file') as unknown as File;
     const productType = data.get('productType') as string || 'wine-liquor';
@@ -29,30 +31,35 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Create upload directory if it doesn't exist
-    const uploadDir = join(process.cwd(), 'public', 'uploads', productType);
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
-    }
+    // Convert file to buffer
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
 
     // Generate unique filename
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 15);
     const fileExtension = file.name.split('.').pop();
     const fileName = `${timestamp}-${randomString}.${fileExtension}`;
-    const filePath = join(uploadDir, fileName);
+    const path = `${productType}/${fileName}`;
 
-    // Convert file to buffer and save
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
+    // Upload to Supabase storage
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from('product-images')
+      .upload(path, buffer, { contentType: file.type });
 
-    // Return the public URL
-    const publicUrl = `/uploads/${productType}/${fileName}`;
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      return NextResponse.json({ error: uploadError.message }, { status: 500 });
+    }
+
+    // Get public URL
+    const { data: urlData } = supabaseAdmin.storage
+      .from('product-images')
+      .getPublicUrl(path);
 
     return NextResponse.json({ 
       success: true, 
-      imageUrl: publicUrl,
+      imageUrl: urlData.publicUrl,
       fileName: fileName 
     });
 
@@ -68,6 +75,10 @@ export async function POST(request: NextRequest) {
 // Handle file deletion
 export async function DELETE(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Storage not configured' }, { status: 500 });
+    }
+
     const { searchParams } = new URL(request.url);
     const imageUrl = searchParams.get('imageUrl');
     const productType = searchParams.get('productType') || 'wine-liquor';
@@ -82,12 +93,15 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid image URL' }, { status: 400 });
     }
 
-    // Delete file from filesystem
-    const filePath = join(process.cwd(), 'public', 'uploads', productType, fileName);
-    
-    if (existsSync(filePath)) {
-      const { unlink } = await import('fs/promises');
-      await unlink(filePath);
+    // Delete file from Supabase storage
+    const path = `${productType}/${fileName}`;
+    const { error: deleteError } = await supabaseAdmin.storage
+      .from('product-images')
+      .remove([path]);
+
+    if (deleteError) {
+      console.error('Delete error:', deleteError);
+      return NextResponse.json({ error: deleteError.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
