@@ -72,6 +72,19 @@ export default function GiftProductsPage() {
   useEffect(() => {
     fetchGiftProducts();
     fetchGiftCategories();
+    
+    // Listen for category updates from other pages
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'giftCategoriesUpdated') {
+        fetchGiftCategories();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   // Handle form submission

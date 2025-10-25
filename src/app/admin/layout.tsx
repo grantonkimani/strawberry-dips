@@ -5,7 +5,7 @@ import { AdminNav } from '@/components/AdminNav';
 import { SessionTimeoutWarning } from '@/components/SessionTimeoutWarning';
 import { useSessionTimeout } from '@/hooks/useSessionTimeout';
 import { useRouter, usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function AdminLayout({
   children,
@@ -15,6 +15,7 @@ export default function AdminLayout({
   const { isLoading, logout, isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
   
   // Skip authentication check for login page
   const isLoginPage = pathname === '/admin/login';
@@ -33,12 +34,29 @@ export default function AdminLayout({
     }
   });
 
+  // Handle hydration
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Redirect to login if not authenticated (after loading is complete)
   useEffect(() => {
-    if (!isLoginPage && !isLoading && !isAuthenticated) {
+    if (mounted && !isLoginPage && !isLoading && !isAuthenticated) {
       router.push('/admin/login');
     }
-  }, [isLoading, isAuthenticated, router, isLoginPage]);
+  }, [mounted, isLoading, isAuthenticated, router, isLoginPage]);
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // For login page, just render children without any auth checks
   if (isLoginPage) {

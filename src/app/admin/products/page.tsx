@@ -67,15 +67,25 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 		
 		// Listen for category updates from other pages
 		const handleStorageChange = (e: StorageEvent) => {
+			console.log('Storage event received:', e.key, e.newValue);
 			if (e.key === 'categoriesUpdated') {
+				console.log('Refreshing categories due to storage event');
 				fetchCategories()
 			}
 		}
 		
+		// Also listen for custom events (for same-tab updates)
+		const handleCustomCategoryUpdate = () => {
+			console.log('Custom category update event received');
+			fetchCategories()
+		}
+		
 		window.addEventListener('storage', handleStorageChange)
+		window.addEventListener('categoryUpdated', handleCustomCategoryUpdate)
 		
 		return () => {
 			window.removeEventListener('storage', handleStorageChange)
+			window.removeEventListener('categoryUpdated', handleCustomCategoryUpdate)
 		}
 	}, [])
 
@@ -102,6 +112,7 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 	}
 
 	async function fetchCategories() {
+		console.log('Fetching categories...');
 		try {
 			const res = await fetch('/api/categories', {
 				cache: 'no-store',
@@ -112,6 +123,7 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 				}
 			})
 			const data = await res.json()
+			console.log('Categories fetched:', data.categories?.length || 0, 'categories');
 			if (data.categories) {
 				setCategories(data.categories)
 			}
@@ -127,7 +139,7 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 		const checked = 'checked' in e.target ? e.target.checked : false
 		setForm(prev => ({
 			...prev,
-			[name]: type === 'checkbox' ? checked : name === 'base_price' ? Number(value) : value,
+			[name]: type === 'checkbox' ? checked : name === 'base_price' ? (value === '' ? '' : Number(value)) : value,
 		}))
 	}
 
@@ -424,10 +436,18 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 						<h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Manage Products</h1>
 						<p className="text-gray-600">Add, edit, or remove items for sale</p>
 					</div>
-					<Button onClick={() => setIsCreating(prev => !prev)} className="bg-pink-600 hover:bg-pink-700">
-						{isCreating ? <X className="h-4 w-4 mr-2"/> : <Plus className="h-4 w-4 mr-2"/>}
-						{isCreating ? 'Cancel' : 'Add Product'}
-					</Button>
+					<div className="flex gap-2">
+						<Button onClick={fetchCategories} variant="outline" className="text-sm">
+							🔄 Refresh Categories
+						</Button>
+						<Button onClick={() => {
+							setForm(emptyForm);
+							setIsCreating(prev => !prev);
+						}} className="bg-pink-600 hover:bg-pink-700">
+							{isCreating ? <X className="h-4 w-4 mr-2"/> : <Plus className="h-4 w-4 mr-2"/>}
+							{isCreating ? 'Cancel' : 'Add Product'}
+						</Button>
+					</div>
 				</div>
 			</div>
 
@@ -459,7 +479,7 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 								</div>
 								<div>
 									<label className="block text-sm font-semibold text-gray-800 mb-1">Base Price *</label>
-									<input name="base_price" type="number" min={0} step={0.01} value={form.base_price || ''} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" />
+									<input name="base_price" type="number" min={0} step={0.01} value={form.base_price === 0 ? '' : form.base_price || ''} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" />
 								</div>
 								<div>
 						<label className="block text-sm font-semibold text-gray-800 mb-1">Images (up to 3)</label>
@@ -642,8 +662,8 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 															type="number" 
 															step={0.01} 
 															min={0} 
-															value={editForm.base_price || ''} 
-															onChange={e => handleEditChange('base_price', Number(e.target.value))} 
+															value={editForm.base_price === 0 ? '' : editForm.base_price || ''} 
+															onChange={e => handleEditChange('base_price', e.target.value === '' ? '' : Number(e.target.value))} 
 															className="px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" 
 														/>
 													</div>

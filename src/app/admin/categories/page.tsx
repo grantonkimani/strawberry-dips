@@ -162,7 +162,11 @@ export default function CategoriesPage() {
         setShowAddForm(false);
         
         // Notify other pages that categories have been updated
+        console.log('Setting localStorage categoriesUpdated event');
         localStorage.setItem('categoriesUpdated', Date.now().toString());
+        
+        // Also dispatch custom event for same-tab updates
+        window.dispatchEvent(new CustomEvent('categoryUpdated'));
         
         // Refresh in background to ensure data consistency
         fetchCategories();
@@ -276,9 +280,28 @@ export default function CategoriesPage() {
 
       if (response.ok) {
         setSuccess('Gift category created successfully!');
-        await fetchGiftCategories();
+        
+        // Optimistic update - add the new category immediately to the UI
+        const newGiftCategoryData = {
+          id: data.giftCategory?.id || Date.now().toString(),
+          name: newGiftCategory.name,
+          description: newGiftCategory.description,
+          icon: newGiftCategory.icon,
+          display_order: newGiftCategory.display_order,
+          is_active: true,
+          created_at: data.giftCategory?.created_at || new Date().toISOString(),
+          updated_at: data.giftCategory?.updated_at || new Date().toISOString()
+        };
+        setGiftCategories(prev => [...prev, newGiftCategoryData]);
+        
         setNewGiftCategory({ name: '', description: '', icon: '🎁', display_order: 0 });
         setShowAddGiftForm(false);
+        
+        // Notify other pages that gift categories have been updated
+        localStorage.setItem('giftCategoriesUpdated', Date.now().toString());
+        
+        // Refresh in background to ensure data consistency
+        await fetchGiftCategories();
       } else {
         setError(data.error || 'Failed to create gift category');
         console.error('API Error:', data);
