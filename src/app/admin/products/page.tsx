@@ -479,7 +479,7 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 								</div>
 								<div>
 									<label className="block text-sm font-semibold text-gray-800 mb-1">Base Price *</label>
-									<input name="base_price" type="number" min={0} step={0.01} value={form.base_price === 0 ? '' : form.base_price || ''} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" />
+									<input name="base_price" type="number" min={0} step={0.01} value={form.base_price === '0' ? '' : form.base_price || ''} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" />
 								</div>
 								<div>
 						<label className="block text-sm font-semibold text-gray-800 mb-1">Images (up to 3)</label>
@@ -662,7 +662,7 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 															type="number" 
 															step={0.01} 
 															min={0} 
-															value={editForm.base_price === 0 ? '' : editForm.base_price || ''} 
+															value={editForm.base_price === '0' ? '' : editForm.base_price || ''} 
 															onChange={e => handleEditChange('base_price', e.target.value === '' ? '' : Number(e.target.value))} 
 															className="px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" 
 														/>
