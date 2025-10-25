@@ -662,7 +662,7 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 															type="number" 
 															step={0.01} 
 															min={0} 
-															value={editForm.base_price === '0' ? '' : editForm.base_price || ''} 
+															value={editForm.base_price === 0 ? '' : editForm.base_price || ''} 
 															onChange={e => handleEditChange('base_price', e.target.value === '' ? '' : Number(e.target.value))} 
 															className="px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" 
 														/>
