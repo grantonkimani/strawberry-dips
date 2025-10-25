@@ -60,6 +60,7 @@ export default function AdminProductsPage() {
 const [isUploadingCreate, setIsUploadingCreate] = useState(false)
 const [isUploadingEdit, setIsUploadingEdit] = useState(false)
 const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(null)
+const [isRefreshingCategories, setIsRefreshingCategories] = useState(false)
 
 	useEffect(() => {
 		fetchProducts()
@@ -113,6 +114,7 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 
 	async function fetchCategories() {
 		console.log('Fetching categories...');
+		setIsRefreshingCategories(true);
 		try {
 			const res = await fetch('/api/categories', {
 				cache: 'no-store',
@@ -126,10 +128,18 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 			console.log('Categories fetched:', data.categories?.length || 0, 'categories');
 			if (data.categories) {
 				setCategories(data.categories)
+				console.log('Categories state updated successfully');
 			}
 		} catch (e) {
 			console.error('Failed to fetch categories:', e)
+		} finally {
+			setIsRefreshingCategories(false);
 		}
+	}
+
+	const handleRefreshCategories = () => {
+		console.log('Refresh categories button clicked');
+		fetchCategories();
 	}
 
 	function handleChange(
@@ -437,8 +447,8 @@ const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(
 						<p className="text-gray-600">Add, edit, or remove items for sale</p>
 					</div>
 					<div className="flex gap-2">
-						<Button onClick={fetchCategories} variant="outline" className="text-sm">
-							🔄 Refresh Categories
+						<Button onClick={handleRefreshCategories} variant="outline" className="text-sm" disabled={isRefreshingCategories}>
+							{isRefreshingCategories ? '⏳ Refreshing...' : '🔄 Refresh Categories'}
 						</Button>
 						<Button onClick={() => {
 							setForm(emptyForm);
