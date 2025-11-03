@@ -101,7 +101,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Prepare insert data, handling empty strings for UUID fields
     const insertData: any = {
       name,
       description,
@@ -122,7 +121,6 @@ export async function POST(request: NextRequest) {
       requires_age_verification: requires_age_verification !== undefined ? requires_age_verification : true
     };
 
-    // Only include wine_liquor_category_id if it's not empty
     if (wine_liquor_category_id && wine_liquor_category_id.trim() !== '') {
       insertData.wine_liquor_category_id = wine_liquor_category_id;
     }
@@ -274,8 +272,8 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // First check if the table exists
-    const { data: tableCheck, error: tableError } = await supabaseAdmin
+    // Table exists check
+    const { error: tableError } = await supabaseAdmin
       .from('wine_liquor_products')
       .select('id')
       .limit(1);

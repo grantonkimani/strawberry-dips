@@ -13,13 +13,20 @@ interface WineLiquorProduct {
   name: string;
   description: string;
   price: number;
-  category: string;
+  category?: string; // may be absent when coming from join
   image_url?: string;
   alcohol_content?: string;
   volume?: string;
   vintage?: string;
   region?: string;
   is_active: boolean;
+  // When API includes join, expose nested category info
+  wine_liquor_categories?: {
+    id: string;
+    name: string;
+    description?: string | null;
+    icon?: string;
+  } | null;
 }
 
 interface WineLiquorCategory {
@@ -45,7 +52,6 @@ export default function WinesLiquorPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch both wine/liquor categories and products
         const [categoriesResponse, productsResponse] = await Promise.all([
           fetch('/api/wine-liquor-categories?includeInactive=true'),
           fetch('/api/wine-liquor-products?includeInactive=true')
@@ -71,31 +77,37 @@ export default function WinesLiquorPage() {
     fetchData();
   }, []);
 
-  // Group products by category
+  // Normalize category name from either product.category or joined category name
+  const getProductCategoryName = (product: WineLiquorProduct) => {
+    return (
+      product.category ||
+      product.wine_liquor_categories?.name ||
+      'Uncategorized'
+    );
+  };
+
+  // Group products by normalized category name
   const groupedProducts = wineLiquorProducts.reduce((acc, product) => {
-    if (!acc[product.category]) {
-      acc[product.category] = [];
+    const categoryName = getProductCategoryName(product);
+    if (!acc[categoryName]) {
+      acc[categoryName] = [];
     }
-    acc[product.category].push(product);
+    acc[categoryName].push(product);
     return acc;
   }, {} as Record<string, WineLiquorProduct[]>);
 
-  // Get category info for a given category name
   const getCategoryInfo = (categoryName: string) => {
     return wineLiquorCategories.find(cat => cat.name === categoryName);
   };
 
-  // Get product count for a category
   const getCategoryProductCount = (categoryName: string) => {
     return groupedProducts[categoryName]?.length || 0;
   };
 
-  // Filter active categories that have products
   const activeCategoriesWithProducts = wineLiquorCategories
     .filter(cat => cat.is_active && getCategoryProductCount(cat.name) > 0)
     .sort((a, b) => a.display_order - b.display_order);
 
-  // Age verification modal
   const AgeVerificationModal = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg p-6 max-w-md w-full">
@@ -152,7 +164,7 @@ export default function WinesLiquorPage() {
           Premium selection of wines, spirits, and champagne to complement your strawberry order. 
           Perfect for special occasions and celebrations.
         </p>
-        
+
         {/* Legal Notice */}
         <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-3xl mx-auto">
           <div className="flex items-start">
@@ -175,7 +187,7 @@ export default function WinesLiquorPage() {
             <Filter className="h-5 w-5 mr-2 text-red-600" />
             Browse by Category
           </h2>
-          
+
           {/* View Mode Toggle */}
           <div className="flex items-center space-x-2">
             <button
@@ -281,7 +293,7 @@ export default function WinesLiquorPage() {
                 <div className="p-4">
                   <h3 className="font-semibold text-gray-900 mb-2">{product.name}</h3>
                   <p className="text-gray-600 text-sm mb-4 line-clamp-3">{product.description}</p>
-                  
+
                   <div className="flex items-center justify-between">
                     <span className="text-xl font-bold text-red-600">
                       KES {product.price.toLocaleString()}
@@ -308,9 +320,55 @@ export default function WinesLiquorPage() {
           </div>
         </div>
       ) : (
-        // Categorical Display - All Categories
+        // Categorical Display - All Categories. If no active categories, show All Products grid.
         <div className="space-y-12">
-          {activeCategoriesWithProducts.map((category) => (
+          {activeCategoriesWithProducts.length === 0 ? (
+            <div>
+              <div className="flex items-center mb-6">
+                <span className="text-3xl mr-3">🍷</span>
+                <div>
+                  <h2 className="text-2xl font-semibold text-gray-900">All Products</h2>
+                  <p className="text-sm text-gray-500 mt-1">{wineLiquorProducts.length} products available</p>
+                </div>
+              </div>
+              <div className="grid gap-6 mb-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {wineLiquorProducts.map((product) => (
+                  <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <ProductImage 
+                      src={product.image_url} 
+                      alt={product.name}
+                      className="aspect-square"
+                      fallbackIcon="🍷"
+                    />
+                    <div className="p-4">
+                      <h3 className="font-semibold text-gray-900 mb-2">{product.name}</h3>
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">{product.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xl font-bold text-red-600">
+                          KES {product.price.toLocaleString()}
+                        </span>
+                        <Button 
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                          onClick={() => {
+                            addItem({
+                              id: product.id,
+                              name: product.name,
+                              price: product.price,
+                              image: product.image_url || '',
+                              category: 'wine-liquor',
+                              quantity: 1
+                            });
+                          }}
+                        >
+                          Add to Cart
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ) : activeCategoriesWithProducts.map((category) => (
             <div key={category.id} className="mb-12">
               <div className="flex items-center mb-6">
                 <span className="text-3xl mr-3">{category.icon}</span>
@@ -344,7 +402,7 @@ export default function WinesLiquorPage() {
                     <div className="p-4">
                       <h3 className="font-semibold text-gray-900 mb-2">{product.name}</h3>
                       <p className="text-gray-600 text-sm mb-4 line-clamp-3">{product.description}</p>
-                      
+
                       <div className="flex items-center justify-between">
                         <span className="text-xl font-bold text-red-600">
                           KES {product.price.toLocaleString()}
@@ -412,7 +470,7 @@ export default function WinesLiquorPage() {
           </Button>
         </div>
       </div>
-      
+
       <ImagePerformanceMonitor />
     </div>
   );
