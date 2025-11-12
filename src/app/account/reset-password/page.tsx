@@ -132,6 +132,7 @@ function ResetPasswordForm() {
                   onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   placeholder="Enter new password"
+                  autoComplete="new-password"
                   required
                   disabled={isLoading}
                 />
@@ -159,6 +160,7 @@ function ResetPasswordForm() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   placeholder="Confirm new password"
+                  autoComplete="new-password"
                   required
                   disabled={isLoading}
                 />
@@ -198,7 +200,7 @@ function ResetPasswordForm() {
           <div className="mt-6 text-center">
             <button
               onClick={() => router.push('/account/login')}
-              className="flex items-center justify-center text-sm text-gray-600 hover:text-pink-600 mx-auto"
+              className="flex items-center justify-center text-sm text-gray-600 hover:text-pink-600 mx-auto underline hover:no-underline cursor-pointer transition-colors"
             >
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back to Login

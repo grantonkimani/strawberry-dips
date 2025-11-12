@@ -3,7 +3,10 @@ import { jwtVerify } from 'jose';
 
 // Helper function to get JWT secret key
 function getJwtSecretKey(): Uint8Array {
-  const secret = process.env.JWT_SECRET_KEY || 'your-secret-key-change-in-production';
+  const secret = process.env.JWT_SECRET_KEY;
+  if (!secret) {
+    throw new Error('JWT_SECRET_KEY environment variable is required. Please set it in your .env.local file.');
+  }
   return new TextEncoder().encode(secret);
 }
 

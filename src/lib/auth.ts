@@ -24,7 +24,10 @@ export interface AuthSession {
 
 // Helper function to get JWT secret key
 function getJwtSecretKey(): Uint8Array {
-  const secret = process.env.JWT_SECRET_KEY || 'your-secret-key-change-in-production';
+  const secret = process.env.JWT_SECRET_KEY;
+  if (!secret) {
+    throw new Error('JWT_SECRET_KEY environment variable is required. Please set it in your .env.local file.');
+  }
   return new TextEncoder().encode(secret);
 }
 
@@ -52,28 +55,8 @@ export async function generateSessionToken(user: AdminUser): Promise<string> {
 // Verify admin credentials
 export async function verifyAdminCredentials(credentials: LoginCredentials): Promise<AdminUser | null> {
   try {
-    // Secure hardcoded admin credentials
-    // Password is hashed for security
-    const ADMIN_USERNAME = 'StrawberrydipsAdmin';
-    const ADMIN_PASSWORD_HASH = '$2b$10$YXRzmbCtlRo3/2GriF5e9.PYXP/CZ.P1.n1EpnDqJKOyr9tkXTmK2'; // Admin@StrawberryDIPSKe67!
-    
-    if (credentials.username === ADMIN_USERNAME) {
-      // Verify password using bcrypt
-      const isValidPassword = await verifyPassword(credentials.password, ADMIN_PASSWORD_HASH);
-      
-      if (isValidPassword) {
-        return {
-          id: 'strawberrydips-admin-id',
-          username: ADMIN_USERNAME,
-          email: 'admin@strawberrydips.com',
-          full_name: 'Strawberrydips Administrator',
-          is_active: true,
-          last_login: new Date().toISOString()
-        };
-      }
-    }
-
-    // Try database lookup if hardcoded credentials don't match
+    // Try database lookup FIRST (primary method - recommended)
+    // This allows database admin users to work even if env vars are set
     try {
       const { data, error } = await supabase
         .from('admin_users')
@@ -82,34 +65,83 @@ export async function verifyAdminCredentials(credentials: LoginCredentials): Pro
         .eq('is_active', true)
         .single();
 
-      if (error || !data) {
-        return null;
+      if (!error && data) {
+        console.log('[AUTH] Found admin user in database:', { 
+          username: data.username, 
+          hasPasswordHash: !!data.password_hash,
+          isActive: data.is_active,
+          passwordHashLength: data.password_hash?.length 
+        });
+        
+        if (!data.is_active) {
+          console.log('[AUTH] Admin user is inactive:', data.username);
+          return null;
+        }
+        
+        if (!data.password_hash) {
+          console.log('[AUTH] Admin user has no password hash:', data.username);
+          return null;
+        }
+        
+        // Use proper bcrypt verification for database users
+        const isValidPassword = await verifyPassword(credentials.password, data.password_hash);
+        
+        console.log('[AUTH] Password verification result:', { 
+          isValid: isValidPassword,
+          username: data.username 
+        });
+        
+        if (isValidPassword) {
+          // Update last login
+          await supabase
+            .from('admin_users')
+            .update({ last_login: new Date().toISOString() })
+            .eq('id', data.id);
+
+          return {
+            id: data.id,
+            username: data.username,
+            email: data.email,
+            full_name: data.full_name,
+            is_active: data.is_active,
+            last_login: data.last_login
+          };
+        } else {
+          console.log('[AUTH] Password verification failed for user:', data.username);
+        }
+      } else {
+        console.log('[AUTH] Admin user not found in database:', { 
+          username: credentials.username, 
+          error: error?.message,
+          errorCode: error?.code 
+        });
       }
-
-      // Use proper bcrypt verification for database users
-      const isValidPassword = await verifyPassword(credentials.password, data.password_hash);
-      
-      if (!isValidPassword) {
-        return null;
-      }
-
-      // Update last login
-      await supabase
-        .from('admin_users')
-        .update({ last_login: new Date().toISOString() })
-        .eq('id', data.id);
-
-      return {
-        id: data.id,
-        username: data.username,
-        email: data.email,
-        full_name: data.full_name,
-        is_active: data.is_active,
-        last_login: data.last_login
-      };
     } catch (dbError) {
-      return null;
+      console.error('Database lookup error:', dbError);
     }
+
+    // Fallback: Check for environment-based admin credentials (if database lookup failed)
+    const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+    const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
+    
+    // If environment variables are set, use them as fallback
+    if (ADMIN_USERNAME && ADMIN_PASSWORD_HASH && credentials.username === ADMIN_USERNAME) {
+      const isValidPassword = await verifyPassword(credentials.password, ADMIN_PASSWORD_HASH);
+      
+      if (isValidPassword) {
+        return {
+          id: 'strawberrydips-admin-id',
+          username: ADMIN_USERNAME,
+          email: process.env.ADMIN_EMAIL || 'admin@strawberrydips.com',
+          full_name: process.env.ADMIN_FULL_NAME || 'Strawberrydips Administrator',
+          is_active: true,
+          last_login: new Date().toISOString()
+        };
+      }
+    }
+    
+    // No valid credentials found
+    return null;
   } catch (error) {
     console.error('Error verifying admin credentials:', error);
     return null;

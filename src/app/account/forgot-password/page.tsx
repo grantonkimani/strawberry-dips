@@ -119,7 +119,7 @@ export default function ForgotPasswordPage() {
           <div className="mt-6 text-center">
             <button
               onClick={() => router.push('/account/login')}
-              className="flex items-center justify-center text-sm text-gray-600 hover:text-pink-600 mx-auto"
+              className="flex items-center justify-center text-sm text-gray-600 hover:text-pink-600 mx-auto underline hover:no-underline cursor-pointer transition-colors"
             >
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back to Login
@@ -133,7 +133,7 @@ export default function ForgotPasswordPage() {
             Don't have an account?{' '}
             <button
               onClick={() => router.push('/account/signup')}
-              className="text-pink-600 hover:text-pink-700 font-medium"
+              className="text-pink-600 hover:text-pink-700 font-medium underline hover:no-underline cursor-pointer transition-colors"
             >
               Sign up here
             </button>

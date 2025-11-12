@@ -173,7 +173,7 @@ function LoginInner() {
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  className="text-sm text-pink-600 hover:text-pink-700"
+                  className="text-sm text-pink-600 hover:text-pink-700 underline hover:no-underline cursor-pointer transition-colors"
                 >
                   Forgot your password?
                 </button>
@@ -201,7 +201,7 @@ function LoginInner() {
                 Don't have an account?{' '}
                 <button
                   onClick={handleSignupRedirect}
-                  className="text-pink-600 hover:text-pink-700 font-medium"
+                  className="text-pink-600 hover:text-pink-700 font-medium underline hover:no-underline cursor-pointer transition-colors"
                 >
                   Create one here
                 </button>
@@ -212,7 +212,15 @@ function LoginInner() {
 
         {/* Guest Checkout Option */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600 mb-3">Or continue as a guest</p>
+          <p className="text-sm text-gray-600 mb-3">
+            Or{' '}
+            <button
+              onClick={() => router.push('/checkout')}
+              className="text-pink-600 hover:text-pink-700 font-medium underline hover:no-underline cursor-pointer transition-colors"
+            >
+              continue as a guest
+            </button>
+          </p>
           <Button
             onClick={() => router.push('/checkout')}
             variant="outline"

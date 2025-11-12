@@ -3,14 +3,50 @@ import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import bcrypt from 'bcryptjs';
 import { SignJWT } from 'jose';
+import { checkRateLimit, getClientIdentifier } from '@/lib/rate-limit';
 
-const JWT_SECRET = process.env.JWT_SECRET_KEY || 'your-secret-key-change-in-production';
 function getJwtSecretKey(): Uint8Array {
-  return new TextEncoder().encode(JWT_SECRET);
+  const secret = process.env.JWT_SECRET_KEY;
+  if (!secret) {
+    console.error('JWT_SECRET_KEY is missing! Customer login will fail.');
+    // Return a default for development, but log the error
+    // In production, this should fail
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET_KEY environment variable is required. Please set it in your environment variables.');
+    }
+    console.warn('Using fallback JWT secret in development. Set JWT_SECRET_KEY in .env.local for production.');
+    return new TextEncoder().encode('dev-fallback-secret-change-in-production');
+  }
+  return new TextEncoder().encode(secret);
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 5 attempts per 15 minutes per IP
+    const clientId = getClientIdentifier(request);
+    const rateLimit = checkRateLimit(`customer-login-${clientId}`, {
+      maxRequests: 5,
+      windowMs: 15 * 60 * 1000 // 15 minutes
+    });
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { 
+          error: rateLimit.error || 'Too many login attempts. Please try again later.',
+          retryAfter: Math.ceil((rateLimit.resetTime - Date.now()) / 1000)
+        },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
+            'X-RateLimit-Limit': '5',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': new Date(rateLimit.resetTime).toISOString()
+          }
+        }
+      );
+    }
+
     const { email, password } = await request.json();
     
     // Diagnostic logging
@@ -180,6 +216,11 @@ export async function POST(request: NextRequest) {
       },
       token: token
     });
+
+    // Add rate limit headers
+    response.headers.set('X-RateLimit-Limit', '5');
+    response.headers.set('X-RateLimit-Remaining', rateLimit.remaining.toString());
+    response.headers.set('X-RateLimit-Reset', new Date(rateLimit.resetTime).toISOString());
 
     console.log(`[CUSTOMER LOGIN] Login successful - ID: ${customer.id}, email: ${customer.email}`);
 

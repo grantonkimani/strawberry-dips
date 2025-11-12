@@ -181,7 +181,7 @@ export default function CustomerSignupPage() {
                     Didn't receive the email? Check your spam folder or{' '}
                     <button 
                       onClick={() => setSuccess(false)}
-                      className="text-pink-600 hover:text-pink-700 underline"
+                      className="text-pink-600 hover:text-pink-700 underline hover:no-underline cursor-pointer transition-colors"
                     >
                       try again
                     </button>
@@ -395,7 +395,7 @@ export default function CustomerSignupPage() {
                 Already have an account?{' '}
                 <button
                   onClick={handleLoginRedirect}
-                  className="text-pink-600 hover:text-pink-700 font-medium"
+                  className="text-pink-600 hover:text-pink-700 font-medium underline hover:no-underline cursor-pointer transition-colors"
                 >
                   Sign in here
                 </button>
