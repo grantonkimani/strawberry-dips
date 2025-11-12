@@ -77,8 +77,8 @@ export function OptimizedImage({
     return imageUrl;
   };
 
-  // Show placeholder while loading
-  if (isLoading && !isInView) {
+  // Show placeholder while loading (but keep container for observer)
+  if (!isInView && !priority) {
     return (
       <div 
         ref={imgRef}
@@ -120,7 +120,7 @@ export function OptimizedImage({
       )}
 
       {/* Low-quality image placeholder */}
-      {src && isLoading && (
+      {src && isLoading && isInView && (
         <img
           src={generateBlurPlaceholder(src)}
           alt=""
@@ -133,24 +133,26 @@ export function OptimizedImage({
         />
       )}
 
-      {/* Actual image */}
-      <img
-        ref={imgRef}
-        src={src}
-        alt={alt}
-        onLoad={handleLoad}
-        onError={handleError}
-        className={`w-full h-full object-cover transition-all duration-500 ${
-          isLoading ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
-        }`}
-        loading={priority ? 'eager' : 'lazy'}
-        decoding="async"
-        fetchPriority={priority ? 'high' : 'low'}
-        style={{
-          contentVisibility: 'auto',
-          containIntrinsicSize: '300px 300px'
-        }}
-      />
+      {/* Actual image - only render when in view or priority */}
+      {isInView && (
+        <img
+          ref={imgRef}
+          src={src}
+          alt={alt}
+          onLoad={handleLoad}
+          onError={handleError}
+          className={`w-full h-full object-cover transition-all duration-500 ${
+            isLoading ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
+          }`}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          fetchPriority={priority ? 'high' : 'low'}
+          style={{
+            contentVisibility: 'auto',
+            containIntrinsicSize: '300px 300px'
+          }}
+        />
+      )}
     </div>
   );
 }

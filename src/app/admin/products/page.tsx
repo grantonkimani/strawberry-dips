@@ -440,26 +440,26 @@ const [isRefreshingCategories, setIsRefreshingCategories] = useState(false)
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-pink-50 to-gray-50">
-			<div className="bg-white border-b border-pink-100 shadow-sm">
-				<div className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
-					<div>
-						<h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Manage Products</h1>
-						<p className="text-gray-600">Add, edit, or remove items for sale</p>
-					</div>
-					<div className="flex gap-2">
-						<Button onClick={handleRefreshCategories} variant="outline" className="text-sm" disabled={isRefreshingCategories}>
-							{isRefreshingCategories ? '⏳ Refreshing...' : '🔄 Refresh Categories'}
-						</Button>
-						<Button onClick={() => {
-							setForm(emptyForm);
-							setIsCreating(prev => !prev);
-						}} className="bg-pink-600 hover:bg-pink-700">
-							{isCreating ? <X className="h-4 w-4 mr-2"/> : <Plus className="h-4 w-4 mr-2"/>}
-							{isCreating ? 'Cancel' : 'Add Product'}
-						</Button>
-					</div>
+		<div className="bg-white border-b border-pink-100 shadow-sm">
+			<div className="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+				<div>
+					<h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">Manage Products</h1>
+					<p className="text-sm sm:text-base text-gray-600">Add, edit, or remove items for sale</p>
+				</div>
+				<div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+					<Button onClick={handleRefreshCategories} variant="outline" className="text-sm w-full sm:w-auto" disabled={isRefreshingCategories}>
+						{isRefreshingCategories ? '⏳ Refreshing...' : '🔄 Refresh Categories'}
+					</Button>
+					<Button onClick={() => {
+						setForm(emptyForm);
+						setIsCreating(prev => !prev);
+					}} className="bg-pink-600 hover:bg-pink-700 w-full sm:w-auto">
+						{isCreating ? <X className="h-4 w-4 mr-2"/> : <Plus className="h-4 w-4 mr-2"/>}
+						{isCreating ? 'Cancel' : 'Add Product'}
+					</Button>
 				</div>
 			</div>
+		</div>
 
 			{/* Navigation */}
 		<div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
