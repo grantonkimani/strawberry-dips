@@ -61,6 +61,7 @@ const [isUploadingCreate, setIsUploadingCreate] = useState(false)
 const [isUploadingEdit, setIsUploadingEdit] = useState(false)
 const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(null)
 const [isRefreshingCategories, setIsRefreshingCategories] = useState(false)
+const [searchTerm, setSearchTerm] = useState('')
 
 	useEffect(() => {
 		fetchProducts()
@@ -93,7 +94,7 @@ const [isRefreshingCategories, setIsRefreshingCategories] = useState(false)
 	async function fetchProducts() {
 		setLoading(true)
 		try {
-			const res = await fetch('/api/products', { 
+			const res = await fetch('/api/products?limit=1000', { 
 				cache: 'no-store',
 				headers: {
 					'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -567,16 +568,36 @@ const [isRefreshingCategories, setIsRefreshingCategories] = useState(false)
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Products</CardTitle>
+						<div className="flex items-center justify-between">
+							<CardTitle>Products ({products.length})</CardTitle>
+							<input
+								type="text"
+								placeholder="Search products..."
+								value={searchTerm}
+								onChange={(e) => setSearchTerm(e.target.value)}
+								className="px-3 py-2 border border-gray-300 rounded-md text-sm w-64 focus:outline-none focus:ring-2 focus:ring-pink-500"
+							/>
+						</div>
 					</CardHeader>
 					<CardContent>
 						{loading ? (
 							<div className="text-center py-8 text-gray-600">Loading...</div>
-						) : products.length === 0 ? (
-							<div className="text-center py-8 text-gray-600">No products found.</div>
-						) : (
-							<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {products.map(p => (
+						) : (() => {
+							const filteredProducts = searchTerm
+								? products.filter(p => 
+										p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+										(p.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+										(p.categories?.name || p.category || '').toLowerCase().includes(searchTerm.toLowerCase())
+									)
+								: products;
+							
+							return filteredProducts.length === 0 ? (
+								<div className="text-center py-8 text-gray-600">
+									{searchTerm ? `No products found matching "${searchTerm}"` : 'No products found.'}
+								</div>
+							) : (
+								<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredProducts.map(p => (
 									<div key={p.id} className="border rounded-lg overflow-hidden bg-white">
 										<div className="h-40 bg-gray-100 flex items-center justify-center">
 											{p.image_url ? (
@@ -714,7 +735,8 @@ const [isRefreshingCategories, setIsRefreshingCategories] = useState(false)
 									</div>
 								))}
 							</div>
-						)}
+							);
+						})()}
 					</CardContent>
 				</Card>
 			</div>
