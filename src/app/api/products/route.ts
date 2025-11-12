@@ -81,11 +81,13 @@ export async function GET(request: NextRequest) {
 		
 		if (error) {
 			console.warn('GET /api/products join failed, retrying without categories:', error?.message || error)
-			const retry = await supabase
+			let retryQuery = supabase
 				.from('products')
 				.select('*')
 				.order('created_at', { ascending: false })
 				.limit(limit)
+			if (availableOnly) retryQuery = retryQuery.eq('is_available', true)
+			const retry = await retryQuery
 			data = retry.data as any
 			error = retry.error as any
 			console.log('GET /api/products - Retry result:', { dataCount: data?.length, error: error?.message });

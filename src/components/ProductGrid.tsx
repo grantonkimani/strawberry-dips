@@ -55,7 +55,7 @@ export function ProductGrid() {
 		try {
 			// Fetch products and categories in parallel with caching
 			const [productsRes, categoriesRes] = await Promise.all([
-				fetch('/api/products?available=true&limit=100', {
+				fetch('/api/products?available=true&limit=1000', {
 					cache: 'no-store', // Always fetch fresh data
 					next: { revalidate: 0 } // No revalidation
 				}),

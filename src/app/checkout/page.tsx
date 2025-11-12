@@ -155,6 +155,7 @@ export default function CheckoutPage() {
     deliveryDate: '',
     deliveryTime: '',
     specialInstructions: '',
+    orderNote: '', // General order note (gift messages, special requests, etc.)
     
     // Payment Info
     paymentMethod: 'mpesa',
@@ -633,6 +634,25 @@ export default function CheckoutPage() {
                       Please provide specific location details, landmarks, building names, or any special delivery instructions to help our delivery person find you easily
                     </p>
                   </div>
+                  
+                  {/* Order Notes Section */}
+                  <div>
+                    <label className="block text-sm sm:text-base font-semibold text-gray-800 mb-2">
+                      Order Notes (Optional)
+                    </label>
+                    <textarea
+                      name="orderNote"
+                      value={formData.orderNote}
+                      onChange={handleInputChange}
+                      rows={4}
+                      maxLength={500}
+                      placeholder="Add a gift message, special requests, or any notes for this order..."
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 text-base sm:text-sm border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 resize-y min-h-[100px]"
+                    />
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1 break-words">
+                      <span className="font-medium">{formData.orderNote.length}/500</span> characters. Gift messages, special requests, or any notes you'd like us to know about this order.
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -688,6 +708,7 @@ export default function CheckoutPage() {
                           deliveryDate: formData.deliveryDate,
                           deliveryTime: formData.deliveryTime,
                           specialInstructions: formData.specialInstructions,
+                          orderNote: formData.orderNote,
                         }}
                         onSuccess={handlePaymentSuccess}
                         onError={handlePaymentError}

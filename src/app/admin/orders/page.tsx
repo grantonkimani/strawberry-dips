@@ -33,6 +33,7 @@ interface Order {
   delivery_date: string;
   delivery_time: string;
   special_instructions: string;
+  order_note?: string | null;
   created_at: string;
   order_items?: OrderItem[]; // not included in list API; fetched on demand
 }
@@ -512,10 +513,20 @@ export default function AdminOrdersPage() {
                       <p><span className="font-medium">Date:</span> {new Date(selectedOrder.delivery_date).toLocaleDateString()}</p>
                       <p><span className="font-medium">Time:</span> {selectedOrder.delivery_time}</p>
                       {selectedOrder.special_instructions && (
-                        <p><span className="font-medium">Instructions:</span> {selectedOrder.special_instructions}</p>
+                        <p><span className="font-medium">Delivery Instructions:</span> {selectedOrder.special_instructions}</p>
                       )}
                     </div>
                   </div>
+
+                  {/* Order Notes */}
+                  {selectedOrder.order_note && (
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">Order Notes</h3>
+                      <div className="bg-pink-50 border border-pink-200 rounded-lg p-3 sm:p-4">
+                        <p className="text-xs sm:text-sm text-gray-700 whitespace-pre-wrap break-words">{selectedOrder.order_note}</p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Order Items */}
                   <div>

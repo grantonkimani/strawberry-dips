@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
         delivery_date: deliveryInfo.deliveryDate || new Date().toISOString().split('T')[0],
         delivery_time: deliveryInfo.deliveryTime || 'morning',
         special_instructions: deliveryInfo.specialInstructions || null,
+        order_note: deliveryInfo.orderNote || null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })

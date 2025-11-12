@@ -30,9 +30,6 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isTouch, setIsTouch] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
-  const [gift, setGift] = useState(false);
-  const [recipient, setRecipient] = useState('');
-  const [note, setNote] = useState('');
   const [bestSellers, setBestSellers] = useState<Product[]>([]);
   const [giftsLoaded, setGiftsLoaded] = useState(false);
   const [bestSellersLoaded, setBestSellersLoaded] = useState(false);
@@ -270,18 +267,7 @@ export default function ProductDetailPage() {
           <div className="mt-4 text-3xl font-semibold">KES {product.base_price.toFixed(2)}</div>
 
           <div className="mt-5 border rounded-lg p-4 bg-white">
-            <div className="flex items-center gap-2">
-              <input id="gift" type="checkbox" checked={gift} onChange={(e) => setGift(e.target.checked)} />
-              <label htmlFor="gift" className="font-medium">Is this a gift?</label>
-            </div>
-            {gift && (
-              <div className="mt-3 space-y-3">
-                <input className="w-full border p-2 rounded" placeholder="Recipient name (optional)" value={recipient} onChange={(e) => setRecipient(e.target.value)} />
-                <textarea className="w-full border p-2 rounded" rows={3} maxLength={250} placeholder="Gift note (max 250 characters)" value={note} onChange={(e) => setNote(e.target.value)} />
-                <div className="text-xs text-gray-500">{250 - note.length} characters left</div>
-              </div>
-            )}
-            <Button className="mt-4 w-full" onClick={() => {
+            <Button className="w-full" onClick={() => {
               if (!product) return;
               addItem({
                 id: product.id,
@@ -289,9 +275,6 @@ export default function ProductDetailPage() {
                 price: product.base_price,
                 image: product.image_url || '',
                 category: product.categories?.name || 'Uncategorized',
-                isGift: gift,
-                recipientName: gift ? recipient : undefined,
-                giftNote: gift ? note : undefined,
               });
             }}>Add to Cart</Button>
           </div>

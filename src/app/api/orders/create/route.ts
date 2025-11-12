@@ -94,6 +94,7 @@ export async function POST(request: NextRequest) {
         delivery_date: customer.deliveryDate || new Date().toISOString().split('T')[0],
         delivery_time: customer.deliveryTime || null,
         special_instructions: customer.specialInstructions || null,
+        order_note: customer.orderNote || null,
         payment_method: 'intasend', // Default payment method
         payment_status: 'completed',
         tracking_code: generateTrackingCode()
