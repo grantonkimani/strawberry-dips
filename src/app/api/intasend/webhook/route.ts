@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { sendOrderConfirmationEmail } from '@/lib/email';
 import crypto from 'crypto';
 
 function timingSafeEqual(a: string, b: string): boolean {
@@ -166,6 +167,56 @@ export async function POST(request: NextRequest) {
       newStatus: (updateData as any).status || currentPaymentStatus,
       paymentStatus: (updateData as any).payment_status || currentPaymentStatus
     });
+
+    // Send confirmation email ONLY when payment is confirmed (COMPLETE)
+    if (state === 'COMPLETE' && nextPaymentStatus === 'completed') {
+      try {
+        // Fetch full order details with items for email
+        const { data: fullOrder, error: fetchError } = await supabase
+          .from('orders')
+          .select(`
+            *,
+            order_items (*)
+          `)
+          .eq('id', order.id)
+          .single();
+
+        if (!fetchError && fullOrder) {
+          const emailResult = await sendOrderConfirmationEmail({
+            id: fullOrder.id,
+            created_at: fullOrder.created_at,
+            customer_name: fullOrder.customer_first_name 
+              ? `${fullOrder.customer_first_name} ${fullOrder.customer_last_name || ''}`.trim() 
+              : 'Customer',
+            customer_email: fullOrder.customer_email,
+            phone: fullOrder.customer_phone,
+            delivery_address: fullOrder.delivery_address,
+            delivery_date: fullOrder.delivery_date,
+            delivery_time: fullOrder.delivery_time,
+            notes: fullOrder.special_instructions,
+            subtotal: fullOrder.subtotal || (fullOrder.total - (fullOrder.delivery_fee || 0)),
+            delivery_fee: fullOrder.delivery_fee || 0,
+            discount: 0,
+            total: fullOrder.total,
+            order_items: fullOrder.order_items?.map((item: any) => ({
+              product_name: item.product_name,
+              quantity: item.quantity,
+              unit_price: item.unit_price,
+              line_total: item.total_price || (item.unit_price * item.quantity)
+            })) || [],
+          });
+
+          if (!emailResult.success) {
+            console.warn('Order confirmation email failed:', emailResult.error);
+          } else {
+            console.log('Order confirmation email sent successfully after payment confirmation');
+          }
+        }
+      } catch (emailError) {
+        console.error('Email sending error in webhook:', emailError);
+        // Don't fail the webhook if email fails
+      }
+    }
 
     // Return success response
     return NextResponse.json({

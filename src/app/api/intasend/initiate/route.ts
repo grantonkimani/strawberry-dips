@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createMpesaPayment, createCardPayment } from '@/lib/intasend';
 import { supabase } from '@/lib/supabase';
-import { sendOrderConfirmationEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -177,30 +176,8 @@ export async function POST(request: NextRequest) {
       console.error('Error updating order with IntaSend reference:', updateError);
     }
 
-    // Send order confirmation email
-    try {
-      const emailResult = await sendOrderConfirmationEmail({
-        id: order.id,
-        customer_email: customerEmail,
-        total: amount,
-        delivery_date: deliveryInfo.deliveryDate || new Date().toISOString().split('T')[0],
-        delivery_time: deliveryInfo.deliveryTime || 'morning',
-        delivery_city: deliveryInfo.city || 'Not provided',
-        delivery_state: deliveryInfo.area || deliveryInfo.state || 'Not provided',
-        special_instructions: deliveryInfo.specialInstructions || null,
-        tracking_code: order.id.slice(0, 8).toUpperCase(), // Use order ID as tracking code
-      });
-      
-      if (!emailResult.success) {
-        console.warn('Order confirmation email failed:', emailResult.error);
-        // Don't fail the request if email fails
-      } else {
-        console.log('Order confirmation email sent successfully');
-      }
-    } catch (emailError) {
-      console.error('Email sending error:', emailError);
-      // Don't fail the request if email fails
-    }
+    // Note: Order confirmation email will be sent after payment is confirmed via webhook or status check
+    // This prevents sending confirmation emails before payment is actually completed
 
     console.log('IntaSend response checkout URL:', intasendResponse.checkout_url);
     console.log('IntaSend response payment link:', intasendResponse.payment_link);
