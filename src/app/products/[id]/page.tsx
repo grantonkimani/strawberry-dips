@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
-import Image from 'next/image';
+import { SafeImage } from '@/components/SafeImage';
 import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
 import { GiftProductGrid } from '@/components/GiftProductGrid';
@@ -200,24 +200,18 @@ export default function ProductDetailPage() {
         >
           {/* Always show image first */}
           <div className="relative w-full h-full">
-            <Image
+            <SafeImage
               src={mainImage}
               alt={product.name}
               fill
               priority
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
-              style={{ visibility: showVideo ? 'hidden' : 'visible' }}
             />
+            {showVideo && (
+              <div className="absolute inset-0 bg-black/50" style={{ visibility: showVideo ? 'visible' : 'hidden' }} />
+            )}
           </div>
-
-          {/* Preload adjacent images for smoother nav */}
-          {galleryImages[activeImageIndex + 1] && (
-            <Image src={galleryImages[activeImageIndex + 1]} alt="" width={1} height={1} className="hidden" />
-          )}
-          {galleryImages[activeImageIndex - 1] && (
-            <Image src={galleryImages[activeImageIndex - 1]} alt="" width={1} height={1} className="hidden" />
-          )}
 
           {/* Prev/Next controls */}
           {galleryImages.length > 1 && !showVideo && (

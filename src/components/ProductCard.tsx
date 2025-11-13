@@ -3,7 +3,7 @@ import { Button } from "./ui/Button";
 import { Card, CardContent, CardFooter } from "./ui/Card";
 import { useCart } from "@/contexts/CartContext";
 import Link from "next/link";
-import Image from "next/image";
+import { SafeImage } from '@/components/SafeImage';
 
 interface Product {
   id: string;
@@ -64,18 +64,15 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Product Image */}
         <div className="relative overflow-hidden rounded-t-lg flex-shrink-0">
           {product.image_url ? (
-            <div className="aspect-[6/5] bg-gray-100">
+            <div className="aspect-[6/5] bg-gray-100 relative">
               <Link href={`/products/${product.id}`} prefetch={true}>
-                <Image 
+                <SafeImage 
                   src={product.image_url}
                   alt={product.name}
                   width={800}
                   height={650}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  loading="lazy"
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                  placeholder="blur"
-                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                   quality={85}
                 />
               </Link>
