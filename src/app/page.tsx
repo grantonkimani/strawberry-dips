@@ -14,8 +14,8 @@ const LazyFeaturedProducts = dynamic(() => import("@/components/FeaturedProducts
       <div className="max-w-7xl mx-auto">
         <div className="flex items-end justify-between mb-6">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900">Best Sellers</h2>
-            <p className="text-gray-600">Customer favorites, freshly made</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Special Offers</h2>
+            <p className="text-sm sm:text-base text-gray-600">Customer favorites, freshly made</p>
           </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
@@ -44,15 +44,17 @@ const LazyProductGrid = dynamic(() => import("@/components/ProductGrid").then(mo
             and delivered fresh to your door.
           </p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="animate-pulse">
-              <div className="aspect-square rounded-xl bg-gradient-to-br from-pink-100 to-purple-100 mb-4" />
-              <div className="h-5 w-3/4 rounded bg-gray-200 mb-2" />
-              <div className="h-4 w-1/2 rounded bg-gray-200 mb-3" />
-              <div className="h-10 w-full rounded-lg bg-gradient-to-r from-pink-200 to-purple-200" />
-            </div>
-          ))}
+        <div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="aspect-square rounded-lg bg-gray-200" />
+                <div className="mt-2 h-4 w-3/4 rounded bg-gray-200" />
+                <div className="mt-1 h-4 w-1/2 rounded bg-gray-200" />
+                <div className="mt-3 h-9 w-full rounded-md bg-gray-200" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -163,8 +165,8 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto">
             <div className="flex items-end justify-between mb-6">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">Best Sellers</h2>
-                <p className="text-gray-600">Customer favorites, freshly made</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Special Offers</h2>
+                <p className="text-sm sm:text-base text-gray-600">Customer favorites, freshly made</p>
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
@@ -193,15 +195,17 @@ export default function HomePage() {
                 and delivered fresh to your door.
               </p>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="aspect-square rounded-xl bg-gradient-to-br from-pink-100 to-purple-100 mb-4" />
-                  <div className="h-5 w-3/4 rounded bg-gray-200 mb-2" />
-                  <div className="h-4 w-1/2 rounded bg-gray-200 mb-3" />
-                  <div className="h-10 w-full rounded-lg bg-gradient-to-r from-pink-200 to-purple-200" />
-                </div>
-              ))}
+            <div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="aspect-square rounded-lg bg-gray-200" />
+                    <div className="mt-2 h-4 w-3/4 rounded bg-gray-200" />
+                    <div className="mt-1 h-4 w-1/2 rounded bg-gray-200" />
+                    <div className="mt-3 h-9 w-full rounded-md bg-gray-200" />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -277,5 +281,4 @@ export default function HomePage() {
       <Footer />
     </div>
   );
-}
-"// Force new deployment" 
+} 
