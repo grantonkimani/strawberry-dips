@@ -20,6 +20,12 @@ interface Product {
   };
   // Legacy support for old category field
   category?: string;
+  // Offer information
+  offer?: {
+    offer_price: number;
+    discount_percentage: number;
+    end_date: string;
+  };
 }
 
 interface ProductCardProps {
@@ -31,7 +37,12 @@ export function ProductCard({ product }: ProductCardProps) {
 
   // Get category name (new structure or legacy)
   const categoryName = product.categories?.name || product.category || 'Uncategorized';
-  const price = product.base_price || 0;
+  const basePrice = product.base_price || 0;
+  
+  // Check if product has an active offer
+  const hasOffer = product.offer && product.offer.offer_price < basePrice;
+  const displayPrice = hasOffer ? product.offer!.offer_price : basePrice;
+  const originalPrice = hasOffer ? basePrice : null;
   
   // Mock stock status for now - in real implementation, this would come from the database
   const stockStatus = Math.random() > 0.7 ? 'low' : 'in-stock';
@@ -41,7 +52,7 @@ export function ProductCard({ product }: ProductCardProps) {
     addItem({
       id: product.id,
       name: product.name,
-      price: price,
+      price: displayPrice, // Use offer price if available
       image: product.image_url || '',
       category: categoryName,
     });
@@ -106,8 +117,21 @@ export function ProductCard({ product }: ProductCardProps) {
             <Heart className="h-4 w-4" />
           </Button>
 
+          {/* Offer Badge - More Visible */}
+          {hasOffer && (
+            <div className="absolute top-2 left-2 z-20">
+              <div className="relative">
+                <span className="bg-gradient-to-r from-red-600 to-red-500 text-white text-sm font-extrabold px-3 py-1.5 rounded-lg shadow-lg border-2 border-white animate-pulse">
+                  {product.offer!.discount_percentage.toFixed(0)}% OFF
+                </span>
+                {/* Small triangle for extra emphasis */}
+                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-red-600"></div>
+              </div>
+            </div>
+          )}
+          
           {/* Category Badge */}
-          <div className="absolute top-2 left-2">
+          <div className={`absolute ${hasOffer ? 'top-2 right-2' : 'top-2 left-2'} z-10`}>
             <span className="bg-pink-500 text-white text-xs px-2 py-1 rounded-full font-medium">
               {categoryName}
             </span>
@@ -145,10 +169,31 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* Price */}
           <div className="flex items-center justify-between">
-            <div>
-              <span className="text-2xl font-bold text-gray-900">
-                KSH {price.toFixed(2)}
-              </span>
+            <div className="w-full">
+              {hasOffer ? (
+                <div className="space-y-2 bg-red-50 border-2 border-red-200 rounded-lg p-3 -mx-1">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-extrabold text-red-600">
+                      KSH {displayPrice.toFixed(2)}
+                    </span>
+                    <span className="text-xs font-bold text-red-700 bg-red-200 px-2 py-0.5 rounded">
+                      SALE
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-base text-gray-500 line-through font-medium">
+                      KSH {originalPrice!.toFixed(2)}
+                    </span>
+                    <span className="text-sm font-bold text-red-700 bg-white px-2 py-1 rounded border border-red-300">
+                      Save KES {(originalPrice! - displayPrice).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <span className="text-2xl font-bold text-gray-900">
+                  KSH {displayPrice.toFixed(2)}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -157,14 +202,16 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardFooter className="p-4 pt-0">
         <Button 
           onClick={handleAddToCart}
-          className={`w-full h-10 md:h-9 text-sm ${
-            stockStatus === 'low' 
-              ? 'bg-red-600 hover:bg-red-700 animate-pulse' 
-              : 'bg-pink-600 hover:bg-pink-700'
-          } text-white`}
+          className={`w-full h-10 md:h-9 text-sm font-semibold ${
+            hasOffer
+              ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white shadow-lg border-2 border-red-400'
+              : stockStatus === 'low' 
+              ? 'bg-red-600 hover:bg-red-700 animate-pulse text-white' 
+              : 'bg-pink-600 hover:bg-pink-700 text-white'
+          }`}
         >
           <ShoppingCart className="h-3.5 w-3.5 mr-2" />
-          {stockStatus === 'low' ? 'Order Now!' : 'Add to Cart'}
+          {hasOffer ? `Add to Cart - Save ${((originalPrice! - displayPrice) / originalPrice! * 100).toFixed(0)}%` : stockStatus === 'low' ? 'Order Now!' : 'Add to Cart'}
         </Button>
       </CardFooter>
     </Card>

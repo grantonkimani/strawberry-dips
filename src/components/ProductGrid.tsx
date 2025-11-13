@@ -26,6 +26,12 @@ interface ApiProduct {
 	};
 	// Legacy support
 	category?: string;
+	// Offer information
+	offer?: {
+		offer_price: number;
+		discount_percentage: number;
+		end_date: string;
+	};
 }
 
 interface Category {
@@ -53,8 +59,8 @@ export function ProductGrid() {
 	// Define fetchData function outside useEffect so it can be reused
 	const fetchData = async () => {
 		try {
-			// Fetch products and categories in parallel with caching
-			const [productsRes, categoriesRes] = await Promise.all([
+			// Fetch products, categories, and offers in parallel with caching
+			const [productsRes, categoriesRes, offersRes] = await Promise.all([
 				fetch('/api/products?available=true&limit=1000', {
 					cache: 'no-store', // Always fetch fresh data
 					next: { revalidate: 0 } // No revalidation
@@ -67,21 +73,65 @@ export function ProductGrid() {
 						'Pragma': 'no-cache',
 						'Expires': '0'
 					}
+				}),
+				fetch('/api/offers', {
+					cache: 'no-store',
+					next: { revalidate: 0 }
 				})
 			]);
 
 			const productsData = await productsRes.json();
 			const categoriesData = await categoriesRes.json();
+			const offersData = await offersRes.json();
 
-			// Set products
+			// Get active offers
+			const activeOffers = offersData.offers || [];
+			
+			// Create a map of product_id -> offer for quick lookup
+			const offersMap = new Map<string, typeof activeOffers[0]>();
+			const today = new Date().toISOString().split('T')[0];
+			
+			activeOffers.forEach((offer: any) => {
+				if (offer.product_id && offer.is_active) {
+					// Double-check date range on client side (in case of timezone issues)
+					const startDate = offer.start_date;
+					const endDate = offer.end_date;
+					
+					// Only include offers that are currently active (within date range)
+					if (startDate <= today && endDate >= today) {
+						offersMap.set(offer.product_id, offer);
+					}
+				}
+			});
+
+			// Merge offers with products
+			let productsList: ApiProduct[] = [];
 			if (Array.isArray(productsData)) {
-				setProducts(productsData);
+				productsList = productsData;
 			} else if (productsData.products) {
-				setProducts(productsData.products);
+				productsList = productsData.products;
 			} else {
 				setError(productsData.error || 'Failed to load products');
 				return;
 			}
+
+			// Attach offers to products
+			const productsWithOffers = productsList.map((product: ApiProduct) => {
+				const offer = offersMap.get(product.id);
+				if (offer) {
+					return {
+						...product,
+						offer: {
+							offer_price: offer.offer_price,
+							discount_percentage: offer.discount_percentage,
+							end_date: offer.end_date
+						}
+					};
+				}
+				return product;
+			});
+
+			setProducts(productsWithOffers);
 
 			// Set categories with product counts
 			if (Array.isArray(categoriesData)) {

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Package, ShoppingBag, Settings, Home, FileText, LogOut, Tag, MessageSquare, Gift, Clock, Cog, Wine, Truck, Menu, X } from 'lucide-react';
+import { Package, ShoppingBag, Settings, Home, FileText, LogOut, Tag, MessageSquare, Gift, Clock, Cog, Wine, Truck, Menu, X, Percent } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSessionTimeout } from '@/hooks/useSessionTimeout';
 
@@ -37,6 +37,7 @@ export function AdminNav() {
     { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
     { href: '/admin/delivery', label: 'Delivery', icon: Truck },
     { href: '/admin/products', label: 'Products', icon: Package },
+    { href: '/admin/offers', label: 'Offers', icon: Percent },
     { href: '/admin/gift-products', label: 'Gift Products', icon: Gift },
     { href: '/admin/wine-liquor-products', label: 'Wine & Liquor', icon: Wine },
     { href: '/admin/categories', label: 'Categories', icon: Tag },

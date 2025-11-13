@@ -21,6 +21,11 @@ interface Product {
   video_url?: string; // optional product video
   poster_url?: string; // optional poster image for video
   categories?: { id: string; name: string };
+  offer?: {
+    offer_price: number;
+    discount_percentage: number;
+    end_date: string;
+  };
 }
 
 export default function ProductDetailPage() {
@@ -40,13 +45,39 @@ export default function ProductDetailPage() {
   useEffect(() => {
     (async () => {
       try {
-        // Add caching for better performance
-        const res = await fetch(`/api/products/${params.id}`, {
-          // Fresh data when viewing a product to reflect recent edits/uploads
-          cache: 'no-store'
-        });
-        const json = await res.json();
-        if (json?.product) setProduct(json.product);
+        // Fetch product and offers in parallel
+        const [productRes, offersRes] = await Promise.all([
+          fetch(`/api/products/${params.id}`, {
+            cache: 'no-store'
+          }),
+          fetch('/api/offers', {
+            cache: 'no-store'
+          })
+        ]);
+        
+        const productJson = await productRes.json();
+        const offersJson = await offersRes.json();
+        
+        if (productJson?.product) {
+          const productData = productJson.product;
+          
+          // Find active offer for this product
+          const activeOffers = offersJson.offers || [];
+          const productOffer = activeOffers.find((offer: any) => 
+            offer.product_id === productData.id && offer.is_active
+          );
+          
+          // Attach offer to product if found
+          if (productOffer) {
+            productData.offer = {
+              offer_price: productOffer.offer_price,
+              discount_percentage: productOffer.discount_percentage,
+              end_date: productOffer.end_date
+            };
+          }
+          
+          setProduct(productData);
+        }
       } finally {
         setLoading(false);
       }
@@ -264,15 +295,37 @@ export default function ProductDetailPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
           <p className="mt-2 text-gray-700">{product.description || 'Delicious handcrafted strawberry treats.'}</p>
-          <div className="mt-4 text-3xl font-semibold">KES {product.base_price.toFixed(2)}</div>
+          
+          {/* Price Display with Offer */}
+          {product.offer && product.offer.offer_price < product.base_price ? (
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl font-semibold text-red-600">KES {product.offer.offer_price.toFixed(2)}</span>
+                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                  {product.offer.discount_percentage.toFixed(0)}% OFF
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg text-gray-500 line-through">KES {product.base_price.toFixed(2)}</span>
+                <span className="text-sm text-gray-600">
+                  Save KES {(product.base_price - product.offer.offer_price).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 text-3xl font-semibold">KES {product.base_price.toFixed(2)}</div>
+          )}
 
           <div className="mt-5 border rounded-lg p-4 bg-white">
             <Button className="w-full" onClick={() => {
               if (!product) return;
+              const displayPrice = product.offer && product.offer.offer_price < product.base_price 
+                ? product.offer.offer_price 
+                : product.base_price;
               addItem({
                 id: product.id,
                 name: product.name,
-                price: product.base_price,
+                price: displayPrice,
                 image: product.image_url || '',
                 category: product.categories?.name || 'Uncategorized',
               });
