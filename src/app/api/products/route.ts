@@ -98,6 +98,19 @@ export async function GET(request: NextRequest) {
 			throw error;
 		}
 		
+		// Normalize image URLs to ensure they use public paths
+		if (data && Array.isArray(data)) {
+			data = data.map((product: any) => {
+				if (product.image_url) {
+					product.image_url = normalizePublicUrl(product.image_url);
+				}
+				if (product.image_urls && Array.isArray(product.image_urls)) {
+					product.image_urls = product.image_urls.map((url: string) => normalizePublicUrl(url));
+				}
+				return product;
+			});
+		}
+		
 		console.log('GET /api/products - Returning products:', data?.length || 0);
 
 		const response = NextResponse.json(data)
@@ -180,6 +193,16 @@ export async function POST(request: NextRequest) {
 		if (error) {
 			console.error('Supabase error:', error)
 			return NextResponse.json({ error: error.message || 'Database error' }, { status: 500 })
+		}
+
+		// Normalize image URLs to ensure they use public paths (even though we normalized before saving)
+		if (data) {
+			if (data.image_url) {
+				data.image_url = normalizePublicUrl(data.image_url);
+			}
+			if (data.image_urls && Array.isArray(data.image_urls)) {
+				data.image_urls = data.image_urls.map((url: string) => normalizePublicUrl(url));
+			}
 		}
 
 		return NextResponse.json({ product: data })

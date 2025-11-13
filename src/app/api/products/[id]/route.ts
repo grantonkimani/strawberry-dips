@@ -18,6 +18,17 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 			.eq('id', id)
 			.single()
 		if (error) throw error
+		
+		// Normalize image URLs to ensure they use public paths
+		if (data) {
+			if (data.image_url) {
+				data.image_url = normalizePublicUrl(data.image_url);
+			}
+			if (data.image_urls && Array.isArray(data.image_urls)) {
+				data.image_urls = data.image_urls.map((url: string) => normalizePublicUrl(url));
+			}
+		}
+		
 		return NextResponse.json({ product: data })
 	} catch (error) {
 		console.error('GET /api/products/[id] error:', error)
@@ -81,6 +92,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 	error = retry.error as any
 	}
 		if (error) throw error
+		
+		// Normalize image URLs to ensure they use public paths (even though we normalized before saving)
+		if (data) {
+			if (data.image_url) {
+				data.image_url = normalizePublicUrl(data.image_url);
+			}
+			if (data.image_urls && Array.isArray(data.image_urls)) {
+				data.image_urls = data.image_urls.map((url: string) => normalizePublicUrl(url));
+			}
+		}
+		
 		return NextResponse.json({ product: data })
 	} catch (error) {
 		console.error('PATCH /api/products/[id] error:', error)
