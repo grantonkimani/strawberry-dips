@@ -132,7 +132,7 @@ const KENYAN_AREAS = [
 ];
 
 export default function CheckoutPage() {
-  const { state, clearCart, getTotalPrice } = useCart();
+  const { state, clearCart, getTotalPrice, getVatAmount, getDeliveryFee, getGrandTotal } = useCart();
   const { customer, isAuthenticated, logout } = useCustomerAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
@@ -140,6 +140,12 @@ export default function CheckoutPage() {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  const subtotal = getTotalPrice();
+  const vatAmount = getVatAmount();
+  const deliveryFee = getDeliveryFee();
+  const orderTotal = getGrandTotal();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -160,6 +166,10 @@ export default function CheckoutPage() {
     // Payment Info
     paymentMethod: 'mpesa',
   });
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Pre-fill form with customer data when authenticated
   useEffect(() => {
@@ -282,6 +292,17 @@ export default function CheckoutPage() {
       phone: '',
     }));
   };
+
+  if (!isClient) {
+    return (
+      <div className="min-h-screen bg-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-pink-200 border-t-pink-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading checkout...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (state.items.length === 0 && !isProcessing) {
     return (
@@ -697,7 +718,13 @@ export default function CheckoutPage() {
                       )}
                       
                       <PaymentOptions
-                        amount={getTotalPrice() + 5.99}
+                        amount={orderTotal}
+                        pricing={{
+                          subtotal,
+                          vatAmount,
+                          deliveryFee,
+                          total: orderTotal,
+                        }}
                         customerPhone={formData.phone}
                         customerEmail={formData.email}
                         customerName={`${formData.firstName} ${formData.lastName}`}
@@ -750,17 +777,24 @@ export default function CheckoutPage() {
                 {/* Totals */}
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal:</span>
-                    <span className="text-gray-900">KSH {getTotalPrice().toFixed(2)}</span>
+                    <span className="text-gray-700 font-semibold">Subtotal (excl. VAT):</span>
+                    <span className="text-gray-900">KSH {subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Delivery:</span>
-                    <span className="text-gray-900">KSH 5.99</span>
+                    <span className="text-gray-700 font-semibold">VAT (16%):</span>
+                    <span className="text-gray-900">KSH {vatAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700 font-semibold">Delivery:</span>
+                    <span className="text-gray-900">KSH {deliveryFee.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-semibold border-t pt-2">
-                    <span>Total:</span>
-                    <span className="text-pink-600">KSH {(getTotalPrice() + 5.99).toFixed(2)}</span>
+                    <span>Total (incl. VAT):</span>
+                    <span className="text-pink-600">KSH {orderTotal.toFixed(2)}</span>
                   </div>
+                  <p className="text-xs text-gray-500 text-right">
+                    Prices include statutory VAT at 16%.
+                  </p>
                 </div>
 
                 {/* Place Order Button - Hidden when payment form is shown */}

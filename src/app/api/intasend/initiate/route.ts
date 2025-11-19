@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createMpesaPayment, createCardPayment } from '@/lib/intasend';
 import { supabase } from '@/lib/supabase';
 
+const VAT_RATE = 0.16;
+const DEFAULT_DELIVERY_FEE = 5.99;
+
 export async function POST(request: NextRequest) {
   try {
     console.log('IntaSend initiate API called');
@@ -22,7 +25,8 @@ export async function POST(request: NextRequest) {
       customerEmail,
       customerPhone,
       cartItems = [],
-      deliveryInfo = {}
+      deliveryInfo = {},
+      pricing = null
     } = body;
 
     // Validate required fields
@@ -33,6 +37,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const subtotalFromItems = Array.isArray(cartItems)
+      ? cartItems.reduce((sum, item) => {
+          const price = Number(item.price) || 0;
+          const quantity = Number(item.quantity) || 1;
+          return sum + price * quantity;
+        }, 0)
+      : 0;
+
+    const deliveryFee = pricing?.deliveryFee ?? DEFAULT_DELIVERY_FEE;
+    const subtotal = pricing?.subtotal ?? subtotalFromItems;
+    const vatAmount = pricing?.vatAmount ?? parseFloat((subtotal * VAT_RATE).toFixed(2));
+    const normalizedAmount = typeof amount === 'number' ? amount : Number(amount);
+    const totalAmount = pricing?.total ?? normalizedAmount ?? subtotal + vatAmount + deliveryFee;
+
+    if (Math.abs(totalAmount - normalizedAmount) > 0.5) {
+      console.warn('Provided amount does not match derived total. Using derived total.', {
+        providedAmount: normalizedAmount,
+        derivedTotal: totalAmount,
+      });
+    }
+
+    const finalAmount = Number((pricing?.total ?? normalizedAmount ?? totalAmount).toFixed(2));
+
     // Create a new order in Supabase
     const { data: newOrder, error: createError } = await supabase
       .from('orders')
@@ -41,9 +68,9 @@ export async function POST(request: NextRequest) {
         customer_last_name: customerName?.split(' ').slice(1).join(' ') || 'Name',
         customer_email: customerEmail,
         customer_phone: customerPhone,
-        subtotal: amount - 5.99, // Assuming 5.99 delivery fee
-        delivery_fee: 5.99,
-        total: amount,
+        subtotal,
+        delivery_fee: deliveryFee,
+        total: finalAmount,
         status: 'pending',
         payment_method: 'intasend',
         payment_status: 'pending',
@@ -94,7 +121,7 @@ export async function POST(request: NextRequest) {
 
     // Prepare IntaSend payment data with proper phone number formatting
     const paymentData = {
-      amount: Math.round(amount), // IntaSend requires whole numbers
+      amount: Math.round(finalAmount), // IntaSend requires whole numbers
       currency: currency,
       email: customerEmail,
       phone_number: (() => {

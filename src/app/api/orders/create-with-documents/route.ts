@@ -5,6 +5,9 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { sendOrderConfirmationEmail } from '@/lib/email';
 
+const VAT_RATE = 0.16;
+const DEFAULT_DELIVERY_FEE = 5.99;
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -27,6 +30,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Create a new order in Supabase
+    const subtotalFromItems = Array.isArray(cartItems)
+      ? cartItems.reduce((sum: number, item: any) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0)
+      : 0;
+    const deliveryFee = DEFAULT_DELIVERY_FEE;
+    const finalTotal = isNaN(amount) ? subtotalFromItems + deliveryFee + parseFloat((subtotalFromItems * VAT_RATE).toFixed(2)) : amount;
+    const vatAmount = Math.max(parseFloat((finalTotal - subtotalFromItems - deliveryFee).toFixed(2)), 0);
+
     const { data: newOrder, error: createError } = await supabase
       .from('orders')
       .insert({
@@ -34,9 +44,9 @@ export async function POST(request: NextRequest) {
         customer_last_name: customerName?.split(' ').slice(1).join(' ') || 'Name',
         customer_email: customerEmail,
         customer_phone: customerPhone,
-        subtotal: amount - 5.99, // Assuming 5.99 delivery fee
-        delivery_fee: 5.99,
-        total: amount,
+        subtotal: subtotalFromItems,
+        delivery_fee: deliveryFee,
+        total: finalTotal,
         status: 'pending',
         payment_method: 'document_upload',
         payment_status: 'document_pending', // Special status for document uploads
@@ -133,13 +143,26 @@ export async function POST(request: NextRequest) {
     try {
       const emailResult = await sendOrderConfirmationEmail({
         id: order.id,
+        customer_name: customerName,
         customer_email: customerEmail,
-        total: amount,
+        phone: customerPhone,
+        delivery_address: deliveryInfo.address || 'Not provided',
         delivery_date: deliveryInfo.deliveryDate || new Date().toISOString().split('T')[0],
         delivery_time: deliveryInfo.deliveryTime || 'morning',
         delivery_city: deliveryInfo.city || 'Not provided',
         delivery_state: deliveryInfo.state || 'Not provided',
         special_instructions: deliveryInfo.specialInstructions || null,
+        subtotal: subtotalFromItems,
+        delivery_fee: deliveryFee,
+        vat_amount: vatAmount,
+        discount: 0,
+        total: finalTotal,
+        order_items: cartItems?.map((item: any) => ({
+          product_name: item.name,
+          quantity: item.quantity,
+          unit_price: item.price,
+          line_total: (Number(item.price) || 0) * (Number(item.quantity) || 1),
+        })) || [],
         tracking_code: order.id.slice(0, 8).toUpperCase(), // Use order ID as tracking code
       });
       

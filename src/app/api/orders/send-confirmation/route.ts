@@ -30,6 +30,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const vatAmount = Math.max(
+      parseFloat(
+        (
+          (order.total || 0) -
+          (order.subtotal || 0) -
+          (order.delivery_fee || 0) +
+          (order.discount || 0)
+        ).toFixed(2)
+      ),
+      0
+    );
+
     // Send order confirmation email with invoice
     try {
       const emailResult = await sendOrderConfirmationEmail({
@@ -45,6 +57,7 @@ export async function POST(request: NextRequest) {
         subtotal: order.subtotal || (order.total - (order.delivery_fee || 0)),
         delivery_fee: order.delivery_fee || 0,
         discount: 0,
+        vat_amount: vatAmount,
         total: order.total,
         order_items: order.order_items?.map((item: any) => ({
           product_name: item.product_name,

@@ -110,6 +110,18 @@ export async function GET(request: NextRequest) {
               if (!fetchError && fullOrder) {
                 // Check if email was already sent (to avoid duplicates)
                 // We'll check by looking at a flag or just send it (idempotent)
+                const vatAmount = Math.max(
+                  parseFloat(
+                    (
+                      (fullOrder.total || 0) -
+                      (fullOrder.subtotal || 0) -
+                      (fullOrder.delivery_fee || 0) +
+                      (fullOrder.discount || 0)
+                    ).toFixed(2)
+                  ),
+                  0
+                );
+
                 const emailResult = await sendOrderConfirmationEmail({
                   id: fullOrder.id,
                   created_at: fullOrder.created_at,
@@ -125,6 +137,7 @@ export async function GET(request: NextRequest) {
                   subtotal: fullOrder.subtotal || (fullOrder.total - (fullOrder.delivery_fee || 0)),
                   delivery_fee: fullOrder.delivery_fee || 0,
                   discount: 0,
+                  vat_amount: vatAmount,
                   total: fullOrder.total,
                   order_items: fullOrder.order_items?.map((item: any) => ({
                     product_name: item.product_name,

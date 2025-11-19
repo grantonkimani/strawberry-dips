@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { sendOrderConfirmationEmail } from '@/lib/email';
 
+const VAT_RATE = 0.16;
+const DEFAULT_DELIVERY_FEE = 5.99;
+
 export async function POST(request: NextRequest) {
   try {
     const {
@@ -9,7 +12,8 @@ export async function POST(request: NextRequest) {
       items,
       total,
       paymentIntentId,
-      paymentMethod
+      paymentMethod,
+      pricing
     } = await request.json();
 
     console.log('Order creation request:', { customer, items: items?.length, total, paymentIntentId, paymentMethod });
@@ -73,6 +77,15 @@ export async function POST(request: NextRequest) {
       Math.random().toString(36).slice(2, 6).toUpperCase();
 
     // Create order
+    const itemsSubtotal = Array.isArray(items)
+      ? items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0)
+      : 0;
+    const subtotal = pricing?.subtotal ?? itemsSubtotal;
+    const deliveryFee = pricing?.deliveryFee ?? DEFAULT_DELIVERY_FEE;
+    const providedTotal = typeof total === 'number' ? total : Number(total);
+    const totalAmount = pricing?.total ?? providedTotal ?? subtotal + deliveryFee + parseFloat((subtotal * VAT_RATE).toFixed(2));
+    const vatAmount = pricing?.vatAmount ?? Math.max(parseFloat((totalAmount - subtotal - deliveryFee).toFixed(2)), 0);
+
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
@@ -80,9 +93,9 @@ export async function POST(request: NextRequest) {
         customer_account_id: customerId, // Link to customer account
         stripe_payment_intent_id: paymentIntentId,
         status: 'paid',
-        subtotal: total - 5.99, // Subtract delivery fee
-        delivery_fee: 5.99,
-        total: total,
+        subtotal,
+        delivery_fee: deliveryFee,
+        total: totalAmount,
         customer_email: customer.email,
         customer_first_name: customer.firstName,
         customer_last_name: customer.lastName,
@@ -148,10 +161,11 @@ export async function POST(request: NextRequest) {
         delivery_date: customer.deliveryDate || new Date().toISOString().split('T')[0],
         delivery_time: customer.deliveryTime || null,
         notes: customer.specialInstructions || null,
-        subtotal: total - 5.99,
-        delivery_fee: 5.99,
+        subtotal,
+        delivery_fee: deliveryFee,
         discount: 0,
-        total: total,
+        total: totalAmount,
+        vat_amount: vatAmount,
         order_items: items.map((item: any) => ({
           product_name: item.name,
           quantity: item.quantity,

@@ -3,6 +3,13 @@
 import React, { useState } from 'react';
 import { Button } from './ui/Button';
 
+interface CheckoutPricing {
+  subtotal: number;
+  vatAmount: number;
+  deliveryFee: number;
+  total: number;
+}
+
 interface IntaSendPaymentProps {
   amount: number;
   customerEmail: string;
@@ -10,6 +17,7 @@ interface IntaSendPaymentProps {
   customerName: string;
   cartItems?: any[];
   deliveryInfo?: any;
+  pricing?: CheckoutPricing;
   onSuccess?: (data: any) => void;
   onError?: (error: string) => void;
 }
@@ -21,6 +29,7 @@ export default function IntaSendPayment({
   customerName,
   cartItems = [],
   deliveryInfo = {},
+  pricing,
   onSuccess,
   onError
 }: IntaSendPaymentProps) {
@@ -63,6 +72,7 @@ export default function IntaSendPayment({
           customerPhone,
           cartItems,
           deliveryInfo,
+          pricing,
         }),
         signal: controller.signal,
       });

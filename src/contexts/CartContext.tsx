@@ -35,6 +35,8 @@ const initialState: CartState = {
 };
 
 const STORAGE_KEY = 'strawberry_dips_cart_v1';
+const VAT_RATE = 0.16; // 16% VAT
+const DELIVERY_FEE = 5.99;
 
 function loadCartFromStorage(): CartState {
   try {
@@ -142,6 +144,9 @@ interface CartContextType {
   closeCart: () => void;
   getTotalPrice: () => number;
   getTotalItems: () => number;
+  getVatAmount: () => number;
+  getDeliveryFee: () => number;
+  getGrandTotal: () => number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -216,6 +221,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }, 0);
   };
 
+  const getVatAmount = () => {
+    const subtotal = getTotalPrice();
+    return parseFloat((subtotal * VAT_RATE).toFixed(2));
+  };
+
+  const getDeliveryFee = () => DELIVERY_FEE;
+
+  const getGrandTotal = () => {
+    const subtotal = getTotalPrice();
+    const vat = getVatAmount();
+    return parseFloat((subtotal + vat + DELIVERY_FEE).toFixed(2));
+  };
+
   const getTotalItems = () => {
     return state.items.reduce((total, item) => {
       return total + (item.quantity || 1);
@@ -235,6 +253,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         closeCart,
         getTotalPrice,
         getTotalItems,
+        getVatAmount,
+        getDeliveryFee,
+        getGrandTotal,
       }}
     >
       {children}

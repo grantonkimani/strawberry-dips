@@ -2,6 +2,13 @@
 
 import IntaSendPayment from './IntaSendPayment';
 
+interface CheckoutPricing {
+  subtotal: number;
+  vatAmount: number;
+  deliveryFee: number;
+  total: number;
+}
+
 interface PaymentOptionsProps {
   amount: number;
   customerPhone?: string;
@@ -11,6 +18,7 @@ interface PaymentOptionsProps {
   deliveryInfo?: any;
   onSuccess: (paymentIntentId: string, paymentMethod: string) => void;
   onError: (error: string) => void;
+  pricing?: CheckoutPricing;
 }
 
 export function PaymentOptions({
@@ -21,7 +29,8 @@ export function PaymentOptions({
   cartItems,
   deliveryInfo,
   onSuccess,
-  onError
+  onError,
+  pricing
 }: PaymentOptionsProps) {
   const handleIntaSendSuccess = (data: any) => {
     // Use orderId from IntaSend response, not invoiceId
@@ -37,6 +46,7 @@ export function PaymentOptions({
         customerPhone={customerPhone || ''}
         cartItems={cartItems}
         deliveryInfo={deliveryInfo}
+        pricing={pricing}
         onSuccess={handleIntaSendSuccess}
         onError={onError}
       />

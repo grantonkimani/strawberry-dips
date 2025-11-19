@@ -33,6 +33,7 @@ export type InvoiceOrder = {
   subtotal?: number;
   delivery_fee?: number;
   discount?: number;
+  vat_amount?: number;
   total: number;
   order_items?: Array<{
     product_name?: string;
@@ -93,6 +94,11 @@ export function buildInvoiceHtml(order: InvoiceOrder): string {
           <td style="padding:6px;color:#555;">Subtotal</td>
           <td style="padding:6px;color:#111;text-align:right;">${fmt(order.subtotal ?? (order.total - (order.delivery_fee || 0) + (order.discount || 0)))}</td>
         </tr>
+        ${typeof order.vat_amount === 'number' ? `
+        <tr>
+          <td style="padding:6px;color:#555;">VAT (16%)</td>
+          <td style="padding:6px;color:#111;text-align:right;">${fmt(order.vat_amount)}</td>
+        </tr>` : ''}
         <tr>
           <td style="padding:6px;color:#555;">Delivery Fee</td>
           <td style="padding:6px;color:#111;text-align:right;">${fmt(order.delivery_fee || 0)}</td>
@@ -193,6 +199,11 @@ export async function generateInvoicePdfBuffer(order: InvoiceOrder): Promise<Buf
     doc.fontSize(10).fillColor('#333').text('Subtotal', rightX, doc.y, { width: 120 });
     doc.text(fmt(order.subtotal ?? (order.total - (order.delivery_fee || 0) + (order.discount || 0))), rightX + 140, doc.y, { width: 100, align: 'right' });
     doc.moveDown(0.2);
+    if (typeof order.vat_amount === 'number') {
+      doc.text('VAT (16%)', rightX, doc.y, { width: 120 });
+      doc.text(fmt(order.vat_amount), rightX + 140, doc.y, { width: 100, align: 'right' });
+      doc.moveDown(0.2);
+    }
     doc.text('Delivery Fee', rightX, doc.y, { width: 120 });
     doc.text(fmt(order.delivery_fee || 0), rightX + 140, doc.y, { width: 100, align: 'right' });
     if (typeof order.discount === 'number' && order.discount > 0) {
