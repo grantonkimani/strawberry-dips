@@ -41,12 +41,19 @@ export interface IntaSendPaymentData {
 // Create M-Pesa payment
 export async function createMpesaPayment(paymentData: IntaSendPaymentData) {
   try {
+    // Validate configuration before making API call
+    if (!INTASEND_CONFIG.publishableKey || !INTASEND_CONFIG.secretKey) {
+      throw new Error('IntaSend API keys are not configured');
+    }
+
     console.log('Creating IntaSend M-Pesa payment:', {
       amount: paymentData.amount,
       currency: paymentData.currency,
       phone: paymentData.phone_number,
       email: paymentData.email,
-      testMode: INTASEND_CONFIG.testMode
+      testMode: INTASEND_CONFIG.testMode,
+      hasPublishableKey: !!INTASEND_CONFIG.publishableKey,
+      hasSecretKey: !!INTASEND_CONFIG.secretKey
     });
 
     const response = await collection.mpesaStkPush({
@@ -67,8 +74,26 @@ export async function createMpesaPayment(paymentData: IntaSendPaymentData) {
     return response;
   } catch (error) {
     const anyErr: any = error;
-    console.error('IntaSend M-Pesa payment error:', anyErr?.response?.data || anyErr?.data || anyErr);
-    throw new Error(`Failed to create M-Pesa payment: ${anyErr?.response?.data?.message || (error instanceof Error ? error.message : 'Unknown error')}`);
+    const errorDetails = {
+      message: anyErr?.message,
+      response: anyErr?.response?.data || anyErr?.data,
+      status: anyErr?.response?.status || anyErr?.status,
+      statusText: anyErr?.response?.statusText,
+      code: anyErr?.code
+    };
+    
+    console.error('IntaSend M-Pesa payment error:', JSON.stringify(errorDetails, null, 2));
+    
+    // Preserve original error structure for better debugging
+    const enhancedError: any = new Error(
+      anyErr?.response?.data?.message || 
+      anyErr?.message || 
+      'Failed to create M-Pesa payment'
+    );
+    enhancedError.response = anyErr?.response;
+    enhancedError.data = anyErr?.data;
+    enhancedError.status = anyErr?.response?.status || anyErr?.status;
+    throw enhancedError;
   }
 }
 
@@ -89,11 +114,18 @@ export async function checkPaymentStatus(invoiceId: string) {
 // Create card payment
 export async function createCardPayment(paymentData: IntaSendPaymentData) {
   try {
+    // Validate configuration before making API call
+    if (!INTASEND_CONFIG.publishableKey || !INTASEND_CONFIG.secretKey) {
+      throw new Error('IntaSend API keys are not configured');
+    }
+
     console.log('Creating IntaSend card payment:', {
       amount: paymentData.amount,
       currency: paymentData.currency,
       email: paymentData.email,
-      testMode: INTASEND_CONFIG.testMode
+      testMode: INTASEND_CONFIG.testMode,
+      hasPublishableKey: !!INTASEND_CONFIG.publishableKey,
+      hasSecretKey: !!INTASEND_CONFIG.secretKey
     });
 
     const response = await collection.charge({
@@ -116,8 +148,26 @@ export async function createCardPayment(paymentData: IntaSendPaymentData) {
     return response;
   } catch (error) {
     const anyErr: any = error;
-    console.error('IntaSend card payment error:', anyErr?.response?.data || anyErr?.data || anyErr);
-    throw new Error(`Failed to create card payment: ${anyErr?.response?.data?.message || (error instanceof Error ? error.message : 'Unknown error')}`);
+    const errorDetails = {
+      message: anyErr?.message,
+      response: anyErr?.response?.data || anyErr?.data,
+      status: anyErr?.response?.status || anyErr?.status,
+      statusText: anyErr?.response?.statusText,
+      code: anyErr?.code
+    };
+    
+    console.error('IntaSend card payment error:', JSON.stringify(errorDetails, null, 2));
+    
+    // Preserve original error structure for better debugging
+    const enhancedError: any = new Error(
+      anyErr?.response?.data?.message || 
+      anyErr?.message || 
+      'Failed to create card payment'
+    );
+    enhancedError.response = anyErr?.response;
+    enhancedError.data = anyErr?.data;
+    enhancedError.status = anyErr?.response?.status || anyErr?.status;
+    throw enhancedError;
   }
 }
 

@@ -119,6 +119,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Verify IntaSend configuration before proceeding
+    const hasPublishableKey = !!process.env.INTASEND_PUBLISHABLE_KEY;
+    const hasSecretKey = !!process.env.INTASEND_SECRET_KEY;
+    const testMode = process.env.INTASEND_TEST_MODE === 'true';
+
+    if (!hasPublishableKey || !hasSecretKey) {
+      console.error('IntaSend configuration missing:', {
+        hasPublishableKey,
+        hasSecretKey,
+        testMode
+      });
+      return NextResponse.json(
+        {
+          error: 'Payment service configuration error',
+          message: 'Payment service is not properly configured. Please contact support.',
+          orderId: order.id
+        },
+        { status: 500 }
+      );
+    }
+
     // Prepare IntaSend payment data with proper phone number formatting
     const paymentData = {
       amount: Math.round(finalAmount), // IntaSend requires whole numbers
@@ -144,6 +165,16 @@ export async function POST(request: NextRequest) {
       country: 'KE',
     };
 
+    console.log('Calling IntaSend API:', {
+      paymentMethod,
+      amount: paymentData.amount,
+      currency: paymentData.currency,
+      phone: paymentData.phone_number,
+      email: paymentData.email,
+      testMode,
+      orderId: order.id
+    });
+
     let intasendResponse;
 
     try {
@@ -162,8 +193,15 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       // Surface more context from the IntaSend SDK/network layer
       const anyErr: any = error;
-      const debugPayload = anyErr?.response?.data || anyErr?.data || anyErr?.message || anyErr;
-      console.error('IntaSend API error:', debugPayload);
+      const errorDetails = {
+        message: anyErr?.message || 'Unknown error',
+        response: anyErr?.response?.data || anyErr?.data || null,
+        status: anyErr?.response?.status || anyErr?.status || null,
+        code: anyErr?.code || null,
+        stack: process.env.NODE_ENV === 'development' ? anyErr?.stack : undefined
+      };
+      
+      console.error('IntaSend API error details:', JSON.stringify(errorDetails, null, 2));
 
       // If IntaSend fails, mark order as failed
       const { error: updateError } = await supabase
@@ -178,12 +216,18 @@ export async function POST(request: NextRequest) {
         console.error('Error updating order status for failure:', updateError);
       }
 
+      // Return more detailed error information
+      const errorMessage = errorDetails.response?.message || errorDetails.message || 'Payment service error';
+      const isAuthError = errorDetails.status === 401 || errorDetails.status === 403;
+      
       return NextResponse.json(
         {
           error: 'IntaSend payment failed',
           orderId: order.id,
-          message: 'Payment failed. Please try again or contact support.',
-          debug: typeof debugPayload === 'string' ? debugPayload : undefined
+          message: isAuthError 
+            ? 'Payment service authentication failed. Please contact support.'
+            : 'Payment failed. Please try again or contact support.',
+          debug: process.env.NODE_ENV === 'development' ? errorDetails : undefined
         },
         { status: 500 }
       );
@@ -224,11 +268,22 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('IntaSend initiate error:', error);
+    const anyErr: any = error;
+    const errorDetails = {
+      message: anyErr?.message || 'Unknown error',
+      name: anyErr?.name,
+      stack: process.env.NODE_ENV === 'development' ? anyErr?.stack : undefined
+    };
+    
+    console.error('IntaSend initiate error:', JSON.stringify(errorDetails, null, 2));
+    console.error('Full error object:', error);
+    
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : 'Failed to initiate IntaSend payment',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Failed to initiate payment',
+        message: anyErr?.message || 'An unexpected error occurred. Please try again or contact support.',
+        orderId: anyErr?.orderId || null,
+        details: process.env.NODE_ENV === 'development' ? errorDetails : undefined
       },
       { status: 500 }
     );
