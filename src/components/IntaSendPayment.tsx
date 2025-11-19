@@ -53,9 +53,9 @@ export default function IntaSendPayment({
     try {
       const orderId = `ORDER-${Date.now()}`;
 
-      // Set a timeout for the API call
+      // Set a timeout for the API call - increased to 30 seconds for slow STK push delivery
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
       const response = await fetch('/api/intasend/initiate', {
         method: 'POST',
@@ -88,7 +88,7 @@ export default function IntaSendPayment({
       if (data.success) {
         if (paymentMethod === 'mpesa') {
           setIsWaitingForConfirmation(false);
-          setStatusMessage('M-Pesa STK push sent to your phone. Please enter your PIN to complete payment.');
+          setStatusMessage('M-Pesa STK push is being sent to your phone. This may take 10-30 seconds. Please check your phone and enter your PIN when the prompt appears.');
 
           // Start polling for payment status
           pollPaymentStatus(data.invoiceId, data.orderId);
@@ -139,7 +139,7 @@ export default function IntaSendPayment({
 
   const pollPaymentStatus = async (invoiceId: string, orderId: string) => {
     let attempts = 0;
-    const maxAttempts = 30; // Poll for 5 minutes (30 * 10 seconds)
+    const maxAttempts = 36; // Poll for 6 minutes (36 * 10 seconds) - increased for slow STK responses
 
     const poll = async () => {
       try {
@@ -160,9 +160,13 @@ export default function IntaSendPayment({
 
         attempts++;
         if (attempts < maxAttempts) {
+          // Update status message periodically to show we're still checking
+          if (attempts % 3 === 0) { // Every 30 seconds
+            setStatusMessage(`Still waiting for payment confirmation... (${Math.floor(attempts * 10 / 60)} min)`);
+          }
           setTimeout(poll, 10000); // Poll every 10 seconds
         } else {
-          setStatusMessage('Payment status check timed out. Please check your order status.');
+          setStatusMessage('Payment status check timed out. Please check your order status or contact support if payment was completed.');
         }
       } catch (error) {
         console.error('Status polling error:', error);
@@ -173,8 +177,8 @@ export default function IntaSendPayment({
       }
     };
 
-    // Start polling after 5 seconds
-    setTimeout(poll, 5000);
+    // Start polling after 15 seconds to give STK push time to arrive
+    setTimeout(poll, 15000);
   };
 
   return (
@@ -237,7 +241,7 @@ export default function IntaSendPayment({
               📱 You will receive an M-Pesa STK push on your phone. Enter your M-Pesa PIN to complete the payment.
             </p>
             <p className="text-xs text-green-700 mt-1">
-              ⏱️ Please wait a moment after clicking "Pay" - we're preparing your payment request.
+              ⏱️ <strong>Please be patient:</strong> STK push notifications can take 10-30 seconds to arrive. Keep your phone nearby and wait for the prompt.
             </p>
           </div>
         )}
