@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { Wine, Filter, Grid, List, Sparkles, Shield, Clock } from 'lucide-react';
+import { Wine, Filter, Grid, List, Sparkles, Shield, Clock, Search, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { ProductImage } from '@/components/OptimizedImage';
 import { ImagePerformanceMonitor } from '@/components/ImagePerformanceMonitor';
@@ -48,6 +48,7 @@ export default function WinesLiquorPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [loading, setLoading] = useState(true);
   const [ageVerified, setAgeVerified] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -86,15 +87,64 @@ export default function WinesLiquorPage() {
     );
   };
 
-  // Group products by normalized category name
-  const groupedProducts = wineLiquorProducts.reduce((acc, product) => {
-    const categoryName = getProductCategoryName(product);
-    if (!acc[categoryName]) {
-      acc[categoryName] = [];
+  // Normalize search term for case-insensitive matching
+  const normalizeSearch = (text: string) => {
+    if (!text || typeof text !== 'string') return '';
+    return text.toLowerCase().trim();
+  };
+
+  // Filter products based on search query
+  // Optimized with useMemo to handle large product lists efficiently
+  const filteredProducts = useMemo(() => {
+    // If no search query, return all products
+    if (!searchQuery.trim()) {
+      return wineLiquorProducts;
     }
-    acc[categoryName].push(product);
-    return acc;
-  }, {} as Record<string, WineLiquorProduct[]>);
+
+    const searchTerm = normalizeSearch(searchQuery);
+    if (!searchTerm) {
+      return wineLiquorProducts;
+    }
+
+    // Filter products - handles any number of products efficiently
+    return wineLiquorProducts.filter(product => {
+      // Safely check each field for matches
+      const nameMatch = product.name ? normalizeSearch(product.name).includes(searchTerm) : false;
+      const descriptionMatch = product.description 
+        ? normalizeSearch(product.description).includes(searchTerm)
+        : false;
+      const categoryName = getProductCategoryName(product);
+      const categoryMatch = categoryName 
+        ? normalizeSearch(categoryName).includes(searchTerm)
+        : false;
+      const regionMatch = product.region 
+        ? normalizeSearch(product.region).includes(searchTerm)
+        : false;
+      const vintageMatch = product.vintage 
+        ? normalizeSearch(product.vintage).includes(searchTerm)
+        : false;
+      const alcoholMatch = product.alcohol_content 
+        ? normalizeSearch(product.alcohol_content).includes(searchTerm)
+        : false;
+      const volumeMatch = product.volume 
+        ? normalizeSearch(product.volume).includes(searchTerm)
+        : false;
+
+      return nameMatch || descriptionMatch || categoryMatch || regionMatch || vintageMatch || alcoholMatch || volumeMatch;
+    });
+  }, [wineLiquorProducts, searchQuery]);
+
+  // Group filtered products by normalized category name
+  const groupedProducts = useMemo(() => {
+    return filteredProducts.reduce((acc, product) => {
+      const categoryName = getProductCategoryName(product);
+      if (!acc[categoryName]) {
+        acc[categoryName] = [];
+      }
+      acc[categoryName].push(product);
+      return acc;
+    }, {} as Record<string, WineLiquorProduct[]>);
+  }, [filteredProducts]);
 
   const getCategoryInfo = (categoryName: string) => {
     return wineLiquorCategories.find(cat => cat.name === categoryName);
@@ -102,6 +152,11 @@ export default function WinesLiquorPage() {
 
   const getCategoryProductCount = (categoryName: string) => {
     return groupedProducts[categoryName]?.length || 0;
+  };
+
+  // Clear search and reset category when needed
+  const clearSearch = () => {
+    setSearchQuery('');
   };
 
   const activeCategoriesWithProducts = wineLiquorCategories
@@ -180,6 +235,47 @@ export default function WinesLiquorPage() {
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="mb-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search wines & liquor by name, description, region, vintage..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-3 pr-20 bg-white rounded-full text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 border border-gray-200 transition-all duration-200 shadow-sm"
+            />
+            
+            {/* Search Icon */}
+            <div className="absolute right-12 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+              <Search className="h-5 w-5" />
+            </div>
+
+            {/* Clear Button */}
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                aria-label="Clear search"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
+          </div>
+          
+          {/* Search Results Count */}
+          {searchQuery && (
+            <div className="mt-3 text-center">
+              <p className="text-sm text-gray-600">
+                Found <span className="font-semibold text-red-600">{filteredProducts.length}</span> product{filteredProducts.length !== 1 ? 's' : ''} matching "{searchQuery}"
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Category Filter */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
@@ -227,7 +323,7 @@ export default function WinesLiquorPage() {
               <div className="text-3xl mb-2">🍷</div>
               <h3 className="font-medium text-gray-900">All Products</h3>
               <p className="text-sm text-gray-500">
-                {wineLiquorProducts.length} products
+                {filteredProducts.length} products
               </p>
             </div>
           </Card>
@@ -277,12 +373,32 @@ export default function WinesLiquorPage() {
           </div>
 
           {/* Product Grid */}
-          <div className={`grid gap-6 ${
-            viewMode === 'grid' 
-              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-              : 'grid-cols-1'
-          }`}>
-            {groupedProducts[selectedCategory]?.map((product) => (
+          {groupedProducts[selectedCategory]?.length === 0 ? (
+            <div className="text-center py-12">
+              <Wine className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-lg text-gray-600 mb-2">No products found</p>
+              <p className="text-sm text-gray-500 mb-4">
+                {searchQuery 
+                  ? `No products in ${selectedCategory} matching "${searchQuery}"`
+                  : `No products available in ${selectedCategory} at the moment`}
+              </p>
+              {searchQuery && (
+                <Button
+                  variant="outline"
+                  onClick={clearSearch}
+                  className="text-red-600 border-red-300 hover:bg-red-50"
+                >
+                  Clear Search
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className={`grid gap-6 ${
+              viewMode === 'grid' 
+                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+                : 'grid-cols-1'
+            }`}>
+              {groupedProducts[selectedCategory]?.map((product) => (
               <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <ProductImage 
                   src={product.image_url} 
@@ -316,8 +432,9 @@ export default function WinesLiquorPage() {
                   </div>
                 </div>
               </Card>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         // Categorical Display - All Categories. If no active categories, show All Products grid.
@@ -328,11 +445,29 @@ export default function WinesLiquorPage() {
                 <span className="text-3xl mr-3">🍷</span>
                 <div>
                   <h2 className="text-2xl font-semibold text-gray-900">All Products</h2>
-                  <p className="text-sm text-gray-500 mt-1">{wineLiquorProducts.length} products available</p>
+                  <p className="text-sm text-gray-500 mt-1">{filteredProducts.length} products available</p>
                 </div>
               </div>
-              <div className="grid gap-6 mb-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {wineLiquorProducts.map((product) => (
+              {filteredProducts.length === 0 ? (
+                <div className="text-center py-12">
+                  <Wine className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <p className="text-lg text-gray-600 mb-2">No products found</p>
+                  <p className="text-sm text-gray-500 mb-4">
+                    {searchQuery ? `Try adjusting your search "${searchQuery}"` : 'No products available at the moment'}
+                  </p>
+                  {searchQuery && (
+                    <Button
+                      variant="outline"
+                      onClick={clearSearch}
+                      className="text-red-600 border-red-300 hover:bg-red-50"
+                    >
+                      Clear Search
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="grid gap-6 mb-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {filteredProducts.map((product) => (
                   <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                     <ProductImage 
                       src={product.image_url} 
@@ -365,8 +500,9 @@ export default function WinesLiquorPage() {
                       </div>
                     </div>
                   </Card>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           ) : activeCategoriesWithProducts.map((category) => (
             <div key={category.id} className="mb-12">
@@ -386,12 +522,17 @@ export default function WinesLiquorPage() {
               </div>
 
               {/* Product Grid for Category */}
-              <div className={`grid gap-6 mb-6 ${
-                viewMode === 'grid' 
-                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-                  : 'grid-cols-1'
-              }`}>
-                {groupedProducts[category.name]?.slice(0, 4).map((product) => (
+              {groupedProducts[category.name]?.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No products found in this category{searchQuery ? ` matching "${searchQuery}"` : ''}
+                </div>
+              ) : (
+                <div className={`grid gap-6 mb-6 ${
+                  viewMode === 'grid' 
+                    ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+                    : 'grid-cols-1'
+                }`}>
+                  {groupedProducts[category.name]?.slice(0, 4).map((product) => (
                   <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                     <ProductImage 
                       src={product.image_url} 
@@ -425,8 +566,9 @@ export default function WinesLiquorPage() {
                       </div>
                     </div>
                   </Card>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               {getCategoryProductCount(category.name) > 4 && (
                 <div className="text-center mt-6">
@@ -475,3 +617,4 @@ export default function WinesLiquorPage() {
     </div>
   );
 }
+
