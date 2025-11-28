@@ -307,10 +307,10 @@ export default function AdminOrdersPage() {
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <CardTitle>Orders ({filteredOrders.length}{filteredOrders.length !== orders.length ? ` of ${orders.length}` : ''})</CardTitle>
-                  <div className="flex items-center space-x-2">
-                    <label className="flex items-center space-x-2 text-sm text-gray-600">
+                  <div className="flex flex-col gap-2 w-full md:flex-row md:flex-wrap md:items-center md:justify-end md:w-auto">
+                    <label className="inline-flex items-center gap-2 text-sm text-gray-600">
                       <input
                         type="checkbox"
                         checked={showFailedOrders}
@@ -322,7 +322,7 @@ export default function AdminOrdersPage() {
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value as any)}
-                      className="text-sm border border-gray-300 rounded-md px-2 py-1"
+                      className="text-sm border border-gray-300 rounded-md px-2 py-1 w-full md:w-auto"
                       title="Filter by status"
                     >
                       <option value="all">All statuses</option>
@@ -338,7 +338,7 @@ export default function AdminOrdersPage() {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as any)}
-                      className="text-sm border border-gray-300 rounded-md px-2 py-1"
+                      className="text-sm border border-gray-300 rounded-md px-2 py-1 w-full md:w-auto"
                       title="Sort orders"
                     >
                       <option value="date_desc">Newest first</option>
@@ -402,9 +402,9 @@ export default function AdminOrdersPage() {
                           }
                         }}
                       >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="flex items-center space-x-2">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="w-full sm:w-auto">
+                            <div className="flex flex-wrap items-center gap-2">
                               <h3 className="font-semibold text-gray-900">
                                 #{order.id.slice(0, 8)}
                               </h3>
@@ -423,7 +423,7 @@ export default function AdminOrdersPage() {
                             </p>
                             <p className="text-sm text-gray-500">{order.customer_email}</p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-left sm:text-right w-full sm:w-auto">
                             <p className="font-semibold text-gray-900">KSH {order.total.toFixed(2)}</p>
                             <p className="text-sm text-gray-500">
                               {new Date(order.created_at).toLocaleDateString()}
@@ -433,11 +433,11 @@ export default function AdminOrdersPage() {
                       </div>
                     ))}
                     {/* Pagination Controls */}
-                    <div className="flex items-center justify-between pt-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-4">
                       <div className="text-sm text-gray-600">
                         Page {page} · {orders.length} of {total} orders
                       </div>
-                      <div className="space-x-2">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:space-x-2">
                         <Button
                           variant="outline"
                           disabled={page <= 1}
@@ -550,7 +550,7 @@ export default function AdminOrdersPage() {
                   {/* Status Update */}
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-2">Update Status</h3>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                       <Button
                         size="sm"
                         variant={selectedOrder.status === 'paid' ? 'default' : 'outline'}

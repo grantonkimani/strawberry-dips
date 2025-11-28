@@ -270,13 +270,13 @@ export default function DeliveryManagementPage() {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <CardTitle>Paid Orders ({filteredOrders.length})</CardTitle>
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-col gap-2 w-full md:flex-row md:flex-wrap md:items-center md:justify-end md:w-auto">
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value as any)}
-                      className="text-sm border border-gray-300 rounded-md px-2 py-1"
+                      className="text-sm border border-gray-300 rounded-md px-2 py-1 w-full md:w-auto"
                       title="Filter by status"
                     >
                       <option value="all">All paid orders</option>
@@ -289,7 +289,7 @@ export default function DeliveryManagementPage() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as any)}
-                    className="text-sm border border-gray-300 rounded-md px-2 py-1"
+                    className="text-sm border border-gray-300 rounded-md px-2 py-1 w-full md:w-auto"
                     title="Sort orders"
                   >
                     <option value="date_desc">Newest first</option>
@@ -349,9 +349,9 @@ export default function DeliveryManagementPage() {
                         }
                       }}
                     >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="flex items-center space-x-2">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="w-full sm:w-auto">
+                          <div className="flex flex-wrap items-center gap-2">
                             <h3 className="font-semibold text-gray-900">
                               #{order.id.slice(0, 8)}
                             </h3>
@@ -366,7 +366,7 @@ export default function DeliveryManagementPage() {
                             {order.customer_first_name} {order.customer_last_name}
                           </p>
                           <p className="text-sm text-gray-500">{order.customer_email}</p>
-                          <div className="flex items-center space-x-4 mt-1">
+                          <div className="flex flex-wrap items-center gap-3 mt-1">
                             <div className="flex items-center text-xs text-gray-500">
                               <MapPin className="h-3 w-3 mr-1" />
                               {order.delivery_city}
@@ -377,7 +377,7 @@ export default function DeliveryManagementPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="text-right">
+                        <div className="text-left sm:text-right w-full sm:w-auto">
                           <p className="font-semibold text-gray-900">KSH {order.total.toFixed(2)}</p>
                           <p className="text-sm text-gray-500">
                             {new Date(order.created_at).toLocaleDateString()}
