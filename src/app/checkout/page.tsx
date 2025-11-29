@@ -726,12 +726,12 @@ export default function CheckoutPage() {
                       )}
 
                       {/* Delivery fee notice and agreement */}
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 space-y-2">
-                        <p className="text-sm text-yellow-900">
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3">
+                        <p className="text-xs sm:text-sm text-yellow-900 leading-relaxed">
                           Delivery fee is <span className="font-semibold">not included</span> in the total shown. After you place your order,
                           our team will contact you to confirm the delivery fee amount based on your delivery location and timing.
                         </p>
-                        <label className="flex items-start space-x-2 text-sm text-gray-800">
+                        <label className="flex items-start space-x-2 sm:space-x-3 text-xs sm:text-sm text-gray-800 leading-relaxed">
                           <input
                             type="checkbox"
                             checked={hasAgreedToDeliveryFee}
@@ -741,15 +741,15 @@ export default function CheckoutPage() {
                                 setDeliveryAgreementError(null);
                               }
                             }}
-                            className="mt-0.5 h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                            className="mt-0.5 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
                           />
-                          <span>
+                          <span className="break-words">
                             I understand that the delivery fee will be confirmed separately, and that Strawberry Dips will contact me to share the
                             delivery fee amount before delivery.
                           </span>
                         </label>
                         {deliveryAgreementError && (
-                          <p className="text-xs text-red-600 mt-1">
+                          <p className="text-xs text-red-600 mt-1 break-words">
                             {deliveryAgreementError}
                           </p>
                         )}
