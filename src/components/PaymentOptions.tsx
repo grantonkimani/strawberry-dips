@@ -19,6 +19,9 @@ interface PaymentOptionsProps {
   onSuccess: (paymentIntentId: string, paymentMethod: string) => void;
   onError: (error: string) => void;
   pricing?: CheckoutPricing;
+   // Optional guard for additional confirmation (e.g. delivery fee agreement)
+   canProceedWithPayment?: boolean;
+   onBlockedPaymentAttempt?: () => void;
 }
 
 export function PaymentOptions({
@@ -30,7 +33,9 @@ export function PaymentOptions({
   deliveryInfo,
   onSuccess,
   onError,
-  pricing
+  pricing,
+  canProceedWithPayment,
+  onBlockedPaymentAttempt,
 }: PaymentOptionsProps) {
   const handleIntaSendSuccess = (data: any) => {
     // Use orderId from IntaSend response, not invoiceId
@@ -47,6 +52,8 @@ export function PaymentOptions({
         cartItems={cartItems}
         deliveryInfo={deliveryInfo}
         pricing={pricing}
+        canProceed={canProceedWithPayment}
+        onBlocked={onBlockedPaymentAttempt}
         onSuccess={handleIntaSendSuccess}
         onError={onError}
       />

@@ -141,6 +141,8 @@ export default function CheckoutPage() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [hasAgreedToDeliveryFee, setHasAgreedToDeliveryFee] = useState(false);
+  const [deliveryAgreementError, setDeliveryAgreementError] = useState<string | null>(null);
 
   const subtotal = getTotalPrice();
   const vatAmount = getVatAmount();
@@ -274,6 +276,12 @@ export default function CheckoutPage() {
   const handlePaymentError = (error: string) => {
     setPaymentError(error);
     setIsProcessing(false);
+  };
+
+  const handleBlockedPaymentAttempt = () => {
+    setDeliveryAgreementError(
+      'Please tick the box to confirm you understand that the delivery fee is not included and we will contact you to confirm the delivery fee amount.'
+    );
   };
 
   const handleCustomerLoginSuccess = (customerData: any) => {
@@ -716,6 +724,36 @@ export default function CheckoutPage() {
                           </p>
                         </div>
                       )}
+
+                      {/* Delivery fee notice and agreement */}
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 space-y-2">
+                        <p className="text-sm text-yellow-900">
+                          Delivery fee is <span className="font-semibold">not included</span> in the total shown. After you place your order,
+                          our team will contact you to confirm the delivery fee amount based on your delivery location and timing.
+                        </p>
+                        <label className="flex items-start space-x-2 text-sm text-gray-800">
+                          <input
+                            type="checkbox"
+                            checked={hasAgreedToDeliveryFee}
+                            onChange={(e) => {
+                              setHasAgreedToDeliveryFee(e.target.checked);
+                              if (e.target.checked) {
+                                setDeliveryAgreementError(null);
+                              }
+                            }}
+                            className="mt-0.5 h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                          />
+                          <span>
+                            I understand that the delivery fee will be confirmed separately, and that Strawberry Dips will contact me to share the
+                            delivery fee amount before delivery.
+                          </span>
+                        </label>
+                        {deliveryAgreementError && (
+                          <p className="text-xs text-red-600 mt-1">
+                            {deliveryAgreementError}
+                          </p>
+                        )}
+                      </div>
                       
                       <PaymentOptions
                         amount={orderTotal}
@@ -737,6 +775,8 @@ export default function CheckoutPage() {
                           specialInstructions: formData.specialInstructions,
                           orderNote: formData.orderNote,
                         }}
+                        canProceedWithPayment={hasAgreedToDeliveryFee}
+                        onBlockedPaymentAttempt={handleBlockedPaymentAttempt}
                         onSuccess={handlePaymentSuccess}
                         onError={handlePaymentError}
                       />

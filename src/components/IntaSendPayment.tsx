@@ -20,6 +20,9 @@ interface IntaSendPaymentProps {
   pricing?: CheckoutPricing;
   onSuccess?: (data: any) => void;
   onError?: (error: string) => void;
+  // Optional guard: if false, payment will be blocked and onBlocked will be called instead
+  canProceed?: boolean;
+  onBlocked?: () => void;
 }
 
 export default function IntaSendPayment({
@@ -31,7 +34,9 @@ export default function IntaSendPayment({
   deliveryInfo = {},
   pricing,
   onSuccess,
-  onError
+  onError,
+  canProceed = true,
+  onBlocked,
 }: IntaSendPaymentProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card'>('mpesa');
@@ -39,6 +44,15 @@ export default function IntaSendPayment({
   const [isWaitingForConfirmation, setIsWaitingForConfirmation] = useState(false);
 
   const handlePayment = async () => {
+    // Frontend guard for delivery-fee agreement or other preconditions
+    if (!canProceed) {
+      const msg =
+        'Please confirm that you understand the delivery fee will be shared with you after we contact you, before paying.';
+      setStatusMessage(msg);
+      onBlocked?.();
+      return;
+    }
+
     if (!customerEmail || !customerPhone) {
       const error = 'Please provide email and phone number';
       setStatusMessage(error);
