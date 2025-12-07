@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Package, Clock, CheckCircle, XCircle, DollarSign, Eye, MapPin, Calendar, Search, X } from 'lucide-react';
+import { Package, Clock, CheckCircle, XCircle, DollarSign, Eye, MapPin, Calendar, Search, X, ChevronDown, ChevronUp, ShoppingBag, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
@@ -12,6 +12,7 @@ interface OrderItem {
   unit_price: number;
   quantity: number;
   total_price: number;
+  product_image_url?: string | null;
 }
 
 interface Order {
@@ -531,14 +532,31 @@ export default function AdminOrdersPage() {
                   {/* Order Items */}
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-2">Items</h3>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {(selectedOrder.order_items || []).map((item) => (
-                        <div key={item.id} className="flex justify-between text-sm">
-                          <div>
-                            <p className="font-medium">{item.product_name}</p>
-                            <p className="text-gray-500">Qty: {item.quantity}</p>
+                        <div key={item.id} className="flex flex-col sm:flex-row sm:justify-between gap-2 sm:gap-4 py-2 sm:py-1">
+                          <div className="flex-1 min-w-0">
+                            {item.product_image_url ? (
+                              <a
+                                href={item.product_image_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-medium text-pink-600 hover:text-pink-700 active:text-pink-800 hover:underline active:underline inline-flex items-center gap-1.5 sm:gap-1 cursor-pointer min-h-[44px] sm:min-h-0 py-2 sm:py-0 px-1 -mx-1 sm:mx-0 rounded transition-colors"
+                                style={{ touchAction: 'manipulation' }}
+                                onClick={(e) => e.stopPropagation()}
+                                aria-label={`View image for ${item.product_name}`}
+                              >
+                                <span className="break-words">{item.product_name}</span>
+                                <ExternalLink className="h-4 w-4 sm:h-3 sm:w-3 flex-shrink-0" aria-hidden="true" />
+                              </a>
+                            ) : (
+                              <p className="font-medium break-words">{item.product_name}</p>
+                            )}
+                            <p className="text-gray-500 text-sm mt-1">Qty: {item.quantity}</p>
                           </div>
-                          <p className="font-medium">KSH {item.total_price.toFixed(2)}</p>
+                          <div className="flex-shrink-0">
+                            <p className="font-medium text-sm sm:text-base">KSH {item.total_price.toFixed(2)}</p>
+                          </div>
                         </div>
                       ))}
                       {(!selectedOrder.order_items || selectedOrder.order_items.length === 0) && (

@@ -29,7 +29,8 @@ export async function GET(
           product_category,
           unit_price,
           quantity,
-          total_price
+          total_price,
+          product_image_url
         )
       `)
       .eq('id', orderId)
@@ -59,7 +60,8 @@ export async function GET(
         product_category: item.product_category,
         unit_price: item.unit_price,
         quantity: item.quantity,
-        total_price: item.total_price
+        total_price: item.total_price,
+        product_image_url: item.product_image_url
       })) || []
     };
 

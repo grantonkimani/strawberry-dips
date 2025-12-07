@@ -107,6 +107,7 @@ export async function POST(request: NextRequest) {
         unit_price: item.price,
         quantity: item.quantity,
         total_price: item.price * item.quantity,
+        product_image_url: item.image || null, // Store product image URL
       }));
 
       const { error: itemsError } = await supabase
