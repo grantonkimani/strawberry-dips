@@ -3,9 +3,12 @@ import { supabase } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/auth-middleware';
 
 // Admin endpoint: Update offer
-async function updateOffer(request: NextRequest, { params }: { params: { id: string } }) {
+async function updateOffer(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const body = await request.json();
     const { product_id, offer_price, discount_percentage, start_date, end_date, is_active } = body;
 
@@ -104,9 +107,21 @@ async function updateOffer(request: NextRequest, { params }: { params: { id: str
 }
 
 // Admin endpoint: Delete offer
-async function deleteOffer(request: NextRequest, { params }: { params: { id: string } }) {
+async function deleteOffer(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const id = params.id;
+    const { id } = await params;
+
+    // Guard against missing/invalid IDs that would break the UUID comparison
+    if (!id || id === 'undefined') {
+      console.error('Delete offer called with invalid id:', id);
+      return NextResponse.json(
+        { error: 'Invalid offer id provided' },
+        { status: 400 }
+      );
+    }
 
     const { error } = await supabase
       .from('offers')

@@ -231,6 +231,10 @@ export default function AdminOffersPage() {
 	}
 
 	async function deleteOffer(id: string) {
+		if (!id || id === 'undefined') {
+			alert('Cannot delete offer: missing offer ID');
+			return;
+		}
 		if (!confirm('Delete this offer?')) return
 		try {
 			const res = await fetch(`/api/offers/${id}`, { method: 'DELETE' })

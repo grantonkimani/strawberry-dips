@@ -35,8 +35,10 @@ const initialState: CartState = {
 };
 
 const STORAGE_KEY = 'strawberry_dips_cart_v1';
-const VAT_RATE = 0.16; // 16% VAT
-const DELIVERY_FEE = 5.99;
+// VAT and delivery fee are currently not charged on the storefront totals.
+// These constants are kept for potential future use but are not applied.
+const VAT_RATE = 0.16;
+const DELIVERY_FEE = 0;
 
 function loadCartFromStorage(): CartState {
   try {
@@ -222,8 +224,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const getVatAmount = () => {
-    const subtotal = getTotalPrice();
-    return parseFloat((subtotal * VAT_RATE).toFixed(2));
+    // VAT is currently not charged to the customer in the storefront.
+    // Return 0 to keep downstream calculations simple and avoid adding VAT.
+    return 0;
   };
 
   const getDeliveryFee = () => DELIVERY_FEE;
@@ -231,7 +234,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const getGrandTotal = () => {
     const subtotal = getTotalPrice();
     const vat = getVatAmount();
-    return parseFloat((subtotal + vat + DELIVERY_FEE).toFixed(2));
+    const delivery = getDeliveryFee();
+    return parseFloat((subtotal + vat + delivery).toFixed(2));
   };
 
   const getTotalItems = () => {

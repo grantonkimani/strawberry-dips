@@ -759,8 +759,9 @@ export default function CheckoutPage() {
                         amount={orderTotal}
                         pricing={{
                           subtotal,
-                          vatAmount,
-                          deliveryFee,
+                          // VAT and delivery are not being charged to the customer in this flow
+                          vatAmount: 0,
+                          deliveryFee: 0,
                           total: orderTotal,
                         }}
                         customerPhone={formData.phone}
@@ -814,27 +815,17 @@ export default function CheckoutPage() {
                   ))}
                 </div>
 
-                {/* Totals */}
+                {/* Totals (VAT not itemised; totals are VAT-neutral on the client side) */}
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-700 font-semibold">Subtotal (excl. VAT):</span>
+                    <span className="text-gray-700 font-semibold">Subtotal:</span>
                     <span className="text-gray-900">KSH {subtotal.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700 font-semibold">VAT (16%):</span>
-                    <span className="text-gray-900">KSH {vatAmount.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700 font-semibold">Delivery:</span>
-                    <span className="text-gray-900">KSH {deliveryFee.toFixed(2)}</span>
-                  </div>
+                  {/* Delivery is handled separately and not included in the customer-facing total */}
                   <div className="flex justify-between text-lg font-semibold border-t pt-2">
-                    <span>Total (incl. VAT):</span>
+                    <span>Total:</span>
                     <span className="text-pink-600">KSH {orderTotal.toFixed(2)}</span>
                   </div>
-                  <p className="text-xs text-gray-500 text-right">
-                    Prices include statutory VAT at 16%.
-                  </p>
                 </div>
 
                 {/* Place Order Button - Hidden when payment form is shown */}
