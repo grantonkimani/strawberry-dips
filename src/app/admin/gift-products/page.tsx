@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ImageUpload } from '@/components/ui/ImageUpload';
@@ -44,6 +44,7 @@ export default function GiftProductsPage() {
     is_active: true
   });
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const editFormRef = useRef<HTMLDivElement>(null);
 
   // Fetch gift products
   const fetchGiftProducts = async () => {
@@ -207,18 +208,30 @@ export default function GiftProductsPage() {
   };
 
   // Start editing
-  const startEditing = (product: GiftProduct) => {
+  const startEditing = (product: GiftProduct, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!product?.id) return;
     setFormData({
-      name: product.name,
-      description: product.description,
-      price: product.price.toString(),
-      category: product.category,
+      name: product.name ?? '',
+      description: product.description ?? '',
+      price: (product.price != null && !Number.isNaN(Number(product.price)))
+        ? String(product.price)
+        : '',
+      category: product.category ?? '',
       image_url: product.image_url || '',
-      is_active: product.is_active
+      is_active: Boolean(product.is_active)
     });
     setEditingProduct(product);
     setShowAddForm(true);
   };
+
+  // Scroll edit form into view when opening for edit
+  useEffect(() => {
+    if (showAddForm && editingProduct && editFormRef.current) {
+      editFormRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [showAddForm, editingProduct]);
 
   // Group products by category
   const groupedProducts = giftProducts.reduce((acc, product) => {
@@ -263,6 +276,7 @@ export default function GiftProductsPage() {
 
       {/* Add/Edit Form */}
       {showAddForm && (
+        <div ref={editFormRef}>
         <Card className="mb-8 p-6">
           <h2 className="text-xl font-semibold mb-4">
             {editingProduct ? 'Edit Gift Product' : 'Add New Gift Product'}
@@ -363,6 +377,7 @@ export default function GiftProductsPage() {
             </div>
           </form>
         </Card>
+        </div>
       )}
 
       {/* Products by Category */}
@@ -397,16 +412,17 @@ export default function GiftProductsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {products.map((product) => (
                   <Card key={product.id} className="p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1">{product.name}</h3>
-                        <p className="text-sm text-gray-600 mb-2">{product.description}</p>
-                        <p className="text-lg font-bold text-pink-600">KSH {product.price.toFixed(2)}</p>
+                    <div className="flex items-start justify-between gap-2 mb-3 min-h-0">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 mb-1 truncate" title={product.name}>{product.name}</h3>
+                        <p className="text-sm text-gray-600 mb-2 line-clamp-2" title={product.description}>{product.description || '\u00A0'}</p>
+                        <p className="text-lg font-bold text-pink-600">KSH {Number(product.price).toFixed(2)}</p>
                       </div>
-                      <div className="flex items-center space-x-1">
+                      <div className="relative z-10 flex items-center space-x-1 flex-shrink-0">
                         <button
+                          type="button"
                           onClick={() => handleToggleActive(product)}
-                          className={`p-1 rounded ${
+                          className={`p-2 rounded touch-manipulation ${
                             product.is_active 
                               ? 'text-green-600 hover:bg-green-50' 
                               : 'text-gray-400 hover:bg-gray-50'
@@ -416,15 +432,17 @@ export default function GiftProductsPage() {
                           {product.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                         </button>
                         <button
-                          onClick={() => startEditing(product)}
-                          className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                          type="button"
+                          onClick={(e) => startEditing(product, e)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded touch-manipulation cursor-pointer"
                           title="Edit product"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDelete(product.id)}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded"
+                          className="p-2 text-red-600 hover:bg-red-50 rounded touch-manipulation"
                           title="Delete product"
                         >
                           <Trash2 className="h-4 w-4" />
